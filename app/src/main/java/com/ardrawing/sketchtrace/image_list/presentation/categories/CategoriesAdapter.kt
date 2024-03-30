@@ -85,7 +85,9 @@ class CategoriesAdapter(
         val holder = viewHolder as CategoriesViewHolder
 
         val categoryAdapter = CategoryAdapter(
-            activity, imageCategoryList[categoryPosition], 1
+            activity = activity,
+            imageList = imageCategoryList[categoryPosition].imageList,
+            from = 1
         )
 
         categoryAdapter.setClickListener(object : CategoryAdapter.ClickListener {

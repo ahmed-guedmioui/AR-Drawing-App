@@ -1,8 +1,7 @@
-package com.ardrawing.sketchtrace.image_list.presentation.categories
+package com.ardrawing.sketchtrace.image_list.presentation.category
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.ardrawing.sketchtrace.App
 import com.ardrawing.sketchtrace.image_list.domain.repository.ImageCategoriesRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
@@ -17,12 +16,12 @@ import javax.inject.Inject
  * @author Ahmed Guedmioui
  */
 @HiltViewModel
-class CategoriesViewModel @Inject constructor(
+class CategoryViewModel @Inject constructor(
     private val imageCategoriesRepository: ImageCategoriesRepository
 ) : ViewModel() {
 
-    private val _categoriesState = MutableStateFlow(CategoriesState())
-    val categoriesState = _categoriesState.asStateFlow()
+    private val _categoryState = MutableStateFlow(CategoryState())
+    val categoryState = _categoryState.asStateFlow()
 
     private val _navigateToDrawingChannel = Channel<Boolean>()
     val navigateToDrawingChannel = _navigateToDrawingChannel.receiveAsFlow()
@@ -32,7 +31,7 @@ class CategoriesViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            _categoriesState.update {
+            _categoryState.update {
                 it.copy(
                     imageCategoryList = imageCategoriesRepository.getImageCategoryList()
                 )
@@ -40,62 +39,59 @@ class CategoriesViewModel @Inject constructor(
         }
     }
 
-    fun onEvent(event: CategoriesUiEvents) {
+    fun onEvent(event: CategoryUiEvents) {
         when (event) {
-            is CategoriesUiEvents.UpdateIsTrace -> {
-                _categoriesState.update {
+
+            is CategoryUiEvents.UpdateCategoryPositionAndIsTrace -> {
+                val imageCategory =
+                    categoryState.value.imageCategoryList[event.categoryPosition]
+
+                _categoryState.update {
                     it.copy(
-                        isTrace = event.isTrace
+                        categoryPosition = event.categoryPosition,
+                        isTrace = event.isTrace,
+                        imageCategory = imageCategory
                     )
                 }
             }
 
-            is CategoriesUiEvents.OnImageClick -> {
+            is CategoryUiEvents.OnImageClick -> {
 
                 viewModelScope.launch {
-                    val imageCategory =
-                        categoriesState.value.imageCategoryList[event.categoryPosition]
+                    val categoryPosition = categoryState.value.categoryPosition
+                    val imageCategory = categoryState.value.imageCategoryList[categoryPosition]
                     val clickedImageItem = imageCategory.imageList[event.imagePosition]
 
-                    _categoriesState.update {
+                    _categoryState.update {
                         it.copy(
                             imagePosition = event.imagePosition,
                             clickedImageItem = clickedImageItem,
-                            imageCategory = imageCategory
                         )
                     }
 
                     if (clickedImageItem.locked) {
                         _unlockImageChannel.send(true)
-                    } else
+                    } else {
                         _navigateToDrawingChannel.send(true)
+                    }
                 }
             }
 
-            CategoriesUiEvents.UnlockImage -> {
+            CategoryUiEvents.UnlockImage -> {
 
                 viewModelScope.launch {
-                    categoriesState.value.clickedImageItem?.let {
+                    categoryState.value.clickedImageItem?.let {
                         imageCategoriesRepository.unlockImageItem(it)
 
-                        categoriesState.value.clickedImageItem?.locked = false
+                        categoryState.value.clickedImageItem?.locked = false
 
-                        categoriesState.value.imageCategory?.adapter?.notifyItemChanged(
-                            categoriesState.value.imagePosition
+                        categoryState.value.imageCategory?.adapter?.notifyItemChanged(
+                            categoryState.value.imagePosition
                         )
                     }
 
                 }
             }
-
-            is CategoriesUiEvents.UpdateIsGallery -> {
-                _categoriesState.update {
-                    it.copy(
-                        isGallery = event.isGallery
-                    )
-                }
-            }
-
         }
     }
 }

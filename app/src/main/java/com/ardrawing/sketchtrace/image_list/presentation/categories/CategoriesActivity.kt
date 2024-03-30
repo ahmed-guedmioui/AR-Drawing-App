@@ -8,7 +8,6 @@ import android.os.Bundle
 import android.os.Environment
 import android.util.Log
 import android.view.View
-import android.view.animation.Animation
 import android.view.animation.AnimationUtils
 import android.widget.Toast
 import androidx.activity.result.ActivityResult
@@ -18,16 +17,11 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.ardrawing.sketchtrace.App
 import com.ardrawing.sketchtrace.R
 import com.ardrawing.sketchtrace.databinding.ActivityCategoriesBinding
-import com.ardrawing.sketchtrace.image_list.domain.repository.ImageCategoriesRepository
 import com.ardrawing.sketchtrace.image_list.presentation.category.CategoryActivity
 import com.ardrawing.sketchtrace.paywall.presentation.PaywallActivity
 import com.ardrawing.sketchtrace.sketch.presentation.SketchActivity
-import com.ardrawing.sketchtrace.core.domain.repository.AppDataRepository
-import com.ardrawing.sketchtrace.my_creation.presentation.my_creation_list.MyCreationListState
-import com.ardrawing.sketchtrace.my_creation.presentation.my_creation_list.MyCreationListViewModel
 import com.ardrawing.sketchtrace.trace.presentation.TraceActivity
 import com.ardrawing.sketchtrace.util.LanguageChanger
 import com.ardrawing.sketchtrace.util.ads.InterManager
@@ -107,10 +101,7 @@ class CategoriesActivity : AppCompatActivity() {
             categoriesViewModel.unlockImageChannel.collect { unlock ->
                 if (unlock) {
                     rewarded {
-                        categoriesState.clickedImageItem?.locked = false
-                        categoriesState.imageCategory?.adapter?.notifyItemChanged(
-                            categoriesState.imagePosition
-                        )
+                        categoriesViewModel.onEvent(CategoriesUiEvents.UnlockImage)
                     }
                 }
             }
@@ -149,6 +140,7 @@ class CategoriesActivity : AppCompatActivity() {
                         imagePosition = imagePosition
                     )
                 )
+
             }
         })
 
@@ -209,6 +201,7 @@ class CategoriesActivity : AppCompatActivity() {
     private fun rewarded(
         onRewComplete: () -> Unit
     ) {
+
         RewardedManager.showRewarded(
             activity = this,
             adClosedListener = object : RewardedManager.OnAdClosedListener {

@@ -14,19 +14,20 @@ import com.bumptech.glide.load.engine.GlideException
 import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.target.Target
 import com.ardrawing.sketchtrace.R
+import com.ardrawing.sketchtrace.image_list.domain.model.images.Image
 import com.ardrawing.sketchtrace.image_list.domain.model.images.ImageCategory
 
 /**
  * @author Ahmed Guedmioui
  */
 class CategoryAdapter(
-    val activity: Activity,
-    private val category: ImageCategory,
+    private val activity: Activity,
+    private val imageList: List<Image>,
     private val from: Int
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     override fun getItemViewType(position: Int): Int {
-        return if (category.imageList[position].locked) 0 else 1
+        return if (imageList[position].locked) 0 else 1
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
@@ -61,7 +62,7 @@ class CategoryAdapter(
         val holder: CategoryViewHolder = viewHolder as CategoryViewHolder
 
         Glide.with(activity)
-            .load(category.imageList[imagePosition].image)
+            .load(imageList[imagePosition].image)
             .thumbnail(0.25f)
             .addListener(object : RequestListener<Drawable?> {
                 override fun onLoadFailed(
@@ -87,7 +88,7 @@ class CategoryAdapter(
     }
 
     override fun getItemCount(): Int {
-        return category.imageList.size
+        return imageList.size
     }
 
     private class CategoryViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {

@@ -2,6 +2,8 @@ package com.ardrawing.sketchtrace.image_list.presentation.category
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.ardrawing.sketchtrace.core.domain.model.app_data.AppData
+import com.ardrawing.sketchtrace.core.domain.repository.AppDataRepository
 import com.ardrawing.sketchtrace.image_list.domain.repository.ImageCategoriesRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
@@ -17,7 +19,8 @@ import javax.inject.Inject
  */
 @HiltViewModel
 class CategoryViewModel @Inject constructor(
-    private val imageCategoriesRepository: ImageCategoriesRepository
+    private val imageCategoriesRepository: ImageCategoriesRepository,
+    private val appDataRepository: AppDataRepository
 ) : ViewModel() {
 
     private val _categoryState = MutableStateFlow(CategoryState())
@@ -29,13 +32,20 @@ class CategoryViewModel @Inject constructor(
     private val _unlockImageChannel = Channel<Boolean>()
     val unlockImageChannel = _unlockImageChannel.receiveAsFlow()
 
+    private val _appData = MutableStateFlow<AppData?>(null)
+    val appData = _appData.asStateFlow()
+
     init {
         viewModelScope.launch {
             _categoryState.update {
                 it.copy(
-                    imageCategoryList = imageCategoriesRepository.getImageCategoryList()
+                    imageCategoryList = imageCategoriesRepository.getImageCategoryList(),
+                    appData = appDataRepository.getAppData()
                 )
             }
+        }
+        _appData.update {
+            appDataRepository.getAppData()
         }
     }
 

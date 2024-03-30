@@ -3,6 +3,7 @@ package com.ardrawing.sketchtrace
 import android.app.Application
 import android.content.Context
 import com.ardrawing.sketchtrace.core.domain.model.app_data.AppData
+import com.ardrawing.sketchtrace.core.domain.repository.AppDataRepository
 import com.ardrawing.sketchtrace.databinding.ActivitySketchBinding
 import com.ardrawing.sketchtrace.image_list.domain.model.images.ImageCategory
 import com.ardrawing.sketchtrace.util.LanguageChanger
@@ -18,7 +19,9 @@ import dagger.hilt.android.HiltAndroidApp
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import java.io.File
+import javax.inject.Inject
 
 /**
  * @author Ahmed Guedmioui
@@ -27,16 +30,13 @@ import java.io.File
 class App : Application() {
 
     companion object {
+
         const val DEVELOPER_NAME = "AhmedGuedmioui"
 
         const val tiktok = "realmadrid"
         const val facebook = "RealMadrid"
         const val instagram = "realmadrid"
-        const val twitter = "realmadrid"
-
-        lateinit var imageCategoryList: MutableList<ImageCategory>
-        lateinit var appData: AppData
-
+        const val x = "realmadrid"
     }
 
     override fun onCreate() {

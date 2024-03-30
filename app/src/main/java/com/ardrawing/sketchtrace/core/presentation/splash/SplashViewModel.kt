@@ -68,7 +68,7 @@ class SplashViewModel @Inject constructor(
     private fun getData() {
         viewModelScope.launch {
 
-            appDataRepository.getAppData().collect { appDataResult ->
+            appDataRepository.loadAppData().collect { appDataResult ->
                 when (appDataResult) {
                     is Resource.Error -> {
                         _showErrorToastChannel.send(true)
@@ -79,7 +79,13 @@ class SplashViewModel @Inject constructor(
 
                     is Resource.Success -> {
 
-                        when (ShouldShowUpdateDialog().invoke()) {
+                        _splashState.update {
+                            it.copy(
+                                appData = appDataRepository.getAppData()
+                            )
+                        }
+
+                        when (ShouldShowUpdateDialog(splashState.value.appData).invoke()) {
                             1 -> {
                                 _updateDialogState.update { 1 }
                             }

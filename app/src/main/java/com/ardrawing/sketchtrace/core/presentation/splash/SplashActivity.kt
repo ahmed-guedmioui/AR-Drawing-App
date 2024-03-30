@@ -230,9 +230,15 @@ class SplashActivity : AppCompatActivity() {
         prefs.edit().putBoolean("can_show_ads", canShowAds.get()).apply()
 
         MobileAds.initialize(this)
-        InterManager.loadInterstitial(this@SplashActivity)
+        InterManager.appData = splashState.appData
+        InterManager.loadInterstitial(
+            activity = this@SplashActivity,
+        )
 
-        admobAppOpenManager.showSplashAd(this) {
+        admobAppOpenManager.showSplashAd(
+            activity = this,
+            appData = splashState.appData
+        ) {
             navigate()
         }
     }
@@ -268,7 +274,7 @@ class SplashActivity : AppCompatActivity() {
 
 
     private fun checkSubscriptionBeforeGoingHome() {
-        if (App.appData.isSubscribed) {
+        if (splashState.appData?.isSubscribed == true) {
             splashViewModel.onEvent(SplashUiEvent.AlreadySubscribed)
             goToHome()
         } else {
@@ -306,7 +312,9 @@ class SplashActivity : AppCompatActivity() {
 
         updateDialog.findViewById<Button>(R.id.update).setOnClickListener {
             if (isSuspended) {
-                UrlOpener.open(this, App.appData.suspendedURL)
+                splashState.appData?.let { appData ->
+                    UrlOpener.open(this, appData.suspendedURL)
+                }
             } else {
                 UrlOpener.open(this, BuildConfig.APPLICATION_ID)
             }
@@ -315,10 +323,12 @@ class SplashActivity : AppCompatActivity() {
         if (!isSuspended) {
             updateDialog.findViewById<ImageView>(R.id.close).visibility = View.VISIBLE
         } else {
-            updateDialog.findViewById<TextView>(R.id.title).text =
-                App.appData.suspendedTitle
-            updateDialog.findViewById<TextView>(R.id.msg).text =
-                App.appData.suspendedMessage
+            splashState.appData?.let { appData ->
+                updateDialog.findViewById<TextView>(R.id.title).text =
+                    appData.suspendedTitle
+                updateDialog.findViewById<TextView>(R.id.msg).text =
+                    appData.suspendedMessage
+            }
         }
 
         updateDialog.setOnDismissListener {

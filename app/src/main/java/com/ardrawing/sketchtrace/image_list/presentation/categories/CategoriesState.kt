@@ -1,5 +1,6 @@
 package com.ardrawing.sketchtrace.image_list.presentation.categories
 
+import com.ardrawing.sketchtrace.core.domain.model.app_data.AppData
 import com.ardrawing.sketchtrace.image_list.domain.model.images.Image
 import com.ardrawing.sketchtrace.image_list.domain.model.images.ImageCategory
 import com.ardrawing.sketchtrace.my_creation.domian.model.Creation
@@ -16,5 +17,7 @@ data class CategoriesState(
 
     val imagePosition: Int = 0,
     val clickedImageItem: Image? = null,
-    val imageCategory: ImageCategory? = null
+    val imageCategory: ImageCategory? = null,
+
+    val appData: AppData? = null
 )

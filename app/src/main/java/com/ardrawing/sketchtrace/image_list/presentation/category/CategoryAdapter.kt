@@ -14,6 +14,7 @@ import com.bumptech.glide.load.engine.GlideException
 import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.target.Target
 import com.ardrawing.sketchtrace.R
+import com.ardrawing.sketchtrace.core.domain.model.app_data.AppData
 import com.ardrawing.sketchtrace.image_list.domain.model.images.Image
 import com.ardrawing.sketchtrace.image_list.domain.model.images.ImageCategory
 

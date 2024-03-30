@@ -10,7 +10,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.OnLifecycleEvent
 import androidx.lifecycle.ProcessLifecycleOwner
-import com.ardrawing.sketchtrace.App
+import com.ardrawing.sketchtrace.core.domain.model.app_data.AppData
 import com.google.android.gms.ads.AdError
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.FullScreenContentCallback
@@ -185,7 +185,7 @@ class AdmobAppOpenManager(
     @OnLifecycleEvent(Lifecycle.Event.ON_START)
     fun onStart() {
 //        if (!isSplash) {
-//            if (!App.appData.showAdsForThisUser) {
+//            if (!appDataRepository.getAppData().showAdsForThisUser) {
 //                return
 //            }
 //
@@ -195,10 +195,13 @@ class AdmobAppOpenManager(
 
     fun showSplashAd(
         activity: Activity,
+        appData: AppData?,
         onAdClosed: () -> Unit
     ) {
 
-        if (!App.appData.showAdsForThisUser || !prefs.getBoolean("can_show_ads", true)) {
+        if (
+            appData?.showAdsForThisUser == false || !prefs.getBoolean("can_show_ads", true)
+        ) {
             onAdClosed()
             return
         }

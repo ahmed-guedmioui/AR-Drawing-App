@@ -16,6 +16,7 @@ import com.ardrawing.sketchtrace.util.AppAnimation
 import com.ardrawing.sketchtrace.util.LanguageChanger
 import com.ardrawing.sketchtrace.util.ads.InterManager
 import com.ardrawing.sketchtrace.util.ads.NativeManager
+import com.ardrawing.sketchtrace.util.ads.RewardedManager
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -51,11 +52,16 @@ class TipsActivity : AppCompatActivity() {
             tipsViewModel.tipsState.collect { tipsState = it }
         }
 
-        NativeManager.loadNative(
-            findViewById(R.id.native_frame),
-            findViewById(R.id.native_temp),
-            this, false
-        )
+        lifecycleScope.launch {
+            tipsViewModel.appData.collect { appData ->
+                NativeManager.loadNative(
+                    appData,
+                    findViewById(R.id.native_frame),
+                    findViewById(R.id.native_temp),
+                    this@TipsActivity, false
+                )
+            }
+        }
 
         changeTip()
         binding.nextStart.setOnClickListener {

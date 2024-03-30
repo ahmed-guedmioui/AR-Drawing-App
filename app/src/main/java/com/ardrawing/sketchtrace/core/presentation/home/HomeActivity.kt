@@ -46,7 +46,7 @@ import javax.inject.Inject
 class HomeActivity : AppCompatActivity() {
 
     private val homeViewModel: HomeViewModel by viewModels()
-    private lateinit var homeState: HomeState
+    private var homeState: HomeState? = null
 
     private lateinit var binding: ActivityHomeBinding
 
@@ -66,12 +66,25 @@ class HomeActivity : AppCompatActivity() {
             rateDialog()
         }
 
-        RewardedManager.loadRewarded(this)
 
         lifecycleScope.launch {
             homeViewModel.homeState.collect {
                 homeState = it
                 helperDialog()
+            }
+        }
+
+        lifecycleScope.launch {
+            homeViewModel.appData.collect { appData ->
+                RewardedManager.appData = appData
+                RewardedManager.loadRewarded(this@HomeActivity)
+
+                NativeManager.loadNative(
+                    appData,
+                    findViewById(R.id.native_frame),
+                    findViewById(R.id.native_temp),
+                    this@HomeActivity, false
+                )
             }
         }
 
@@ -86,12 +99,6 @@ class HomeActivity : AppCompatActivity() {
                 }
             }
         }
-
-        NativeManager.loadNative(
-            findViewById(R.id.native_frame),
-            findViewById(R.id.native_temp),
-            this, false
-        )
 
         val pushAnimation = AnimationUtils.loadAnimation(this, R.anim.view_push)
 
@@ -159,7 +166,7 @@ class HomeActivity : AppCompatActivity() {
         helperDialog.setOnDismissListener {
             homeViewModel.onEvent(HomeUiEvent.ShowHideHelperDialog)
         }
-        if (homeState.showHelperDialog) {
+        if (homeState?.showHelperDialog == true) {
             helperDialog.show()
         } else {
             helperDialog.dismiss()

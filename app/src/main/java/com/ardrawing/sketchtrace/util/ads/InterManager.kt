@@ -5,7 +5,8 @@ import android.app.ProgressDialog
 import android.content.Context
 import android.os.Handler
 import android.os.Looper
-import com.ardrawing.sketchtrace.App
+import android.util.Log
+import com.ardrawing.sketchtrace.core.domain.model.app_data.AppData
 import com.facebook.ads.Ad
 import com.facebook.ads.AdError
 import com.facebook.ads.InterstitialAdListener
@@ -17,6 +18,7 @@ import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback
 
 object InterManager {
 
+    var appData: AppData? = null
 
     private lateinit var admobInterstitialAd: InterstitialAd
     private lateinit var facebookInterstitialAd: com.facebook.ads.InterstitialAd
@@ -27,33 +29,39 @@ object InterManager {
     private lateinit var onAdClosedListener: OnAdClosedListener
     private var counter = 1
 
-    fun loadInterstitial(activity: Activity) {
+
+    fun loadInterstitial(
+        activity: Activity,
+    ) {
         val prefs = activity.getSharedPreferences(
             "ar_drawing_med_prefs_file", Context.MODE_PRIVATE
         )
 
-        if (!App.appData.showAdsForThisUser || !prefs.getBoolean("can_show_ads", true)) {
+        if (appData?.showAdsForThisUser == false || !prefs.getBoolean("can_show_ads", true)) {
             return
         }
 
-        when (App.appData.interstitial) {
+        when (appData?.interstitial) {
             AdType.admob -> loadAdmobInter(activity)
             AdType.facebook -> loadFacebookInter(activity)
         }
     }
 
-    fun showInterstitial(activity: Activity, adClosedListener: OnAdClosedListener) {
+    fun showInterstitial(
+        activity: Activity,
+        adClosedListener: OnAdClosedListener
+    ) {
         onAdClosedListener = adClosedListener
         val prefs = activity.getSharedPreferences(
             "ar_drawing_med_prefs_file", Context.MODE_PRIVATE
         )
 
-        if (!App.appData.showAdsForThisUser || !prefs.getBoolean("can_show_ads", true)) {
+        if (appData?.showAdsForThisUser == false || !prefs.getBoolean("can_show_ads", true)) {
             onAdClosedListener.onAdClosed()
             return
         }
 
-        if (App.appData.clicksToShowInter == counter) {
+        if (appData?.clicksToShowInter == counter) {
             counter = 1
 
             val progressDialog = ProgressDialog(activity)
@@ -62,14 +70,15 @@ object InterManager {
             progressDialog.show()
 
             Handler(Looper.getMainLooper()).postDelayed({
-                when (App.appData.interstitial) {
+                when (appData?.interstitial) {
                     AdType.admob -> showAdmobInter(activity)
                     AdType.facebook -> showFacebookInter(activity)
                     else -> onAdClosedListener.onAdClosed()
                 }
                 try {
                     progressDialog.dismiss()
-                } catch (_: Exception) {}
+                } catch (_: Exception) {
+                }
 
             }, 2000)
 
@@ -85,7 +94,7 @@ object InterManager {
     private fun loadFacebookInter(activity: Activity) {
         isFacebookInterLoaded = false
         facebookInterstitialAd =
-            com.facebook.ads.InterstitialAd(activity, App.appData.facebookInterstitial)
+            com.facebook.ads.InterstitialAd(activity, appData?.facebookInterstitial)
         val interstitialAdListener: InterstitialAdListener = object : InterstitialAdListener {
             override fun onInterstitialDisplayed(ad: Ad) {}
             override fun onInterstitialDismissed(ad: Ad) {
@@ -127,12 +136,15 @@ object InterManager {
 
         val adRequest = AdRequest.Builder().build()
 
+        Log.d("Ads_Tag", "admobInterstitial ${appData?.admobInterstitial ?: ""}")
+
         InterstitialAd.load(
             activity,
-            App.appData.admobInterstitial,
+            appData?.admobInterstitial ?: "",
             adRequest,
             object : InterstitialAdLoadCallback() {
                 override fun onAdLoaded(interstitialAd: InterstitialAd) {
+                    Log.d("Ads_Tag", "onAdLoaded")
                     isAdmobInterLoaded = true
                     admobInterstitialAd = interstitialAd
                     interstitialAd.fullScreenContentCallback =
@@ -154,6 +166,7 @@ object InterManager {
                 }
 
                 override fun onAdFailedToLoad(loadAdError: LoadAdError) {
+                    Log.d("Ads_Tag", "onAdFailedToLoad inter $loadAdError")
                     isAdmobInterLoaded = false
                 }
             })

@@ -1,6 +1,8 @@
 package com.ardrawing.sketchtrace.core.presentation.get_started
 
 import androidx.lifecycle.ViewModel
+import com.ardrawing.sketchtrace.core.domain.model.app_data.AppData
+import com.ardrawing.sketchtrace.core.domain.repository.AppDataRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -11,10 +13,27 @@ import javax.inject.Inject
  * @author Ahmed Guedmioui
  */
 @HiltViewModel
-class GetStartedViewModel @Inject constructor() : ViewModel() {
+class GetStartedViewModel @Inject constructor(
+    private val appDataRepository: AppDataRepository
+) : ViewModel() {
 
     private val _getStartedState = MutableStateFlow(GetStartedState())
     val getsStartedState = _getStartedState.asStateFlow()
+
+    private val _appData = MutableStateFlow<AppData?>(null)
+    val appData = _appData.asStateFlow()
+
+    init {
+        _getStartedState.update {
+            it.copy(
+                appData = appDataRepository.getAppData()
+            )
+        }
+
+        _appData.update {
+            appDataRepository.getAppData()
+        }
+    }
 
     fun onEvent(getStartedUiEvent: GetStartedUiEvent) {
         when (getStartedUiEvent) {

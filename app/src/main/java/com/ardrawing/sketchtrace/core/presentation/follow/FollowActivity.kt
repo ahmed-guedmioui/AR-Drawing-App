@@ -11,7 +11,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.ardrawing.sketchtrace.App.Companion.facebook
 import com.ardrawing.sketchtrace.App.Companion.instagram
 import com.ardrawing.sketchtrace.App.Companion.tiktok
-import com.ardrawing.sketchtrace.App.Companion.twitter
+import com.ardrawing.sketchtrace.App.Companion.x
 import com.ardrawing.sketchtrace.databinding.ActivityFollowBinding
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
@@ -26,7 +26,7 @@ class FollowActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        
+
         val languageCode = prefs.getString("language", "en") ?: "en"
         LanguageChanger.changeAppLanguage(languageCode, this)
         binding = ActivityFollowBinding.inflate(layoutInflater)
@@ -53,6 +53,11 @@ class FollowActivity : AppCompatActivity() {
             openAppWithUserId("x")
         }
 
+        if (tiktok.isNotBlank()) binding.tiktok.visibility = View.GONE
+        if (facebook.isNotBlank()) binding.facebook.visibility = View.GONE
+        if (instagram.isNotBlank()) binding.instagram.visibility = View.GONE
+        if (x.isNotBlank()) binding.x.visibility = View.GONE
+
 
     }
 
@@ -73,7 +78,7 @@ class FollowActivity : AppCompatActivity() {
             }
 
             "x" -> { // Twitter
-                appIntent.data = Uri.parse("https://twitter.com/$twitter")
+                appIntent.data = Uri.parse("https://twitter.com/$x")
             }
         }
 

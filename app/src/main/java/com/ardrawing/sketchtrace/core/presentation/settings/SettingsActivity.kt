@@ -20,8 +20,8 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.ardrawing.sketchtrace.App
 import com.ardrawing.sketchtrace.R
+import com.ardrawing.sketchtrace.core.domain.model.app_data.AppData
 import com.ardrawing.sketchtrace.databinding.ActivitySettingsBinding
 import com.ardrawing.sketchtrace.core.presentation.follow.FollowActivity
 import com.ardrawing.sketchtrace.core.presentation.language.LanguageActivity
@@ -30,6 +30,7 @@ import com.ardrawing.sketchtrace.core.presentation.tips.TipsActivity
 import com.ardrawing.sketchtrace.paywall.presentation.PaywallActivity
 import com.ardrawing.sketchtrace.util.Constants
 import com.ardrawing.sketchtrace.util.LanguageChanger
+import com.ardrawing.sketchtrace.util.ads.NativeManager
 import com.ardrawing.sketchtrace.util.openDeveloper
 import com.ardrawing.sketchtrace.util.rateApp
 import com.ardrawing.sketchtrace.util.shareApp
@@ -42,7 +43,7 @@ class SettingsActivity : AppCompatActivity() {
 
     private val settingsViewModel: SettingsViewModel by viewModels()
 
-    private lateinit var settingsState: SettingsState
+    private var settingsState: SettingsState? = null
     private lateinit var binding: ActivitySettingsBinding
 
 
@@ -61,21 +62,44 @@ class SettingsActivity : AppCompatActivity() {
         lifecycleScope.launch {
             settingsViewModel.settingsState.collect {
                 settingsState = it
-                privacyDialog()
+                settingsState?.appData?.let { appData ->
+                    privacyDialog(appData)
+                }
             }
         }
 
-        if (App.appData.showRecommendedApps) {
-            binding.recommendedAppsRecyclerView.layoutManager =
-                LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
+        lifecycleScope.launch {
+            settingsViewModel.appData.collect { appData ->
+                appData?.let {
+                    if (it.showRecommendedApps) {
+                        binding.recommendedAppsRecyclerView.layoutManager =
+                            LinearLayoutManager(
+                                this@SettingsActivity,
+                                LinearLayoutManager.HORIZONTAL,
+                                false
+                            )
 
-            binding.recommendedAppsRecyclerView.adapter =
-                RecommendedAppsAdapter(
-                    this
-                )
-        } else {
-            binding.recommendedAppsParent.visibility = View.GONE
+                        binding.recommendedAppsRecyclerView.adapter =
+                            RecommendedAppsAdapter(
+                                activity = this@SettingsActivity,
+                                appData = it
+                            )
+                    } else {
+                        binding.recommendedAppsParent.visibility = View.GONE
+                    }
+                }
+
+                if (appData?.isSubscribed == true) {
+                    binding.subscribeInfo.text = getString(
+                        R.string.your_subscription_will_expire_in_n,
+                        settingsState?.appData?.subscriptionExpireDate
+                    )
+                } else {
+                    binding.subscribeInfo.text = getString(R.string.your_are_not_subscribed)
+                }
+            }
         }
+
 
         binding.back.setOnClickListener {
             onBackPressed()
@@ -114,7 +138,7 @@ class SettingsActivity : AppCompatActivity() {
         }
 
         binding.subscribe.setOnClickListener {
-            if (App.appData.isSubscribed) {
+            if (settingsState?.appData?.isSubscribed == true) {
                 Toast.makeText(
                     this, getString(R.string.you_are_already_subscribed), Toast.LENGTH_SHORT
                 ).show()
@@ -124,19 +148,10 @@ class SettingsActivity : AppCompatActivity() {
                 }
             }
         }
-
-        if (App.appData.isSubscribed) {
-            binding.subscribeInfo.text = getString(
-                R.string.your_subscription_will_expire_in_n,
-                App.appData.subscriptionExpireDate
-            )
-        } else {
-            binding.subscribeInfo.text = getString(R.string.your_are_not_subscribed)
-        }
     }
 
     @SuppressLint("SetJavaScriptEnabled")
-    private fun privacyDialog() {
+    private fun privacyDialog(appData: AppData) {
         val privacyDialog = Dialog(this)
         privacyDialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
         privacyDialog.setCancelable(true)
@@ -158,11 +173,11 @@ class SettingsActivity : AppCompatActivity() {
             override fun shouldOverrideUrlLoading(
                 view: WebView?, request: WebResourceRequest?
             ): Boolean {
-                view?.loadUrl(App.appData.privacyLink)
+                view?.loadUrl(appData.privacyLink)
                 return super.shouldOverrideUrlLoading(view, request)
             }
         }
-        webView.loadUrl(App.appData.privacyLink)
+        webView.loadUrl(appData.privacyLink)
 
         privacyDialog.setOnDismissListener {
             settingsViewModel.onEvent(SettingsUiEvent.ShowHidePrivacyDialog)
@@ -172,7 +187,7 @@ class SettingsActivity : AppCompatActivity() {
             privacyDialog.dismiss()
         }
 
-        if (settingsState.showPrivacyDialog) {
+        if (settingsState?.showPrivacyDialog == true) {
             privacyDialog.show()
         } else {
             privacyDialog.dismiss()
@@ -185,11 +200,11 @@ class SettingsActivity : AppCompatActivity() {
             recreate()
             Constants.languageChanged1 = false
         }
-        
-        if (App.appData.isSubscribed) {
+
+        if (settingsState?.appData?.isSubscribed == true) {
             binding.subscribeInfo.text = getString(
                 R.string.your_subscription_will_expire_in_n,
-                App.appData.subscriptionExpireDate
+                settingsState?.appData?.subscriptionExpireDate
             )
         } else {
             binding.subscribeInfo.text = getString(R.string.your_are_not_subscribed)

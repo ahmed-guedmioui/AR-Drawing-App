@@ -31,7 +31,7 @@ class CategoryActivity : AppCompatActivity() {
     private var categoryAdapter: CategoryAdapter? = null
 
     private val categoryViewModel: CategoryViewModel by viewModels()
-    private lateinit var categoryState: CategoryState
+    private var categoryState: CategoryState? = null
 
     @Inject
     lateinit var prefs: SharedPreferences
@@ -68,10 +68,10 @@ class CategoryActivity : AppCompatActivity() {
                 categoryAdapter?.notifyDataSetChanged()
 
                 binding.title.text =
-                    categoryState.imageCategory?.imageCategoryName
+                    categoryState?.imageCategory?.imageCategoryName
 
 
-                if (categoryState.isTrace) {
+                if (categoryState?.isTrace == true) {
                     binding.title.text = getString(R.string.trace)
                 } else {
                     binding.title.text = getString(R.string.sketch)
@@ -80,10 +80,21 @@ class CategoryActivity : AppCompatActivity() {
         }
 
         lifecycleScope.launch {
+            categoryViewModel.appData.collect { appData ->
+                NativeManager.loadNative(
+                    appData,
+                    findViewById(R.id.native_frame),
+                    findViewById(R.id.native_temp),
+                    this@CategoryActivity, false
+                )
+            }
+        }
+
+        lifecycleScope.launch {
             categoryViewModel.navigateToDrawingChannel.collect { navigate ->
                 if (navigate) {
-                    categoryState.clickedImageItem?.let { clickedImageItem ->
-                        if (categoryState.isTrace) {
+                    categoryState?.clickedImageItem?.let { clickedImageItem ->
+                        if (categoryState?.isTrace == true) {
                             traceDrawingScreen(clickedImageItem.image)
                         } else {
                             sketchDrawingScreen(clickedImageItem.image)
@@ -98,19 +109,14 @@ class CategoryActivity : AppCompatActivity() {
                 if (unlock) {
                     rewarded {
                         categoryViewModel.onEvent(CategoryUiEvents.UnlockImage)
-                        categoryAdapter?.notifyItemChanged(
-                            categoryState.imagePosition
-                        )
+
+                        categoryState?.imagePosition?.let {
+                            categoryAdapter?.notifyItemChanged(it)
+                        }
                     }
                 }
             }
         }
-
-        NativeManager.loadNative(
-            findViewById(R.id.native_frame),
-            findViewById(R.id.native_temp),
-            this
-        )
 
         binding.back.setOnClickListener {
             onBackPressed()
@@ -123,7 +129,7 @@ class CategoryActivity : AppCompatActivity() {
 
         categoryAdapter = CategoryAdapter(
             activity = this,
-            imageList = categoryState.imageCategory?.imageList ?: emptyList(),
+            imageList = categoryState?.imageCategory?.imageList ?: emptyList(),
             from = 2
         )
 

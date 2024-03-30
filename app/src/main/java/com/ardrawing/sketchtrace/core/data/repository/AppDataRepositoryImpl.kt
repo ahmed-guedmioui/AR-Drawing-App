@@ -2,12 +2,12 @@ package com.ardrawing.sketchtrace.core.data.repository
 
 import android.app.Application
 import android.content.SharedPreferences
-import com.ardrawing.sketchtrace.App
 import com.ardrawing.sketchtrace.BuildConfig
 import com.ardrawing.sketchtrace.R
 import com.ardrawing.sketchtrace.core.data.mapper.toAppData
 import com.ardrawing.sketchtrace.core.data.remote.AppDataApi
 import com.ardrawing.sketchtrace.core.data.remote.respnod.app_data.AppDataDto
+import com.ardrawing.sketchtrace.core.domain.model.app_data.AppData
 import com.ardrawing.sketchtrace.core.domain.repository.AppDataRepository
 import com.ardrawing.sketchtrace.core.domain.usecase.ShouldShowAdsForUser
 import com.ardrawing.sketchtrace.core.domain.usecase.UpdateSubscriptionInfo
@@ -34,7 +34,7 @@ class AppDataRepositoryImpl @Inject constructor(
     private val prefs: SharedPreferences
 ) : AppDataRepository {
 
-    override suspend fun getAppData(): Flow<Resource<Unit>> {
+    override suspend fun loadAppData(): Flow<Resource<Unit>> {
         return flow {
 
             emit(Resource.Loading(true))
@@ -65,10 +65,15 @@ class AppDataRepositoryImpl @Inject constructor(
             }
 
             appDataDto?.let {
-                App.appData = it.toAppData()
+                AppDataInstance.appData = it.toAppData().copy(
+                    admobInterstitial = "ca-app-pub-3940256099942544/1033173712",
+                    admobNative = "ca-app-pub-3940256099942544/2247696110",
+                    admobRewarded = "ca-app-pub-3940256099942544/5224354917",
+                    admobOpenApp =  "ca-app-pub-3940256099942544/9257395921"
+                )
 
                 prefs.edit()
-                    .putString("admobOpenApp", App.appData.admobOpenApp)
+                    .putString("admobOpenApp", getAppData()?.admobOpenApp)
                     .apply()
 
                 subscription()
@@ -86,26 +91,30 @@ class AppDataRepositoryImpl @Inject constructor(
         }
     }
 
+    override fun getAppData(): AppData? {
+        return AppDataInstance.appData
+    }
+
     override suspend fun setAdsVisibilityForUser() {
-        ShouldShowAdsForUser(application).invoke()
+        ShouldShowAdsForUser(application, getAppData()).invoke()
     }
 
     private fun subscription() {
         Purchases.sharedInstance.getCustomerInfo(
             object : ReceiveCustomerInfoCallback {
                 override fun onError(error: PurchasesError) {
-                    UpdateSubscriptionInfo(application, null).invoke()
+                    UpdateSubscriptionInfo(null, getAppData()).invoke()
                 }
 
                 override fun onReceived(customerInfo: CustomerInfo) {
                     val date = customerInfo.getExpirationDateForEntitlement(BuildConfig.ENTITLEMENT)
                     date?.let {
                         if (it.after(Date())) {
-                            App.appData.isSubscribed = true
+                            getAppData()?.isSubscribed = true
                         }
                     }
-                    UpdateSubscriptionInfo(application, date).invoke()
-                    ShouldShowAdsForUser(application).invoke()
+                    UpdateSubscriptionInfo(date, getAppData()).invoke()
+                    ShouldShowAdsForUser(application, getAppData()).invoke()
                 }
             }
         )
@@ -113,56 +122,57 @@ class AppDataRepositoryImpl @Inject constructor(
 
 
     // Only for testing
-    suspend fun getAppTestData(): Flow<Resource<Unit>> {
+    suspend fun loadTestAppData(): Flow<Resource<Unit>> {
         return flow {
 
             emit(Resource.Loading(true))
-
             delay(3000)
 
-            App.appData = AppDataDto(
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null
-            ).toAppData()
-
             prefs.edit()
-                .putString("admobOpenApp", App.appData.admobOpenApp)
+                .putString("admobOpenApp", getTestAppData().admobOpenApp)
                 .apply()
 
-            ShouldShowAdsForUser(application).invoke()
+            subscription()
 
             emit(Resource.Success())
-
             emit(Resource.Loading(false))
         }
     }
 
+    private fun getTestAppData(): AppData = AppDataDto(
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+    ).toAppData()
+
+
 }
 
-
+object AppDataInstance {
+    var appData: AppData? = null
+}
 
 
 

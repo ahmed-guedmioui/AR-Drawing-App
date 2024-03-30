@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.ardrawing.sketchtrace.App
 import com.ardrawing.sketchtrace.R
+import com.ardrawing.sketchtrace.core.domain.model.app_data.AppData
 import com.ardrawing.sketchtrace.image_list.domain.model.images.ImageCategory
 import com.ardrawing.sketchtrace.image_list.presentation.category.CategoryAdapter
 import com.ardrawing.sketchtrace.util.ads.NativeManager
@@ -18,8 +19,9 @@ import com.ardrawing.sketchtrace.util.ads.NativeManager
  * @author Ahmed Guedmioui
  */
 class CategoriesAdapter(
+    private val activity: Activity,
     private val imageCategoryList: List<ImageCategory>,
-    private val activity: Activity
+    private val appData: AppData?
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     override fun getItemViewType(i: Int): Int {
@@ -37,7 +39,11 @@ class CategoriesAdapter(
         if (viewType == 0) {
             val view: View = LayoutInflater.from(activity)
                 .inflate(R.layout.include_native, parent, false)
-            return NativeViewHolder(view, activity)
+            return NativeViewHolder(
+                itemView = view,
+                activity = activity,
+                appData = appData
+            )
         }
 
         if (viewType == 1) {
@@ -133,10 +139,15 @@ class CategoriesAdapter(
         }
     }
 
-    private class NativeViewHolder(itemView: View, activity: Activity) :
+    private class NativeViewHolder(
+        itemView: View,
+        activity: Activity,
+        appData: AppData?
+    ) :
         RecyclerView.ViewHolder(itemView) {
         init {
             NativeManager.loadNative(
+                appData = appData,
                 itemView.findViewById(R.id.native_frame),
                 itemView.findViewById(R.id.native_temp),
                 activity, false

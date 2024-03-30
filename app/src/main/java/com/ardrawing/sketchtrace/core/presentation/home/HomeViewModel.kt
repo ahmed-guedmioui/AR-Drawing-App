@@ -2,6 +2,8 @@ package com.ardrawing.sketchtrace.core.presentation.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.ardrawing.sketchtrace.core.domain.model.app_data.AppData
+import com.ardrawing.sketchtrace.core.domain.repository.AppDataRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
@@ -16,16 +18,27 @@ import javax.inject.Inject
  * @author Ahmed Guedmioui
  */
 @HiltViewModel
-class HomeViewModel @Inject constructor() : ViewModel() {
+class HomeViewModel @Inject constructor(
+    private val appDataRepository: AppDataRepository
+) : ViewModel() {
 
     private val _homeState = MutableStateFlow(HomeState())
     val homeState = _homeState.asStateFlow()
+
+    private val _appData = MutableStateFlow<AppData?>(null)
+    val appData = _appData.asStateFlow()
 
     private val _doubleTapToastChannel = Channel<Boolean>()
     val doubleTapToastChannel = _doubleTapToastChannel.receiveAsFlow()
 
     private val _closeChannel = Channel<Boolean>()
     val closeChannel = _closeChannel.receiveAsFlow()
+
+    init {
+        _appData.update {
+            appDataRepository.getAppData()
+        }
+    }
 
     fun onEvent(homeUiEvent: HomeUiEvent) {
         when (homeUiEvent) {

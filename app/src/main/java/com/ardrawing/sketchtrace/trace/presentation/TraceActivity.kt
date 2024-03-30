@@ -71,7 +71,7 @@ class TraceActivity : AppCompatActivity() {
         binding = ActivityTraceBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        if (App.appData.isSubscribed) {
+        if (appDataRepository.getAppData()?.isSubscribed == true) {
             binding.vipPhoto.visibility = View.GONE
             binding.vipVideo.visibility = View.GONE
         }
@@ -376,7 +376,7 @@ class TraceActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        if (App.appData.isSubscribed) {
+        if (appDataRepository.getAppData()?.isSubscribed == true) {
             binding.vipPhoto.visibility = View.GONE
             binding.vipVideo.visibility = View.GONE
         }

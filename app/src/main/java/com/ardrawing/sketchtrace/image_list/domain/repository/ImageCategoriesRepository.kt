@@ -11,7 +11,7 @@ import java.util.Date
  */
 interface ImageCategoriesRepository {
     suspend fun loadImageCategoryList(): Flow<Resource<Unit>>
-    suspend fun getImageCategoryList(): List<ImageCategory>
+    fun getImageCategoryList(): MutableList<ImageCategory>
     suspend fun unlockImageItem(imageItem: Image)
     suspend fun setGalleryAndCameraItems()
     suspend fun setNativeItems(date: Date? = null)

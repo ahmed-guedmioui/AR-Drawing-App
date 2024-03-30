@@ -2,6 +2,7 @@ package com.ardrawing.sketchtrace.util.ads
 
 import android.app.Activity
 import android.content.Context
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.Button
@@ -9,7 +10,6 @@ import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
-import com.ardrawing.sketchtrace.App
 import com.facebook.ads.Ad
 import com.facebook.ads.AdError
 import com.facebook.ads.AdOptionsView
@@ -24,12 +24,14 @@ import com.google.android.gms.ads.VideoController.VideoLifecycleCallbacks
 import com.google.android.gms.ads.nativead.NativeAd
 import com.google.android.gms.ads.nativead.NativeAdView
 import com.ardrawing.sketchtrace.R
+import com.ardrawing.sketchtrace.core.domain.model.app_data.AppData
 
 object NativeManager {
 
     private var admobNativeAd: NativeAd? = null
 
     fun loadNative(
+        appData: AppData?,
         nativeFrame: FrameLayout,
         nativeTemp: TextView,
         activity: Activity,
@@ -40,18 +42,18 @@ object NativeManager {
             "ar_drawing_med_prefs_file", Context.MODE_PRIVATE
         )
 
-        if (!App.appData.showAdsForThisUser || !prefs.getBoolean("can_show_ads", true)) {
+        if (appData?.showAdsForThisUser == false || !prefs.getBoolean("can_show_ads", true)) {
             nativeTemp.visibility = View.GONE
             return
         }
 
-        when (App.appData.native) {
+        when (appData?.native) {
             AdType.admob -> loadAdmobNative(
-                nativeFrame, nativeTemp, activity, isButtonTop
+                appData, nativeFrame, nativeTemp, activity, isButtonTop
             )
 
             AdType.facebook -> loadFacebookNative(
-                nativeFrame, nativeTemp, activity, isButtonTop
+                appData, nativeFrame, nativeTemp, activity, isButtonTop
             )
 
             else -> {
@@ -65,16 +67,21 @@ object NativeManager {
     // Admob ---------------------------------------------------------------------------------------------------------------------
 
     private fun loadAdmobNative(
+        appData: AppData?,
         nativeFrame: FrameLayout,
         nativeTemp: TextView,
         activity: Activity,
         isButtonTop: Boolean
     ) {
+
+        Log.d("Ads_Tag", "admobNative ${InterManager.appData?.admobNative ?: ""}")
+
         val builder = AdLoader.Builder(
             activity,
-            App.appData.admobNative
+            appData?.admobNative ?: ""
         )
         builder.forNativeAd { nativeAd: NativeAd ->
+            Log.d("Ads_Tag", "forNativeAd")
             val isDestroyed = activity.isDestroyed
             if (isDestroyed || activity.isFinishing || activity.isChangingConfigurations) {
                 nativeAd.destroy()
@@ -102,6 +109,8 @@ object NativeManager {
         }
         val adLoader = builder.withAdListener(object : AdListener() {
             override fun onAdFailedToLoad(loadAdError: LoadAdError) {
+                Log.d("Ads_Tag", "onAdFailedToLoad native $loadAdError")
+
                 nativeFrame.visibility = View.GONE
                 nativeTemp.visibility = View.GONE
             }
@@ -159,12 +168,16 @@ object NativeManager {
     // Facebook ---------------------------------------------------------------------------------------------------------------------
 
     private fun loadFacebookNative(
+        appData: AppData?,
         nativeFrame: FrameLayout,
         nativeTemp: TextView,
         activity: Activity,
         isButtonTop: Boolean
     ) {
-        val nativeAd = com.facebook.ads.NativeAd(activity, App.appData.facebookNative)
+        val nativeAd = com.facebook.ads.NativeAd(
+            activity,
+            appData?.facebookNative
+        )
         val nativeAdListener: NativeAdListener = object : NativeAdListener {
             override fun onMediaDownloaded(ad: Ad) {}
             override fun onError(ad: Ad, adError: AdError) {

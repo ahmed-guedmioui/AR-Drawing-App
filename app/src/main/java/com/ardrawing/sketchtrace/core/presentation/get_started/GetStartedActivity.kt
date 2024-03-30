@@ -20,6 +20,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.ardrawing.sketchtrace.App
 import com.ardrawing.sketchtrace.R
+import com.ardrawing.sketchtrace.core.domain.model.app_data.AppData
 import com.ardrawing.sketchtrace.databinding.ActivityGetStartedBinding
 import com.ardrawing.sketchtrace.core.presentation.home.HomeActivity
 import com.ardrawing.sketchtrace.paywall.presentation.PaywallActivity
@@ -38,7 +39,7 @@ class GetStartedActivity : AppCompatActivity() {
 
     private val getStartedViewModel: GetStartedViewModel by viewModels()
 
-    private lateinit var getStartedState: GetStartedState
+    private var getStartedState: GetStartedState? = null
     private lateinit var binding: ActivityGetStartedBinding
 
 
@@ -57,18 +58,27 @@ class GetStartedActivity : AppCompatActivity() {
         lifecycleScope.launch {
             getStartedViewModel.getsStartedState.collect {
                 getStartedState = it
-                privacyDialog()
+
+                getStartedState?.appData?.let { appData ->
+                    privacyDialog(appData)
+                }
+            }
+        }
+
+        lifecycleScope.launch {
+            getStartedViewModel.appData.collect { appData ->
+                NativeManager.loadNative(
+                    appData,
+                    findViewById(R.id.native_frame),
+                    findViewById(R.id.native_temp),
+                    this@GetStartedActivity, false
+                )
             }
         }
 
         binding.privacyPolicy.setOnClickListener {
             getStartedViewModel.onEvent(GetStartedUiEvent.ShowHidePrivacyDialog)
         }
-        NativeManager.loadNative(
-            findViewById(R.id.native_frame),
-            findViewById(R.id.native_temp),
-            this, false
-        )
 
 
         binding.getStarted.setOnClickListener {
@@ -83,7 +93,7 @@ class GetStartedActivity : AppCompatActivity() {
     }
 
     private fun move() {
-        if (App.appData.isSubscribed) {
+        if (getStartedState?.appData?.isSubscribed == true) {
             goToHome()
         } else {
             Intent(this, PaywallActivity::class.java).also {
@@ -102,7 +112,7 @@ class GetStartedActivity : AppCompatActivity() {
     }
 
     @SuppressLint("SetJavaScriptEnabled")
-    private fun privacyDialog() {
+    private fun privacyDialog(appData: AppData) {
         val privacyDialog = Dialog(this)
         privacyDialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
         privacyDialog.setCancelable(true)
@@ -124,11 +134,11 @@ class GetStartedActivity : AppCompatActivity() {
             override fun shouldOverrideUrlLoading(
                 view: WebView?, request: WebResourceRequest?
             ): Boolean {
-                view?.loadUrl(App.appData.privacyLink)
+                view?.loadUrl(appData.privacyLink)
                 return super.shouldOverrideUrlLoading(view, request)
             }
         }
-        webView.loadUrl(App.appData.privacyLink)
+        webView.loadUrl(appData.privacyLink)
 
         privacyDialog.setOnDismissListener {
             getStartedViewModel.onEvent(GetStartedUiEvent.ShowHidePrivacyDialog)
@@ -138,7 +148,7 @@ class GetStartedActivity : AppCompatActivity() {
             privacyDialog.dismiss()
         }
 
-        if (getStartedState.showPrivacyDialog) {
+        if (getStartedState?.showPrivacyDialog == true) {
             privacyDialog.show()
         } else {
             privacyDialog.dismiss()

@@ -1,6 +1,7 @@
 package com.ardrawing.sketchtrace.advanced_editing.presentation
 
 import androidx.lifecycle.ViewModel
+import com.ardrawing.sketchtrace.core.domain.repository.AppDataRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -11,10 +12,20 @@ import javax.inject.Inject
  * @author Ahmed Guedmioui
  */
 @HiltViewModel
-class AdvancedEditingViewModel @Inject constructor() : ViewModel() {
+class AdvancedEditingViewModel @Inject constructor(
+    private val appDataRepository: AppDataRepository
+) : ViewModel() {
 
     private val _advancedEditingState = MutableStateFlow(AdvancedEditingState())
     val advancedEditingState = _advancedEditingState.asStateFlow()
+
+    init {
+        _advancedEditingState.update {
+            it.copy(
+                appData = appDataRepository.getAppData()
+            )
+        }
+    }
 
     fun onEvent(advancedEditingUiEvent: AdvancedEditingUiEvent) {
         when (advancedEditingUiEvent) {

@@ -2,15 +2,14 @@ package com.ardrawing.sketchtrace.image_list.data.repository
 
 import android.app.Application
 import android.content.SharedPreferences
-import android.util.Log
-import com.ardrawing.sketchtrace.App
 import com.ardrawing.sketchtrace.R
+import com.ardrawing.sketchtrace.core.domain.repository.AppDataRepository
+import com.ardrawing.sketchtrace.core.domain.usecase.UpdateSubscriptionInfo
 import com.ardrawing.sketchtrace.image_list.data.mapper.toImageCategoryList
 import com.ardrawing.sketchtrace.image_list.data.remote.ImageCategoryApi
+import com.ardrawing.sketchtrace.image_list.domain.model.images.Image
 import com.ardrawing.sketchtrace.image_list.domain.model.images.ImageCategory
 import com.ardrawing.sketchtrace.image_list.domain.repository.ImageCategoriesRepository
-import com.ardrawing.sketchtrace.core.domain.usecase.UpdateSubscriptionInfo
-import com.ardrawing.sketchtrace.image_list.domain.model.images.Image
 import com.ardrawing.sketchtrace.util.Resource
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -19,14 +18,14 @@ import retrofit2.HttpException
 import java.util.Date
 import javax.inject.Inject
 
-
 /**
  * @author Ahmed Guedmioui
  */
 class ImageCategoriesRepositoryImpl @Inject constructor(
     private val application: Application,
+    private val prefs: SharedPreferences,
     private val imageCategoryApi: ImageCategoryApi,
-    private val prefs: SharedPreferences
+    private val appDataRepository: AppDataRepository
 ) : ImageCategoriesRepository {
 
     override suspend fun loadImageCategoryList(): Flow<Resource<Unit>> {
@@ -60,7 +59,7 @@ class ImageCategoriesRepositoryImpl @Inject constructor(
             }
 
             categoryListDto?.let {
-                App.imageCategoryList = it.toImageCategoryList().toMutableList()
+                ImageCategoriesInstance.imageCategoryList = it.toImageCategoryList().toMutableList()
                 emit(Resource.Success())
                 emit(Resource.Loading(false))
                 return@flow
@@ -73,8 +72,8 @@ class ImageCategoriesRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun getImageCategoryList(): List<ImageCategory> {
-        return App.imageCategoryList
+    override fun getImageCategoryList(): MutableList<ImageCategory> {
+        return ImageCategoriesInstance.imageCategoryList ?: mutableListOf()
     }
 
     override suspend fun unlockImageItem(imageItem: Image) {
@@ -83,14 +82,12 @@ class ImageCategoriesRepositoryImpl @Inject constructor(
 
     override suspend fun setUnlockedImages(date: Date?) {
         date?.let {
-            UpdateSubscriptionInfo(application, it).invoke()
+            UpdateSubscriptionInfo(it, appDataRepository.getAppData()).invoke()
         }
 
-        Log.d("tag_setUnlockedImages", "setUnlockedImages: ${App.appData.isSubscribed}")
-
         // When user is subscribed all images will be unlocked
-        if (App.appData.isSubscribed) {
-            App.imageCategoryList.forEach { categoryItem ->
+        if (appDataRepository.getAppData()?.isSubscribed == true) {
+            getImageCategoryList().forEach { categoryItem ->
                 categoryItem.imageList.forEach { image ->
                     image.locked = false
                 }
@@ -100,7 +97,7 @@ class ImageCategoriesRepositoryImpl @Inject constructor(
         }
 
         // When user is not subscribed unlock only the image the user manually unlocked by watching an ad
-        App.imageCategoryList.forEach { categoryItem ->
+        getImageCategoryList().forEach { categoryItem ->
             categoryItem.imageList.forEach { image ->
                 if (image.locked) {
                     prefs.getBoolean(image.prefsId, true).let { locked ->
@@ -113,21 +110,18 @@ class ImageCategoriesRepositoryImpl @Inject constructor(
 
     override suspend fun setNativeItems(date: Date?) {
         date?.let {
-            UpdateSubscriptionInfo(application, it).invoke()
+            UpdateSubscriptionInfo(it, appDataRepository.getAppData()).invoke()
         }
 
-        if (App.appData.isSubscribed) {
+        if (appDataRepository.getAppData()?.isSubscribed == true) {
 
-            val iterator: MutableIterator<ImageCategory> = App.imageCategoryList.iterator()
-
+            val iterator: MutableIterator<ImageCategory> = getImageCategoryList().iterator()
             while (iterator.hasNext()) {
                 val categoryItem: ImageCategory = iterator.next()
                 if (categoryItem.imageCategoryName == "native") {
                     iterator.remove() // Safely remove the element using the iterator
                 }
             }
-
-
             return
         }
 
@@ -137,15 +131,18 @@ class ImageCategoriesRepositoryImpl @Inject constructor(
             imageList = emptyList()
         )
 
-        var index = App.appData.nativeRate
-        while (index < App.imageCategoryList.size) {
-            App.imageCategoryList.add(index, nativeItem)
-            index += App.appData.nativeRate + 1
+        appDataRepository.getAppData()?.nativeRate?.let { nativeRate ->
+            var index = nativeRate
+            while (index < getImageCategoryList().size) {
+                getImageCategoryList().add(index, nativeItem)
+                index += nativeRate + 1
+            }
         }
+
     }
 
     override suspend fun setGalleryAndCameraItems() {
-        App.imageCategoryList.add(
+        getImageCategoryList().add(
             0,
             ImageCategory(
                 imageCategoryName = "gallery and camera",
@@ -154,7 +151,7 @@ class ImageCategoriesRepositoryImpl @Inject constructor(
             )
         )
 
-        App.imageCategoryList.add(
+        getImageCategoryList().add(
             1,
             ImageCategory(
                 imageCategoryName = "explore",
@@ -163,9 +160,11 @@ class ImageCategoriesRepositoryImpl @Inject constructor(
             )
         )
     }
-
 }
 
+object ImageCategoriesInstance {
+    var imageCategoryList: MutableList<ImageCategory>? = null
+}
 
 
 

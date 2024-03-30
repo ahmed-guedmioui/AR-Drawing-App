@@ -34,7 +34,7 @@ class LanguageActivity : AppCompatActivity() {
     val zh_rCN = "zh"
 
     private val languageViewModel: LanguageViewModel by viewModels()
-    private lateinit var languageState: LanguageState
+    private var languageState: LanguageState? = null
 
     private lateinit var binding: ActivityLanguageBinding
 
@@ -56,12 +56,16 @@ class LanguageActivity : AppCompatActivity() {
             }
         }
 
-        NativeManager.loadNative(
-            findViewById(R.id.native_frame),
-            findViewById(R.id.native_temp),
-            this, false
-        )
-
+        lifecycleScope.launch {
+            languageViewModel.appData.collect { appData ->
+                NativeManager.loadNative(
+                    appData,
+                    findViewById(R.id.native_frame),
+                    findViewById(R.id.native_temp),
+                    this@LanguageActivity, false
+                )
+            }
+        }
 
         val fromSplash = intent?.extras?.getBoolean("from_splash")
 
@@ -73,23 +77,29 @@ class LanguageActivity : AppCompatActivity() {
         }
 
         binding.apply.setOnClickListener {
-            InterManager.showInterstitial(this, object : InterManager.OnAdClosedListener {
-                override fun onAdClosed() {
-                    prefs.edit().putString("language", languageState.language).apply()
-                    prefs.edit().putBoolean("language_chosen", true).apply()
+            InterManager.showInterstitial(
+                this,
+                object : InterManager.OnAdClosedListener {
+                    override fun onAdClosed() {
+                        prefs.edit().putString("language", languageState?.language ?: en).apply()
+                        prefs.edit().putBoolean("language_chosen", true).apply()
 
-                    LanguageChanger.changeAppLanguage(languageState.language, this@LanguageActivity)
+                        LanguageChanger.changeAppLanguage(
+                            languageState?.language ?: en,
+                            this@LanguageActivity
+                        )
 
-                    if (fromSplash == true) {
-                        startActivity(Intent(this@LanguageActivity, TipsActivity::class.java))
-                    } else {
-                        Constants.languageChanged1 = true
-                        Constants.languageChanged2 = true
+                        if (fromSplash == true) {
+                            startActivity(Intent(this@LanguageActivity, TipsActivity::class.java))
+                        } else {
+                            Constants.languageChanged1 = true
+                            Constants.languageChanged2 = true
+                        }
+
+                        finish()
                     }
-
-                    finish()
                 }
-            })
+            )
         }
 
         val language = prefs.getString("language", en)
@@ -143,7 +153,7 @@ class LanguageActivity : AppCompatActivity() {
         binding.french.background = AppCompatResources.getDrawable(this, R.drawable.language_bg)
         binding.japanese.background = AppCompatResources.getDrawable(this, R.drawable.language_bg)
 
-        when (languageState.language) {
+        when (languageState?.language) {
             en -> {
                 binding.english.background =
                     AppCompatResources.getDrawable(this, R.drawable.language_selected_bg)

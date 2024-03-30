@@ -38,16 +38,8 @@ class AdvancedEditingActivity : AppCompatActivity(), SeekBar.OnSeekBarChangeList
     @Inject
     lateinit var prefs: SharedPreferences
 
-    @Inject
-    lateinit var appDataRepository: AppDataRepository
-
-    @Inject
-    lateinit var imageCategoriesRepository: ImageCategoriesRepository
-
-    
-
     private val advancedEditingViewModel: AdvancedEditingViewModel by viewModels()
-    private lateinit var advancedEditingState: AdvancedEditingState
+    private var advancedEditingState: AdvancedEditingState? = null
 
     private lateinit var binding: ActivityAdvancedBinding
 
@@ -64,7 +56,7 @@ class AdvancedEditingActivity : AppCompatActivity(), SeekBar.OnSeekBarChangeList
         binding = ActivityAdvancedBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        if (App.appData.isSubscribed) {
+        if (advancedEditingState?.appData?.isSubscribed == true) {
             binding.vipApply.visibility = View.GONE
         }
 
@@ -99,7 +91,7 @@ class AdvancedEditingActivity : AppCompatActivity(), SeekBar.OnSeekBarChangeList
         binding.sharpnessSeek.setOnSeekBarChangeListener(this)
 
         binding.apply.setOnClickListener {
-            if (App.appData.isSubscribed) {
+            if (advancedEditingState?.appData?.isSubscribed == true) {
                 Constants.bitmap = Constants.convertedBitmap
                 Constants.convertedBitmap = null
 
@@ -116,15 +108,14 @@ class AdvancedEditingActivity : AppCompatActivity(), SeekBar.OnSeekBarChangeList
     }
 
 
-
     private fun showApplyAlertDialog() {
 
         val alertDialog = AlertDialog.Builder(this)
             .setTitle(
                 getString(R.string.do_you_want_to_apply_the_editing)
             )
-            .setPositiveButton(getString(R.string.yes)) { dialog, _ ->
-                if (App.appData.isSubscribed) {
+            .setPositiveButton(getString(R.string.yes)) { _, _ ->
+                if (advancedEditingState?.appData?.isSubscribed == true) {
                     Constants.bitmap = Constants.convertedBitmap
                     Constants.convertedBitmap = null
 
@@ -151,7 +142,7 @@ class AdvancedEditingActivity : AppCompatActivity(), SeekBar.OnSeekBarChangeList
     }
 
     private fun updatedSelected() {
-        when (advancedEditingState.selected) {
+        when (advancedEditingState?.selected) {
             0 -> {
                 resetAllCardsColor()
             }
@@ -207,68 +198,70 @@ class AdvancedEditingActivity : AppCompatActivity(), SeekBar.OnSeekBarChangeList
     }
 
     private fun setPreviousEdited() {
-        when (advancedEditingState.selected) {
-            1 -> {
-                // apply the other filters except edge
+        advancedEditingState?.let {
+            when (it.selected) {
+                1 -> {
+                    // apply the other filters except edge
 
-                if (advancedEditingState.isContrast) {
-                    contrast()
-                }
-                if (advancedEditingState.isNoise) {
-                    noise()
-                }
-                if (advancedEditingState.isSharpened) {
-                    sharpen()
-                }
-            }
-
-            2 -> {
-                // apply the other filters except contrast
-
-                if (advancedEditingState.isEdged) {
-                    edge()
-                }
-                if (advancedEditingState.isNoise) {
-                    noise()
-                }
-                if (advancedEditingState.isSharpened) {
-                    sharpen()
+                    if (it.isContrast) {
+                        contrast()
+                    }
+                    if (it.isNoise) {
+                        noise()
+                    }
+                    if (it.isSharpened) {
+                        sharpen()
+                    }
                 }
 
-            }
+                2 -> {
+                    // apply the other filters except contrast
 
-            3 -> {
-                // apply the other filters except noise
+                    if (it.isEdged) {
+                        edge()
+                    }
+                    if (it.isNoise) {
+                        noise()
+                    }
+                    if (it.isSharpened) {
+                        sharpen()
+                    }
 
-                if (advancedEditingState.isEdged) {
-                    edge()
                 }
-                if (advancedEditingState.isContrast) {
-                    contrast()
-                }
-                if (advancedEditingState.isSharpened) {
-                    sharpen()
-                }
-            }
 
-            4 -> {
-                // apply the other filters except sharpness
+                3 -> {
+                    // apply the other filters except noise
 
-                if (advancedEditingState.isEdged) {
-                    edge()
+                    if (it.isEdged) {
+                        edge()
+                    }
+                    if (it.isContrast) {
+                        contrast()
+                    }
+                    if (it.isSharpened) {
+                        sharpen()
+                    }
                 }
-                if (advancedEditingState.isContrast) {
-                    contrast()
-                }
-                if (advancedEditingState.isNoise) {
-                    noise()
+
+                4 -> {
+                    // apply the other filters except sharpness
+
+                    if (it.isEdged) {
+                        edge()
+                    }
+                    if (it.isContrast) {
+                        contrast()
+                    }
+                    if (it.isNoise) {
+                        noise()
+                    }
                 }
             }
         }
     }
 
     private fun sendSelected(level: Int) {
-        when (advancedEditingState.selected) {
+        when (advancedEditingState?.selected) {
             1 -> {
                 advancedEditingViewModel.onEvent(
                     AdvancedEditingUiEvent.SetEdge(level)
@@ -310,7 +303,10 @@ class AdvancedEditingActivity : AppCompatActivity(), SeekBar.OnSeekBarChangeList
 
                 gPUImage.setFilter(
                     GPUImageSharpenFilter(
-                        range(advancedEditingState.edge, 0.0f, 4.0f)
+                        range(
+                            advancedEditingState?.edge ?: 0,
+                            0.0f, 4.0f
+                        )
                     )
                 )
 
@@ -335,7 +331,10 @@ class AdvancedEditingActivity : AppCompatActivity(), SeekBar.OnSeekBarChangeList
 
                 gPUImage.setFilter(
                     GPUImageContrastFilter(
-                        range(advancedEditingState.contrast, 1.0f, 4.0f)
+                        range(
+                            advancedEditingState?.contrast ?: 0,
+                            1.0f, 4.0f
+                        )
                     )
                 )
 
@@ -360,7 +359,10 @@ class AdvancedEditingActivity : AppCompatActivity(), SeekBar.OnSeekBarChangeList
 
                 val filter = GPUImageGaussianBlurFilter()
                 filter.setBlurSize(
-                    range(advancedEditingState.noise, 0.0f, 1.0f)
+                    range(
+                        advancedEditingState?.noise ?: 0,
+                        0.0f, 1.0f
+                    )
                 )
 
                 gPUImage.setFilter(filter)
@@ -387,7 +389,10 @@ class AdvancedEditingActivity : AppCompatActivity(), SeekBar.OnSeekBarChangeList
 
                 gPUImage.setFilter(
                     GPUImageSharpenFilter(
-                        range(advancedEditingState.sharpness, 0.0f, 2.0f)
+                        range(
+                            advancedEditingState?.sharpness ?: 0,
+                            0.0f, 2.0f
+                        )
                     )
                 )
 

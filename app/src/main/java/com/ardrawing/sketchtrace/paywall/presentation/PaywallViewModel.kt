@@ -65,7 +65,7 @@ class PaywallViewModel @Inject constructor(
 
                     paywallUiEvent.date?.let {
                         if (it.after(Date())) {
-                            App.appData.isSubscribed = true
+                            appDataRepository.getAppData()?.isSubscribed = true
 
                             viewModelScope.launch {
                                 appDataRepository.setAdsVisibilityForUser()

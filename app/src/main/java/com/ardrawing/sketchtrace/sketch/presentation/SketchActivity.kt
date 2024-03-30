@@ -127,7 +127,7 @@ class SketchActivity : AppCompatActivity() {
 
         updateMainTimerText("05:00", 500000)
 
-        if (!App.appData.isSubscribed) {
+        if (appDataRepository.getAppData()?.isSubscribed == false) {
             countDown()
         } else {
             binding.mainTempContainer.visibility = View.GONE
@@ -143,7 +143,10 @@ class SketchActivity : AppCompatActivity() {
         }
 
         NativeManager.loadNative(
-            findViewById(R.id.native_frame), findViewById(R.id.native_temp), this, true
+            appDataRepository.getAppData(),
+            findViewById(R.id.native_frame),
+            findViewById(R.id.native_temp),
+            this, true
         )
 
         setupFlashButton()
@@ -463,7 +466,7 @@ class SketchActivity : AppCompatActivity() {
 
 
     private fun subscribe() {
-        if (App.appData.isSubscribed) {
+        if (appDataRepository.getAppData()?.isSubscribed == true) {
             handler?.removeCallbacks(timerRunnable)
             countDownTimer?.cancel()
 
@@ -577,7 +580,11 @@ class SketchActivity : AppCompatActivity() {
             override fun onFinish() {
                 isTimeIsUp = true
                 updateMainTimerText("00:00", 0)
-                if (!isDialogShowing && !isTimeIsUpDialogShowing && !App.appData.isSubscribed) {
+                if (
+                    !isDialogShowing
+                    && !isTimeIsUpDialogShowing
+                    && appDataRepository.getAppData()?.isSubscribed == false
+                ) {
                     timeDialog()
                 }
             }
@@ -805,7 +812,7 @@ class SketchActivity : AppCompatActivity() {
             binding.objImage.setImageBitmap(Constants.bitmap)
         }
 
-        if (App.appData.isSubscribed) {
+        if (appDataRepository.getAppData()?.isSubscribed == true) {
             binding.mainTempContainer.visibility = View.GONE
             binding.vipPhoto.visibility = View.GONE
             binding.vipVideo.visibility = View.GONE
@@ -846,7 +853,7 @@ class SketchActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        if (!App.appData.isSubscribed) {
+        if (appDataRepository.getAppData()?.isSubscribed == false) {
             handler?.removeCallbacks(timerRunnable)
             countDownTimer?.cancel()
             Constants.bitmap = null

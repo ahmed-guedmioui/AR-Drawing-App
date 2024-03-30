@@ -65,12 +65,7 @@ class AppDataRepositoryImpl @Inject constructor(
             }
 
             appDataDto?.let {
-                AppDataInstance.appData = it.toAppData().copy(
-                    admobInterstitial = "ca-app-pub-3940256099942544/1033173712",
-                    admobNative = "ca-app-pub-3940256099942544/2247696110",
-                    admobRewarded = "ca-app-pub-3940256099942544/5224354917",
-                    admobOpenApp =  "ca-app-pub-3940256099942544/9257395921"
-                )
+                AppDataInstance.appData = it.toAppData()
 
                 prefs.edit()
                     .putString("admobOpenApp", getAppData()?.admobOpenApp)

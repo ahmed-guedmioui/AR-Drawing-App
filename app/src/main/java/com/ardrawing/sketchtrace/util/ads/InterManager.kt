@@ -136,8 +136,6 @@ object InterManager {
 
         val adRequest = AdRequest.Builder().build()
 
-        Log.d("Ads_Tag", "admobInterstitial ${appData?.admobInterstitial ?: ""}")
-
         InterstitialAd.load(
             activity,
             appData?.admobInterstitial ?: "",
@@ -166,7 +164,6 @@ object InterManager {
                 }
 
                 override fun onAdFailedToLoad(loadAdError: LoadAdError) {
-                    Log.d("Ads_Tag", "onAdFailedToLoad inter $loadAdError")
                     isAdmobInterLoaded = false
                 }
             })

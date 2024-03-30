@@ -74,8 +74,6 @@ object NativeManager {
         isButtonTop: Boolean
     ) {
 
-        Log.d("Ads_Tag", "admobNative ${InterManager.appData?.admobNative ?: ""}")
-
         val builder = AdLoader.Builder(
             activity,
             appData?.admobNative ?: ""
@@ -109,8 +107,6 @@ object NativeManager {
         }
         val adLoader = builder.withAdListener(object : AdListener() {
             override fun onAdFailedToLoad(loadAdError: LoadAdError) {
-                Log.d("Ads_Tag", "onAdFailedToLoad native $loadAdError")
-
                 nativeFrame.visibility = View.GONE
                 nativeTemp.visibility = View.GONE
             }

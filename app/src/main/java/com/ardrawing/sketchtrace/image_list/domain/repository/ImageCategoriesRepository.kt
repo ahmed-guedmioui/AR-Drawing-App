@@ -10,11 +10,11 @@ import java.util.Date
  * @author Ahmed Guedmioui
  */
 interface ImageCategoriesRepository {
-    suspend fun loadImageCategoryList(): Flow<Resource<Unit>>
-    fun getImageCategoryList(): MutableList<ImageCategory>
-    suspend fun unlockImageItem(imageItem: Image)
-    suspend fun setGalleryAndCameraItems()
-    suspend fun setNativeItems(date: Date? = null)
-    suspend fun setUnlockedImages(date: Date? = null)
+    suspend fun loadImageCategories(): Flow<Resource<Unit>>
+    fun getImageCategories(): MutableList<ImageCategory>
+    fun unlockImageItem(imageItem: Image)
+    fun setGalleryAndCameraItems()
+    fun setNativeItems(date: Date? = null)
+    fun setUnlockedImages(date: Date? = null)
 
 }

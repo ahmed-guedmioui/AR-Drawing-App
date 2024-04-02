@@ -49,6 +49,7 @@ class CategoriesActivity : AppCompatActivity() {
     private val categoriesViewModel: CategoriesViewModel by viewModels()
     private var categoriesState: CategoriesState? = null
 
+
     @Inject
     lateinit var prefs: SharedPreferences
 

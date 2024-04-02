@@ -9,6 +9,15 @@ import kotlinx.coroutines.flow.Flow
  */
 interface AppDataRepository {
     suspend fun loadAppData(): Flow<Resource<Unit>>
-    fun getAppData(): AppData?
-    suspend fun setAdsVisibilityForUser()
+    fun getAppData(): AppData
+    fun updateIsSubscribed(
+        isSubscribed: Boolean
+    )
+    fun updateShowAdsForThisUser(
+        showAdsForThisUser: Boolean
+    )
+    fun updateSubscriptionExpireDate(
+        subscriptionExpireDate: String
+    )
+    fun setAdsVisibilityForUser()
 }

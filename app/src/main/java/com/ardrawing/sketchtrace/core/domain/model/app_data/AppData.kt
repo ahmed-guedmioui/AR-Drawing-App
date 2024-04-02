@@ -40,7 +40,7 @@ data class AppData(
 
     // these ones are not gotten from json configuration,
     // we assign a value to it based on if we can show ads for this user
-    var showAdsForThisUser: Boolean = false,
     var isSubscribed: Boolean = false,
+    var showAdsForThisUser: Boolean = false,
     var subscriptionExpireDate: String = ""
 )

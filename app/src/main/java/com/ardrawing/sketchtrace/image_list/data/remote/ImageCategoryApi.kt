@@ -1,7 +1,7 @@
 package com.ardrawing.sketchtrace.image_list.data.remote
 
 import com.ardrawing.sketchtrace.BuildConfig
-import com.ardrawing.sketchtrace.image_list.data.remote.respond.images.ImageCategoryListDto
+import com.ardrawing.sketchtrace.image_list.data.remote.respond.images.ImageCategoriesDto
 import retrofit2.http.GET
 
 /**
@@ -11,7 +11,7 @@ interface ImageCategoryApi {
 
 
     @GET(IMAGES_PATH)
-    suspend fun getImageCategoryList(): ImageCategoryListDto?
+    suspend fun getImageCategories(): ImageCategoriesDto?
 
     companion object {
         const val IMAGES_BASE_URL = BuildConfig.IMAGES_BASE_URL

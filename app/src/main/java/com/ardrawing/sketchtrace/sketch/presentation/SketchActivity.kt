@@ -123,8 +123,6 @@ class SketchActivity : AppCompatActivity() {
         binding = ActivitySketchBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-
-
         updateMainTimerText("05:00", 500000)
 
         if (appDataRepository.getAppData()?.isSubscribed == false) {

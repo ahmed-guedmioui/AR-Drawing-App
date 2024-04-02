@@ -39,7 +39,7 @@ class CategoryViewModel @Inject constructor(
         viewModelScope.launch {
             _categoryState.update {
                 it.copy(
-                    imageCategoryList = imageCategoriesRepository.getImageCategoryList(),
+                    imageCategoryList = imageCategoriesRepository.getImageCategories(),
                     appData = appDataRepository.getAppData()
                 )
             }

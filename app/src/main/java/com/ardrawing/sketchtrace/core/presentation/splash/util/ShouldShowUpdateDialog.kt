@@ -1,4 +1,4 @@
-package com.ardrawing.sketchtrace.core.domain.usecase
+package com.ardrawing.sketchtrace.core.presentation.splash.util
 
 import com.ardrawing.sketchtrace.BuildConfig
 import com.ardrawing.sketchtrace.core.domain.model.app_data.AppData

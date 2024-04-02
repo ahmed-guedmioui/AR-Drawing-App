@@ -2,7 +2,6 @@ package com.ardrawing.sketchtrace.image_list.presentation.categories
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.ardrawing.sketchtrace.App
 import com.ardrawing.sketchtrace.core.domain.model.app_data.AppData
 import com.ardrawing.sketchtrace.core.domain.repository.AppDataRepository
 import com.ardrawing.sketchtrace.image_list.domain.repository.ImageCategoriesRepository
@@ -40,7 +39,7 @@ class CategoriesViewModel @Inject constructor(
         viewModelScope.launch {
             _categoriesState.update {
                 it.copy(
-                    imageCategoryList = imageCategoriesRepository.getImageCategoryList(),
+                    imageCategoryList = imageCategoriesRepository.getImageCategories(),
                     appData = appDataRepository.getAppData()
                 )
             }

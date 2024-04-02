@@ -1,7 +1,7 @@
 package com.ardrawing.sketchtrace.core.domain.usecase
 
 import android.annotation.SuppressLint
-import com.ardrawing.sketchtrace.core.domain.model.app_data.AppData
+import com.ardrawing.sketchtrace.core.domain.repository.AppDataRepository
 import java.text.SimpleDateFormat
 import java.util.Date
 
@@ -9,9 +9,9 @@ import java.util.Date
  * @author Ahmed Guedmioui
  */
 
-class UpdateSubscriptionInfo(
+class UpdateSubscriptionExpireDate(
     private val date: Date?,
-    private val appData: AppData?
+    private val appDataRepository: AppDataRepository
 ) {
 
     @SuppressLint("SimpleDateFormat")
@@ -21,7 +21,7 @@ class UpdateSubscriptionInfo(
             val formattedDate: String = dateFormat.format(date)
 
             if (date.after(Date())) {
-                appData?.subscriptionExpireDate = formattedDate
+                appDataRepository.updateSubscriptionExpireDate(formattedDate)
             }
         }
 

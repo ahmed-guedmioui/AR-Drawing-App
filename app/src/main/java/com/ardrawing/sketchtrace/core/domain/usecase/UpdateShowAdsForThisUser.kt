@@ -2,27 +2,28 @@ package com.ardrawing.sketchtrace.core.domain.usecase
 
 import android.app.Application
 import android.util.Log
-import com.ardrawing.sketchtrace.core.domain.model.app_data.AppData
+import com.ardrawing.sketchtrace.core.domain.repository.AppDataRepository
 import com.ardrawing.sketchtrace.util.CountryChecker
 
 /**
  * @author Ahmed Guedmioui
  */
-class ShouldShowAdsForUser(
+class UpdateShowAdsForThisUser(
     private val application: Application,
-    private val appData: AppData?
+    private val appDataRepository: AppDataRepository
 ) {
 
     operator fun invoke() {
 
-        if (appData?.isSubscribed == true) {
-            appData.showAdsForThisUser = false
+        if (appDataRepository.getAppData().isSubscribed) {
+            appDataRepository.updateShowAdsForThisUser(false)
             Log.d("REVENUE_CUT", "ShouldShowAdsForUser: isSubscribed")
             return
         }
 
-        if (appData?.areAdsForOnlyWhiteListCountries == false) {
-           appData.showAdsForThisUser = true
+        if (!appDataRepository.getAppData().areAdsForOnlyWhiteListCountries) {
+            appDataRepository.updateShowAdsForThisUser(true)
+
             Log.d("REVENUE_CUT", "ShouldShowAdsForUser: not AdsForOnlyWhiteListCountries")
             return
         }
@@ -30,18 +31,20 @@ class ShouldShowAdsForUser(
         val countryChecker = CountryChecker(application, CountryChecker.CheckerType.SpeedServer)
         countryChecker.setOnCheckerListener(object : CountryChecker.OnCheckerListener {
             override fun onCheckerCountry(country: String?, userFromGG: Boolean) {
-                appData?.countriesWhiteList?.forEach { countryInWhiteList ->
+                appDataRepository.getAppData().countriesWhiteList.forEach { countryInWhiteList ->
                     if (countryInWhiteList == country) {
                         Log.d("REVENUE_CUT", "ShouldShowAdsForUser: countryInWhiteList")
-                        appData.showAdsForThisUser = true
+                        appDataRepository.updateShowAdsForThisUser(true)
+
                     }
                 }
             }
 
             override fun onCheckerError(error: String?) {
-                if (appData?.areAdsForOnlyWhiteListCountries == false) {
+                if (!appDataRepository.getAppData().areAdsForOnlyWhiteListCountries) {
                     Log.d("REVENUE_CUT", "ShouldShowAdsForUser: onChecker Country Error")
-                    appData.showAdsForThisUser = true
+                    appDataRepository.updateShowAdsForThisUser(true)
+
                 }
             }
         })

@@ -188,7 +188,7 @@ object NativeManager {
                 nativeTemp.visibility = View.GONE
                 nativeFrame.visibility = View.VISIBLE
                 populateFacebookNative(
-                    nativeFrame, nativeTemp, nativeAd, activity, isButtonTop
+                    nativeFrame, nativeAd, activity, isButtonTop
                 )
             }
 
@@ -200,7 +200,6 @@ object NativeManager {
 
     private fun populateFacebookNative(
         nativeFrame: FrameLayout,
-        nativeTemp: TextView,
         nativeAd: com.facebook.ads.NativeAd,
         activity: Activity,
         isButtonTop: Boolean

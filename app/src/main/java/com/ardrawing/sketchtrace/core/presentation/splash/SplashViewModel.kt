@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ardrawing.sketchtrace.image_list.domain.repository.ImageCategoriesRepository
 import com.ardrawing.sketchtrace.core.domain.repository.AppDataRepository
-import com.ardrawing.sketchtrace.core.domain.usecase.ShouldShowUpdateDialog
+import com.ardrawing.sketchtrace.core.presentation.splash.util.ShouldShowUpdateDialog
 import com.ardrawing.sketchtrace.util.Resource
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
@@ -120,7 +120,7 @@ class SplashViewModel @Inject constructor(
 
     private fun getImages() {
         viewModelScope.launch {
-            imageCategoriesRepository.loadImageCategoryList().collect { imagesResult ->
+            imageCategoriesRepository.loadImageCategories().collect { imagesResult ->
                 when (imagesResult) {
                     is Resource.Error -> {
                         _showErrorToastChannel.send(true)

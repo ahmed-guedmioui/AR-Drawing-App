@@ -18,7 +18,9 @@ import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.cardview.widget.CardView
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.viewpager.widget.ViewPager
 import com.ardrawing.sketchtrace.BuildConfig
 import com.ardrawing.sketchtrace.R
@@ -68,34 +70,40 @@ class HomeActivity : AppCompatActivity() {
 
 
         lifecycleScope.launch {
-            homeViewModel.homeState.collect {
-                homeState = it
-                helperDialog()
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                homeViewModel.homeState.collect {
+                    homeState = it
+                    helperDialog()
+                }
             }
         }
 
         lifecycleScope.launch {
-            homeViewModel.appData.collect { appData ->
-                RewardedManager.appData = appData
-                RewardedManager.loadRewarded(this@HomeActivity)
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                homeViewModel.appData.collect { appData ->
+                    RewardedManager.appData = appData
+                    RewardedManager.loadRewarded(this@HomeActivity)
 
-                NativeManager.loadNative(
-                    appData,
-                    findViewById(R.id.native_frame),
-                    findViewById(R.id.native_temp),
-                    this@HomeActivity, false
-                )
+                    NativeManager.loadNative(
+                        appData,
+                        findViewById(R.id.native_frame),
+                        findViewById(R.id.native_temp),
+                        this@HomeActivity, false
+                    )
+                }
             }
         }
 
         lifecycleScope.launch {
-            homeViewModel.doubleTapToastChannel.collectLatest { showToasts ->
-                if (showToasts) {
-                    Toast.makeText(
-                        this@HomeActivity,
-                        getString(R.string.double_click_to_exit),
-                        Toast.LENGTH_SHORT
-                    ).show()
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                homeViewModel.doubleTapToastChannel.collectLatest { showToasts ->
+                    if (showToasts) {
+                        Toast.makeText(
+                            this@HomeActivity,
+                            getString(R.string.double_click_to_exit),
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
                 }
             }
         }
@@ -218,9 +226,11 @@ class HomeActivity : AppCompatActivity() {
     override fun onBackPressed() {
         homeViewModel.onEvent(HomeUiEvent.BackPressed)
         lifecycleScope.launch {
-            homeViewModel.closeChannel.collectLatest { close ->
-                if (close) {
-                    super.onBackPressed()
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                homeViewModel.closeChannel.collectLatest { close ->
+                    if (close) {
+                        super.onBackPressed()
+                    }
                 }
             }
         }

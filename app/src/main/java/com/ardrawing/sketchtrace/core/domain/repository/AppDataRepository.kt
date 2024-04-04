@@ -19,5 +19,5 @@ interface AppDataRepository {
     fun updateSubscriptionExpireDate(
         subscriptionExpireDate: String
     )
-    fun setAdsVisibilityForUser()
+    fun updateShowAdsForThisUser()
 }

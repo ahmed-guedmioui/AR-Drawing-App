@@ -2,6 +2,7 @@ package com.ardrawing.sketchtrace.core.data.repository
 
 import android.app.Application
 import android.content.SharedPreferences
+import android.util.Log
 import com.ardrawing.sketchtrace.BuildConfig
 import com.ardrawing.sketchtrace.R
 import com.ardrawing.sketchtrace.core.data.mapper.toAppData
@@ -9,8 +10,8 @@ import com.ardrawing.sketchtrace.core.data.remote.AppDataApi
 import com.ardrawing.sketchtrace.core.data.remote.respnod.app_data.AppDataDto
 import com.ardrawing.sketchtrace.core.domain.model.app_data.AppData
 import com.ardrawing.sketchtrace.core.domain.repository.AppDataRepository
-import com.ardrawing.sketchtrace.core.domain.usecase.UpdateShowAdsForThisUser
 import com.ardrawing.sketchtrace.core.domain.usecase.UpdateSubscriptionExpireDate
+import com.ardrawing.sketchtrace.util.CountryChecker
 import com.ardrawing.sketchtrace.util.Resource
 import com.google.gson.Gson
 import com.revenuecat.purchases.CustomerInfo
@@ -136,11 +137,6 @@ class AppDataRepositoryImpl @Inject constructor(
         return Gson().fromJson(appDataJsonString, AppData::class.java)
     }
 
-    override fun setAdsVisibilityForUser() {
-        UpdateShowAdsForThisUser(
-            application, this@AppDataRepositoryImpl
-        ).invoke()
-    }
 
     private fun subscription() {
         Purchases.sharedInstance.getCustomerInfo(
@@ -162,12 +158,46 @@ class AppDataRepositoryImpl @Inject constructor(
                     UpdateSubscriptionExpireDate(
                         date, this@AppDataRepositoryImpl
                     ).invoke()
-                    UpdateShowAdsForThisUser(
-                        application, this@AppDataRepositoryImpl
-                    ).invoke()
+                    updateShowAdsForThisUser()
                 }
             }
         )
+    }
+
+    override fun updateShowAdsForThisUser() {
+        if (getAppData().isSubscribed) {
+            updateShowAdsForThisUser(false)
+            Log.d("REVENUE_CUT", "ShouldShowAdsForUser: isSubscribed")
+            return
+        }
+
+        if (!getAppData().areAdsForOnlyWhiteListCountries) {
+            updateShowAdsForThisUser(true)
+
+            Log.d("REVENUE_CUT", "ShouldShowAdsForUser: not AdsForOnlyWhiteListCountries")
+            return
+        }
+
+        val countryChecker = CountryChecker(application, CountryChecker.CheckerType.SpeedServer)
+        countryChecker.setOnCheckerListener(object : CountryChecker.OnCheckerListener {
+            override fun onCheckerCountry(country: String?, userFromGG: Boolean) {
+                getAppData().countriesWhiteList.forEach { countryInWhiteList ->
+                    if (countryInWhiteList == country) {
+                        Log.d("REVENUE_CUT", "ShouldShowAdsForUser: countryInWhiteList")
+                        updateShowAdsForThisUser(true)
+
+                    }
+                }
+            }
+
+            override fun onCheckerError(error: String?) {
+                if (!getAppData().areAdsForOnlyWhiteListCountries) {
+                    Log.d("REVENUE_CUT", "ShouldShowAdsForUser: onChecker Country Error")
+                    updateShowAdsForThisUser(true)
+
+                }
+            }
+        })
     }
 
 

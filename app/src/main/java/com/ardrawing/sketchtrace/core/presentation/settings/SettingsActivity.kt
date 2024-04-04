@@ -18,7 +18,9 @@ import android.widget.Button
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.ardrawing.sketchtrace.R
 import com.ardrawing.sketchtrace.core.domain.model.app_data.AppData
@@ -60,42 +62,46 @@ class SettingsActivity : AppCompatActivity() {
         setContentView(view)
 
         lifecycleScope.launch {
-            settingsViewModel.settingsState.collect {
-                settingsState = it
-                settingsState?.appData?.let { appData ->
-                    privacyDialog(appData)
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                settingsViewModel.settingsState.collect {
+                    settingsState = it
+                    settingsState?.appData?.let { appData ->
+                        privacyDialog(appData)
+                    }
                 }
             }
         }
 
         lifecycleScope.launch {
-            settingsViewModel.appData.collect { appData ->
-                appData?.let {
-                    if (it.showRecommendedApps) {
-                        binding.recommendedAppsRecyclerView.layoutManager =
-                            LinearLayoutManager(
-                                this@SettingsActivity,
-                                LinearLayoutManager.HORIZONTAL,
-                                false
-                            )
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                settingsViewModel.appData.collect { appData ->
+                    appData?.let {
+                        if (it.showRecommendedApps) {
+                            binding.recommendedAppsRecyclerView.layoutManager =
+                                LinearLayoutManager(
+                                    this@SettingsActivity,
+                                    LinearLayoutManager.HORIZONTAL,
+                                    false
+                                )
 
-                        binding.recommendedAppsRecyclerView.adapter =
-                            RecommendedAppsAdapter(
-                                activity = this@SettingsActivity,
-                                appData = it
-                            )
-                    } else {
-                        binding.recommendedAppsParent.visibility = View.GONE
+                            binding.recommendedAppsRecyclerView.adapter =
+                                RecommendedAppsAdapter(
+                                    activity = this@SettingsActivity,
+                                    appData = it
+                                )
+                        } else {
+                            binding.recommendedAppsParent.visibility = View.GONE
+                        }
                     }
-                }
 
-                if (appData?.isSubscribed == true) {
-                    binding.subscribeInfo.text = getString(
-                        R.string.your_subscription_will_expire_in_n,
-                        settingsState?.appData?.subscriptionExpireDate
-                    )
-                } else {
-                    binding.subscribeInfo.text = getString(R.string.your_are_not_subscribed)
+                    if (appData?.isSubscribed == true) {
+                        binding.subscribeInfo.text = getString(
+                            R.string.your_subscription_will_expire_in_n,
+                            settingsState?.appData?.subscriptionExpireDate
+                        )
+                    } else {
+                        binding.subscribeInfo.text = getString(R.string.your_are_not_subscribed)
+                    }
                 }
             }
         }

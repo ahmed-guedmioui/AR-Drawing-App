@@ -7,7 +7,9 @@ import android.view.View
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.content.res.AppCompatResources
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import com.ardrawing.sketchtrace.R
 import com.ardrawing.sketchtrace.databinding.ActivityLanguageBinding
 import com.ardrawing.sketchtrace.core.presentation.tips.TipsActivity
@@ -51,19 +53,23 @@ class LanguageActivity : AppCompatActivity() {
         setContentView(view)
 
         lifecycleScope.launch {
-            languageViewModel.languageState.collect {
-                languageState = it
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                languageViewModel.languageState.collect {
+                    languageState = it
+                }
             }
         }
 
         lifecycleScope.launch {
-            languageViewModel.appData.collect { appData ->
-                NativeManager.loadNative(
-                    appData,
-                    findViewById(R.id.native_frame),
-                    findViewById(R.id.native_temp),
-                    this@LanguageActivity, false
-                )
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                languageViewModel.appData.collect { appData ->
+                    NativeManager.loadNative(
+                        appData,
+                        findViewById(R.id.native_frame),
+                        findViewById(R.id.native_temp),
+                        this@LanguageActivity, false
+                    )
+                }
             }
         }
 

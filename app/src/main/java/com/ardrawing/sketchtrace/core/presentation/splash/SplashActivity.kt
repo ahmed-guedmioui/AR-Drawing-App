@@ -22,7 +22,9 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import com.ardrawing.sketchtrace.App
 import com.ardrawing.sketchtrace.BuildConfig
 import com.ardrawing.sketchtrace.R
@@ -86,15 +88,19 @@ class SplashActivity : AppCompatActivity() {
         AppAnimation().startRepeatingAnimation(binding.animationImage)
 
         lifecycleScope.launch {
-            splashViewModel.splashState.collect {
-                splashState = it
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                splashViewModel.splashState.collect {
+                    splashState = it
+                }
             }
         }
 
         lifecycleScope.launch {
-            splashViewModel.updateDialogState.collect { state ->
-                if (state > 0) {
-                    updateDialog(state)
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                splashViewModel.updateDialogState.collect { state ->
+                    if (state > 0) {
+                        updateDialog(state)
+                    }
                 }
             }
         }
@@ -105,23 +111,27 @@ class SplashActivity : AppCompatActivity() {
         )
 
         lifecycleScope.launch {
-            splashViewModel.continueAppChannel.collect { continueApp ->
-                if (continueApp) {
-                    getConsent()
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                splashViewModel.continueAppChannel.collect { continueApp ->
+                    if (continueApp) {
+                        getConsent()
+                    }
                 }
             }
         }
 
         lifecycleScope.launch {
-            splashViewModel.showErrorToastChannel.collect { show ->
-                if (show) {
-                    Toast.makeText(
-                        this@SplashActivity,
-                        getString(R.string.error_connect_to_a_network_and_try_again),
-                        Toast.LENGTH_SHORT
-                    ).show()
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                splashViewModel.showErrorToastChannel.collect { show ->
+                    if (show) {
+                        Toast.makeText(
+                            this@SplashActivity,
+                            getString(R.string.error_connect_to_a_network_and_try_again),
+                            Toast.LENGTH_SHORT
+                        ).show()
 
-                    tryAgainButtonVisibility(true)
+                        tryAgainButtonVisibility(true)
+                    }
                 }
             }
         }

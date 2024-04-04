@@ -67,7 +67,7 @@ class PaywallViewModel @Inject constructor(
                             appDataRepository.updateIsSubscribed(true)
 
                             viewModelScope.launch {
-                                appDataRepository.setAdsVisibilityForUser()
+                                appDataRepository.updateShowAdsForThisUser()
                                 imageCategoriesRepository.setUnlockedImages(it)
                                 imageCategoriesRepository.setNativeItems(it)
                             }
@@ -76,7 +76,7 @@ class PaywallViewModel @Inject constructor(
 
                 } else {
                     viewModelScope.launch {
-                        appDataRepository.setAdsVisibilityForUser()
+                        appDataRepository.updateShowAdsForThisUser()
                     }
                 }
             }

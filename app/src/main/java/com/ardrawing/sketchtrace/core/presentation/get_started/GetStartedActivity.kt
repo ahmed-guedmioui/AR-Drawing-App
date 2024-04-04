@@ -17,7 +17,9 @@ import android.webkit.WebViewClient
 import android.widget.Button
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import com.ardrawing.sketchtrace.App
 import com.ardrawing.sketchtrace.R
 import com.ardrawing.sketchtrace.core.domain.model.app_data.AppData
@@ -56,23 +58,27 @@ class GetStartedActivity : AppCompatActivity() {
         setContentView(view)
 
         lifecycleScope.launch {
-            getStartedViewModel.getsStartedState.collect {
-                getStartedState = it
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                getStartedViewModel.getsStartedState.collect {
+                    getStartedState = it
 
-                getStartedState?.appData?.let { appData ->
-                    privacyDialog(appData)
+                    getStartedState?.appData?.let { appData ->
+                        privacyDialog(appData)
+                    }
                 }
             }
         }
 
         lifecycleScope.launch {
-            getStartedViewModel.appData.collect { appData ->
-                NativeManager.loadNative(
-                    appData,
-                    findViewById(R.id.native_frame),
-                    findViewById(R.id.native_temp),
-                    this@GetStartedActivity, false
-                )
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                getStartedViewModel.appData.collect { appData ->
+                    NativeManager.loadNative(
+                        appData,
+                        findViewById(R.id.native_frame),
+                        findViewById(R.id.native_temp),
+                        this@GetStartedActivity, false
+                    )
+                }
             }
         }
 

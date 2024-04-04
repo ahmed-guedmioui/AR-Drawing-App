@@ -9,7 +9,9 @@ import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import com.ardrawing.sketchtrace.App
 import com.ardrawing.sketchtrace.R
 import com.ardrawing.sketchtrace.databinding.ActivityAdvancedBinding
@@ -61,9 +63,11 @@ class AdvancedEditingActivity : AppCompatActivity(), SeekBar.OnSeekBarChangeList
         }
 
         lifecycleScope.launch {
-            advancedEditingViewModel.advancedEditingState.collect {
-                advancedEditingState = it
-                updatedSelected()
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                advancedEditingViewModel.advancedEditingState.collect {
+                    advancedEditingState = it
+                    updatedSelected()
+                }
             }
         }
 

@@ -7,7 +7,9 @@ import android.view.View
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.GridLayoutManager
 import com.ardrawing.sketchtrace.R
 import com.ardrawing.sketchtrace.databinding.ActivityCategoryBinding
@@ -62,42 +64,48 @@ class CategoryActivity : AppCompatActivity() {
         }
 
         lifecycleScope.launch {
-            categoryViewModel.categoryState.collect {
-                categoryState = it
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                categoryViewModel.categoryState.collect {
+                    categoryState = it
 
-                categoryAdapter?.notifyDataSetChanged()
+                    categoryAdapter?.notifyDataSetChanged()
 
-                binding.title.text =
-                    categoryState?.imageCategory?.imageCategoryName
+                    binding.title.text =
+                        categoryState?.imageCategory?.imageCategoryName
 
 
-                if (categoryState?.isTrace == true) {
-                    binding.title.text = getString(R.string.trace)
-                } else {
-                    binding.title.text = getString(R.string.sketch)
+                    if (categoryState?.isTrace == true) {
+                        binding.title.text = getString(R.string.trace)
+                    } else {
+                        binding.title.text = getString(R.string.sketch)
+                    }
                 }
             }
         }
 
         lifecycleScope.launch {
-            categoryViewModel.appData.collect { appData ->
-                NativeManager.loadNative(
-                    appData,
-                    findViewById(R.id.native_frame),
-                    findViewById(R.id.native_temp),
-                    this@CategoryActivity, false
-                )
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                categoryViewModel.appData.collect { appData ->
+                    NativeManager.loadNative(
+                        appData,
+                        findViewById(R.id.native_frame),
+                        findViewById(R.id.native_temp),
+                        this@CategoryActivity, false
+                    )
+                }
             }
         }
 
         lifecycleScope.launch {
-            categoryViewModel.navigateToDrawingChannel.collect { navigate ->
-                if (navigate) {
-                    categoryState?.clickedImageItem?.let { clickedImageItem ->
-                        if (categoryState?.isTrace == true) {
-                            traceDrawingScreen(clickedImageItem.image)
-                        } else {
-                            sketchDrawingScreen(clickedImageItem.image)
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                categoryViewModel.navigateToDrawingChannel.collect { navigate ->
+                    if (navigate) {
+                        categoryState?.clickedImageItem?.let { clickedImageItem ->
+                            if (categoryState?.isTrace == true) {
+                                traceDrawingScreen(clickedImageItem.image)
+                            } else {
+                                sketchDrawingScreen(clickedImageItem.image)
+                            }
                         }
                     }
                 }
@@ -105,13 +113,15 @@ class CategoryActivity : AppCompatActivity() {
         }
 
         lifecycleScope.launch {
-            categoryViewModel.unlockImageChannel.collect { unlock ->
-                if (unlock) {
-                    rewarded {
-                        categoryViewModel.onEvent(CategoryUiEvents.UnlockImage)
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                categoryViewModel.unlockImageChannel.collect { unlock ->
+                    if (unlock) {
+                        rewarded {
+                            categoryViewModel.onEvent(CategoryUiEvents.UnlockImage)
 
-                        categoryState?.imagePosition?.let {
-                            categoryAdapter?.notifyItemChanged(it)
+                            categoryState?.imagePosition?.let {
+                                categoryAdapter?.notifyItemChanged(it)
+                            }
                         }
                     }
                 }

@@ -57,7 +57,7 @@ class SplashViewModel @Inject constructor(
 
             SplashUiEvent.AlreadySubscribed -> {
                 viewModelScope.launch {
-                    appDataRepository.setAdsVisibilityForUser()
+                    appDataRepository.updateShowAdsForThisUser()
                     imageCategoriesRepository.setUnlockedImages()
                     imageCategoriesRepository.setNativeItems()
                 }
@@ -99,7 +99,7 @@ class SplashViewModel @Inject constructor(
 
                                 if (splashState.value.areImagesLoaded) {
 
-                                    appDataRepository.setAdsVisibilityForUser()
+                                    appDataRepository.updateShowAdsForThisUser()
                                     imageCategoriesRepository.setUnlockedImages()
                                     imageCategoriesRepository.setNativeItems()
                                     imageCategoriesRepository.setGalleryAndCameraItems()
@@ -136,7 +136,7 @@ class SplashViewModel @Inject constructor(
 
                         if (splashState.value.isAppDataLoaded && updateDialogState.value == 0) {
 
-                            appDataRepository.setAdsVisibilityForUser()
+                            appDataRepository.updateShowAdsForThisUser()
                             imageCategoriesRepository.setUnlockedImages()
                             imageCategoriesRepository.setNativeItems()
                             imageCategoriesRepository.setGalleryAndCameraItems()

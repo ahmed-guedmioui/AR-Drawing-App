@@ -7,7 +7,9 @@ import android.util.Log
 import android.view.View
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.GridLayoutManager
 import com.ardrawing.sketchtrace.databinding.ActivityMyCreationLsitBinding
 import com.ardrawing.sketchtrace.my_creation.presentation.my_creation_details.MyCreationDetailsActivity
@@ -48,9 +50,11 @@ class MyCreationListActivity : AppCompatActivity() {
         }
 
         lifecycleScope.launch {
-            myCreationListViewModel.myCreationState.collect {
-                myCreationListState = it
-                myCreationListAdapter?.notifyDataSetChanged()
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                myCreationListViewModel.myCreationState.collect {
+                    myCreationListState = it
+                    myCreationListAdapter?.notifyDataSetChanged()
+                }
             }
         }
 

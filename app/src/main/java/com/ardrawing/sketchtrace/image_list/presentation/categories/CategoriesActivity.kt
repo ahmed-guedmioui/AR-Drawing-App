@@ -15,7 +15,9 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.ardrawing.sketchtrace.R
 import com.ardrawing.sketchtrace.core.domain.repository.AppDataRepository
@@ -75,37 +77,43 @@ class CategoriesActivity : AppCompatActivity() {
         }
 
         lifecycleScope.launch {
-            categoriesViewModel.categoriesState.collect {
-                categoriesState = it
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                categoriesViewModel.categoriesState.collect {
+                    categoriesState = it
 
-                categoriesAdapter?.notifyDataSetChanged()
+                    categoriesAdapter?.notifyDataSetChanged()
 
-                if (categoriesState?.isTrace == true) {
-                    binding.title.text = getString(R.string.trace)
-                } else {
-                    binding.title.text = getString(R.string.sketch)
+                    if (categoriesState?.isTrace == true) {
+                        binding.title.text = getString(R.string.trace)
+                    } else {
+                        binding.title.text = getString(R.string.sketch)
+                    }
                 }
             }
         }
 
         lifecycleScope.launch {
-            categoriesViewModel.appData.collect { appData ->
-                categoriesAdapter = CategoriesAdapter(
-                    activity = this@CategoriesActivity,
-                    imageCategoryList = categoriesState?.imageCategoryList ?: emptyList(),
-                    appData = appData
-                )
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                categoriesViewModel.appData.collect { appData ->
+                    categoriesAdapter = CategoriesAdapter(
+                        activity = this@CategoriesActivity,
+                        imageCategoryList = categoriesState?.imageCategoryList ?: emptyList(),
+                        appData = appData
+                    )
+                }
             }
         }
 
         lifecycleScope.launch {
-            categoriesViewModel.navigateToDrawingChannel.collect { navigate ->
-                if (navigate) {
-                    categoriesState?.clickedImageItem?.let { clickedImageItem ->
-                        if (categoriesState?.isTrace == true) {
-                            traceDrawingScreen(clickedImageItem.image)
-                        } else {
-                            sketchDrawingScreen(clickedImageItem.image)
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                categoriesViewModel.navigateToDrawingChannel.collect { navigate ->
+                    if (navigate) {
+                        categoriesState?.clickedImageItem?.let { clickedImageItem ->
+                            if (categoriesState?.isTrace == true) {
+                                traceDrawingScreen(clickedImageItem.image)
+                            } else {
+                                sketchDrawingScreen(clickedImageItem.image)
+                            }
                         }
                     }
                 }
@@ -113,10 +121,12 @@ class CategoriesActivity : AppCompatActivity() {
         }
 
         lifecycleScope.launch {
-            categoriesViewModel.unlockImageChannel.collect { unlock ->
-                if (unlock) {
-                    rewarded {
-                        categoriesViewModel.onEvent(CategoriesUiEvents.UnlockImage)
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                categoriesViewModel.unlockImageChannel.collect { unlock ->
+                    if (unlock) {
+                        rewarded {
+                            categoriesViewModel.onEvent(CategoriesUiEvents.UnlockImage)
+                        }
                     }
                 }
             }

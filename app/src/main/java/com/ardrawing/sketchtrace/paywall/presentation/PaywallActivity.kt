@@ -32,7 +32,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.viewpager2.widget.ViewPager2
 import com.ardrawing.sketchtrace.BuildConfig
 import com.ardrawing.sketchtrace.R
@@ -88,9 +90,11 @@ class PaywallActivity : AppCompatActivity() {
         toHome = intent?.extras?.getBoolean("toHome") ?: false
 
         lifecycleScope.launch {
-            paywallViewModel.paywallState.collect {
-                paywallState = it
-                showHideFAQs()
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                paywallViewModel.paywallState.collect {
+                    paywallState = it
+                    showHideFAQs()
+                }
             }
         }
 

@@ -8,7 +8,9 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.cardview.widget.CardView
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import com.ardrawing.sketchtrace.R
 import com.ardrawing.sketchtrace.core.presentation.get_started.GetStartedActivity
 import com.ardrawing.sketchtrace.databinding.ActivityTipsBinding
@@ -49,17 +51,23 @@ class TipsActivity : AppCompatActivity() {
         isFromSplash = intent?.extras?.getBoolean("from_splash") ?: true
 
         lifecycleScope.launch {
-            tipsViewModel.tipsState.collect { tipsState = it }
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                tipsViewModel.tipsState.collect {
+                    tipsState = it
+                }
+            }
         }
 
         lifecycleScope.launch {
-            tipsViewModel.appData.collect { appData ->
-                NativeManager.loadNative(
-                    appData,
-                    findViewById(R.id.native_frame),
-                    findViewById(R.id.native_temp),
-                    this@TipsActivity, false
-                )
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                tipsViewModel.appData.collect { appData ->
+                    NativeManager.loadNative(
+                        appData,
+                        findViewById(R.id.native_frame),
+                        findViewById(R.id.native_temp),
+                        this@TipsActivity, false
+                    )
+                }
             }
         }
 

@@ -68,17 +68,11 @@ class CategoryActivity : AppCompatActivity() {
                 categoryViewModel.categoryState.collect {
                     categoryState = it
 
-                    categoryAdapter?.notifyDataSetChanged()
+                    initImageListRec()
 
                     binding.title.text =
                         categoryState?.imageCategory?.imageCategoryName
 
-
-                    if (categoryState?.isTrace == true) {
-                        binding.title.text = getString(R.string.trace)
-                    } else {
-                        binding.title.text = getString(R.string.sketch)
-                    }
                 }
             }
         }
@@ -132,10 +126,12 @@ class CategoryActivity : AppCompatActivity() {
             onBackPressed()
         }
 
+    }
+
+    private fun initImageListRec() {
         binding.recyclerView.setHasFixedSize(true)
         val gridLayoutManager = GridLayoutManager(this, 3)
         binding.recyclerView.layoutManager = gridLayoutManager
-
 
         categoryAdapter = CategoryAdapter(
             activity = this,
@@ -157,10 +153,10 @@ class CategoryActivity : AppCompatActivity() {
         binding.recyclerView.adapter = categoryAdapter
     }
 
-
     private fun rewarded(
         onRewComplete: () -> Unit
     ) {
+
         RewardedManager.showRewarded(
             activity = this,
             adClosedListener = object : RewardedManager.OnAdClosedListener {

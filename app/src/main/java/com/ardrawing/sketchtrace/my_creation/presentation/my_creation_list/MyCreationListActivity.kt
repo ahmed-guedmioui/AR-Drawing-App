@@ -34,8 +34,6 @@ class MyCreationListActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMyCreationLsitBinding
 
-    private var myCreationListAdapter: MyCreationListAdapter? = null
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -53,16 +51,22 @@ class MyCreationListActivity : AppCompatActivity() {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 myCreationListViewModel.myCreationState.collect {
                     myCreationListState = it
-                    myCreationListAdapter?.notifyDataSetChanged()
+                    initCreationListRec()
                 }
             }
         }
 
-        myCreationListAdapter = MyCreationListAdapter(
+    }
+
+    private fun initCreationListRec() {
+       val myCreationListAdapter = MyCreationListAdapter(
             this, myCreationListState.creationList
         )
 
-        myCreationListAdapter?.setClickListener(object :
+        binding.recyclerView.layoutManager = GridLayoutManager(this, 2)
+        binding.recyclerView.adapter = myCreationListAdapter
+
+        myCreationListAdapter.setClickListener(object :
             MyCreationListAdapter.ClickListener {
             override fun oClick(uri: String, isVideo: Boolean) {
 
@@ -83,9 +87,6 @@ class MyCreationListActivity : AppCompatActivity() {
                     })
             }
         })
-
-        binding.recyclerView.layoutManager = GridLayoutManager(this, 2)
-        binding.recyclerView.adapter = myCreationListAdapter
 
     }
 

@@ -128,6 +128,7 @@ class SketchActivity : AppCompatActivity() {
         if (appDataRepository.getAppData()?.isSubscribed == false) {
             countDown()
         } else {
+            binding.theDrawingIsReadyBtn.visibility = View.VISIBLE
             binding.mainTempContainer.visibility = View.GONE
             binding.vipPhoto.visibility = View.GONE
             binding.vipVideo.visibility = View.GONE
@@ -563,7 +564,6 @@ class SketchActivity : AppCompatActivity() {
         binding.theDrawingIsReadyBtn.visibility = View.GONE
 
         val countdownDurationMillis: Long = 5 * 60 * 1000
-        // Set the countdown interval (e.g., 1 second)
         val countdownIntervalMillis: Long = 1000
 
         countDownTimer = object : CountDownTimer(countdownDurationMillis, countdownIntervalMillis) {
@@ -578,8 +578,7 @@ class SketchActivity : AppCompatActivity() {
             override fun onFinish() {
                 isTimeIsUp = true
                 updateMainTimerText("00:00", 0)
-                if (
-                    !isDialogShowing
+                if (!isDialogShowing
                     && !isTimeIsUpDialogShowing
                     && appDataRepository.getAppData()?.isSubscribed == false
                 ) {
@@ -596,7 +595,7 @@ class SketchActivity : AppCompatActivity() {
         // Update your TextView with the timerText
         binding.mainTemp.text = timerText
 
-        if (millisUntilFinished <= 90000) {
+        if (millisUntilFinished <= 500000) {
             binding.theDrawingIsReadyBtn.visibility = View.VISIBLE
         }
     }
@@ -627,6 +626,7 @@ class SketchActivity : AppCompatActivity() {
     }
 
     private fun rewarded(onRewDone: () -> Unit) {
+        RewardedManager.appData = appDataRepository.getAppData()
         RewardedManager.showRewarded(
             activity = this,
             adClosedListener = object : RewardedManager.OnAdClosedListener {
@@ -808,13 +808,6 @@ class SketchActivity : AppCompatActivity() {
 
         if (Constants.bitmap != null) {
             binding.objImage.setImageBitmap(Constants.bitmap)
-        }
-
-        if (appDataRepository.getAppData()?.isSubscribed == true) {
-            binding.mainTempContainer.visibility = View.GONE
-            binding.vipPhoto.visibility = View.GONE
-            binding.vipVideo.visibility = View.GONE
-            binding.vipRecord.visibility = View.GONE
         }
 
         subscribe()

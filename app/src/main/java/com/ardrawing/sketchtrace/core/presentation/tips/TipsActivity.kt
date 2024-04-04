@@ -30,7 +30,7 @@ import javax.inject.Inject
 class TipsActivity : AppCompatActivity() {
 
     private val tipsViewModel: TipsViewModel by viewModels()
-    private lateinit var tipsState: TipsState
+    private var tipsState: TipsState? = null
 
     private lateinit var binding: ActivityTipsBinding
 
@@ -87,7 +87,7 @@ class TipsActivity : AppCompatActivity() {
     private fun changeTip() {
 
         changeDotsColor()
-        when (tipsState.tipNum) {
+        when (tipsState?.tipNum) {
             1 -> {
                 binding.tipTitle.text = getString(R.string.tip_title_1)
                 binding.tipDesc.text = getString(R.string.tip_desc_1)
@@ -160,7 +160,7 @@ class TipsActivity : AppCompatActivity() {
         findViewById<CardView>(R.id.dot_3).setCardBackgroundColor(getColor(R.color.primary_2))
         findViewById<CardView>(R.id.dot_4).setCardBackgroundColor(getColor(R.color.primary_2))
 
-        when (tipsState.tipNum) {
+        when (tipsState?.tipNum) {
             1 -> {
                 findViewById<CardView>(R.id.dot_1).setCardBackgroundColor(getColor(R.color.primary_3))
             }

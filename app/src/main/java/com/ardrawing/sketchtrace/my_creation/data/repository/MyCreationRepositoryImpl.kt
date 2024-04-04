@@ -42,6 +42,9 @@ class MyCreationRepositoryImpl @Inject constructor(
     private val application: Application
 ) : CreationRepository {
 
+    val photosFolderName = "AR Drawing Photos"
+    val videosFolderName = "AR Drawing Videos"
+
     private fun notifyMediaScanner(file: File, isVideo: Boolean) {
 
         if (isVideo) {
@@ -81,7 +84,7 @@ class MyCreationRepositoryImpl @Inject constructor(
             withContext(Dispatchers.IO) {
                 val picturesFolder = File(
                     Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES),
-                    application.getString(R.string.app_name) + " Photos"
+                    photosFolderName
                 )
 
                 if (!picturesFolder.exists()) {
@@ -120,7 +123,7 @@ class MyCreationRepositoryImpl @Inject constructor(
             withContext(Dispatchers.IO) {
                 val appVideosDir = File(
                     Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES),
-                    application.getString(R.string.app_name) + " Videos"
+                    videosFolderName
                 )
 
                 if (!appVideosDir.exists()) {
@@ -263,7 +266,9 @@ class MyCreationRepositoryImpl @Inject constructor(
 
     private fun getFilePathFromContentUri(contentUri: Uri): String? {
         val projection = arrayOf(MediaStore.Images.Media.DATA)
-        val cursor = application.contentResolver.query(contentUri, projection, null, null, null)
+        val cursor = application.contentResolver.query(
+            contentUri, projection, null, null, null
+        )
         val columnIndex = cursor?.getColumnIndexOrThrow(MediaStore.Images.Media.DATA)
         cursor?.moveToFirst()
         val filePath = columnIndex?.let { cursor.getString(it) }
@@ -283,7 +288,7 @@ class MyCreationRepositoryImpl @Inject constructor(
             val imageProjection = arrayOf(MediaStore.Images.Media._ID, MediaStore.Images.Media.DATA)
             val imageSelection = "${MediaStore.Images.Media.DATA} LIKE ?"
             val imageSelectionArgs = arrayOf(
-                "%${application.getString(R.string.app_name)} Photos%"
+                "%$photosFolderName%"
             )
 
             application.contentResolver.query(
@@ -308,7 +313,7 @@ class MyCreationRepositoryImpl @Inject constructor(
             val videoProjection = arrayOf(MediaStore.Video.Media._ID, MediaStore.Video.Media.DATA)
             val videoSelection = "${MediaStore.Video.Media.DATA} LIKE ?"
             val videoSelectionArgs = arrayOf(
-                "%${application.getString(R.string.app_name)} Videos%"
+                "%$videosFolderName%"
             )
 
             application.contentResolver.query(

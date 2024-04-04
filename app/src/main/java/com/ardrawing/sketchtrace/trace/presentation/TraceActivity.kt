@@ -1,7 +1,7 @@
 package com.ardrawing.sketchtrace.trace.presentation
 
+import android.annotation.SuppressLint
 import android.app.Activity
-import android.content.ContentResolver
 import android.content.Intent
 import android.content.SharedPreferences
 import android.content.res.Resources
@@ -14,20 +14,17 @@ import android.os.Handler
 import android.os.Looper
 import android.provider.Settings
 import android.view.View
-import android.view.Window
-import android.view.animation.Animation
 import android.view.animation.AnimationUtils
 import android.widget.SeekBar
 import android.widget.Toast
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
-import com.ardrawing.sketchtrace.App
 import com.ardrawing.sketchtrace.R
+import com.ardrawing.sketchtrace.core.domain.repository.AppDataRepository
 import com.ardrawing.sketchtrace.databinding.ActivityTraceBinding
 import com.ardrawing.sketchtrace.image_list.domain.repository.ImageCategoriesRepository
 import com.ardrawing.sketchtrace.paywall.presentation.PaywallActivity
-import com.ardrawing.sketchtrace.core.domain.repository.AppDataRepository
 import com.ardrawing.sketchtrace.util.LanguageChanger
 import com.ardrawing.sketchtrace.util.ads.RewardedManager
 import com.ardrawing.sketchtrace.util.other.MultiTouch
@@ -38,6 +35,8 @@ import com.github.dhaval2404.imagepicker.ImagePicker
 import com.thebluealliance.spectrum.SpectrumDialog
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
+
+@SuppressLint("ClickableViewAccessibility")
 
 @AndroidEntryPoint
 class TraceActivity : AppCompatActivity() {
@@ -53,15 +52,9 @@ class TraceActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityTraceBinding
 
-    private val PERMISSION_CODE_CAMERA = 3002
     private var bmOriginal: Bitmap? = null
     private var brightness: Int = 0
-    private lateinit var cResolver: ContentResolver
-    private lateinit var window: Window
-    private lateinit var pushanim: Animation
     private var isLock: Boolean = false
-    private var isEditSketch: Boolean = false
-    private var isblack: Boolean = true
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -76,28 +69,25 @@ class TraceActivity : AppCompatActivity() {
             binding.vipVideo.visibility = View.GONE
         }
 
-        pushanim = AnimationUtils.loadAnimation(this, R.anim.view_push)
-        cResolver = contentResolver
-
-        pushanim = AnimationUtils.loadAnimation(this, R.anim.view_push)
+       val pushAnim = AnimationUtils.loadAnimation(this, R.anim.view_push)
 
         binding.apply {
 
             binding.relEditRound.setOnClickListener {
-                it.startAnimation(pushanim)
+                it.startAnimation(pushAnim)
                 colorDialog()
             }
 
             relFlip.setOnClickListener { flip ->
-                flip.startAnimation(pushanim)
-                bmOriginal = flip(bmOriginal, 2)
+                flip.startAnimation(pushAnim)
+                bmOriginal = flip(bmOriginal)
                 bmOriginal?.let {
                     objImage.setImageBitmap(it)
                 }
             }
 
             relCamera.setOnClickListener {
-                it.startAnimation(pushanim)
+                it.startAnimation(pushAnim)
                 rewarded {
                     getExternalFilesDir(Environment.DIRECTORY_DCIM)?.let { it1 ->
                         ImagePicker.with(this@TraceActivity)
@@ -112,7 +102,7 @@ class TraceActivity : AppCompatActivity() {
             }
 
             relGallery.setOnClickListener {
-                it.startAnimation(pushanim)
+                it.startAnimation(pushAnim)
                 rewarded {
                     ImagePicker.with(this@TraceActivity)
                         .galleryOnly()
@@ -123,7 +113,7 @@ class TraceActivity : AppCompatActivity() {
             }
 
             relLock.setOnClickListener {
-                it.startAnimation(pushanim)
+                it.startAnimation(pushAnim)
                 if (!isLock) {
                     objImage.isEnabled = false
                     isLock = true
@@ -148,58 +138,36 @@ class TraceActivity : AppCompatActivity() {
 
                 override fun onStopTrackingTouch(seekBar: SeekBar?) {}
             })
-
-            brightnessSeek.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
-                override fun onProgressChanged(
-                    seekBar: SeekBar?,
-                    progress: Int,
-                    fromUser: Boolean
-                ) {
-                    brightness = if (progress <= 20) {
-                        20
-                    } else {
-                        progress
-                    }
-                    val attributes = window.attributes
-                    attributes.screenBrightness = brightness / 255.0f
-                    window.attributes = attributes
-                }
-
-                override fun onStartTrackingTouch(seekBar: SeekBar?) {}
-
-                override fun onStopTrackingTouch(seekBar: SeekBar?) {}
-            })
         }
 
         val i = Resources.getSystem().displayMetrics.widthPixels
         val imagePath = intent.extras?.getString("imagePath")
 
-        isblack = true
-        window = getWindow()
-        window.attributes = window.attributes
-        cResolver = contentResolver
+
+        val window = window
         binding.brightnessSeek.max = 255
         binding.brightnessSeek.progress = 255
         binding.brightnessSeek.keyProgressIncrement = 1
         try {
-            brightness = Settings.System.getInt(cResolver, getString(R.string.screen_brightness))
+            brightness = Settings.System.getInt(
+                contentResolver, getString(R.string.screen_brightness)
+            )
         } catch (e: Settings.SettingNotFoundException) {
             e.printStackTrace()
         }
+
         binding.brightnessSeek.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(
+                seekBar: SeekBar, progress: Int, fromUser: Boolean
+            ) {
+                brightness = progress
+                window.attributes.screenBrightness = progress / 255.0f
+            }
+
             override fun onStartTrackingTouch(seekBar: SeekBar) {}
             override fun onStopTrackingTouch(seekBar: SeekBar) {}
-            override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
-                brightness = if (progress <= 20) {
-                    20
-                } else {
-                    progress
-                }
-                val attributes = window.attributes
-                attributes.screenBrightness = brightness / 255.0f
-                window.attributes = attributes
-            }
         })
+
         if (imagePath != null) {
             Glide.with(this)
                 .asBitmap()
@@ -214,13 +182,13 @@ class TraceActivity : AppCompatActivity() {
                         val d = i.toDouble()
                         imageView.setOnTouchListener(
                             MultiTouch(
-                                imageView, 1.0f, 1.0f, (d / 3.5).toInt().toFloat(), 600.0f
+                                imageView, 1.0f, 1.0f,
+                                (d / 3.5).toInt().toFloat(), 600.0f
                             )
                         )
                         val bitmap = bmOriginal
                         if (bitmap != null) {
                             binding.objImage.setImageBitmap(bitmap)
-                            isEditSketch = false
                         } else {
                             Toast.makeText(
                                 this@TraceActivity,
@@ -283,33 +251,15 @@ class TraceActivity : AppCompatActivity() {
             .show(supportFragmentManager, getString(R.string.color))
     }
 
-    private fun flip(bitmap: Bitmap?, i: Int): Bitmap? {
+    private fun flip(bitmap: Bitmap?): Bitmap? {
         val matrix = Matrix()
-        return when (i) {
-            1 -> {
-                matrix.preScale(1.0f, -1.0f)
-                try {
-                    Bitmap.createBitmap(
-                        bitmap!!, 0, 0, bitmap.width, bitmap.height, matrix, true
-                    )
-                } catch (e: Exception) {
-                    null
-                }
-
-            }
-
-            2 -> {
-                matrix.preScale(-1.0f, 1.0f)
-                try {
-                    Bitmap.createBitmap(
-                        bitmap!!, 0, 0, bitmap.width, bitmap.height, matrix, true
-                    )
-                } catch (e: Exception) {
-                    null
-                }
-            }
-
-            else -> null
+        matrix.preScale(-1.0f, 1.0f)
+        return try {
+            Bitmap.createBitmap(
+                bitmap!!, 0, 0, bitmap.width, bitmap.height, matrix, true
+            )
+        } catch (e: Exception) {
+            null
         }
     }
 
@@ -341,7 +291,6 @@ class TraceActivity : AppCompatActivity() {
                             val bitmap = bmOriginal
                             if (bitmap != null) {
                                 binding.objImage.setImageBitmap(bitmap)
-                                isEditSketch = false
                             } else {
                                 Toast.makeText(
                                     this@TraceActivity,
@@ -380,5 +329,9 @@ class TraceActivity : AppCompatActivity() {
             binding.vipPhoto.visibility = View.GONE
             binding.vipVideo.visibility = View.GONE
         }
+    }
+
+    companion object {
+        private val PERMISSION_CODE_CAMERA = 3002
     }
 }

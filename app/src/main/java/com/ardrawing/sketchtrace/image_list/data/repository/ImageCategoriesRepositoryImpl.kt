@@ -2,6 +2,7 @@ package com.ardrawing.sketchtrace.image_list.data.repository
 
 import android.app.Application
 import android.content.SharedPreferences
+import android.util.Log
 import com.ardrawing.sketchtrace.R
 import com.ardrawing.sketchtrace.core.domain.repository.AppDataRepository
 import com.ardrawing.sketchtrace.core.domain.usecase.UpdateSubscriptionExpireDate
@@ -65,6 +66,9 @@ class ImageCategoriesRepositoryImpl @Inject constructor(
 
             remoteImageCategoriesDto?.let { imageCategoriesDto ->
 
+                ImageCategoriesInstance.imageCategories =
+                    imageCategoriesDto.toImageCategoryList().toMutableList()
+
                 updateImageCategoriesJsonString(imageCategoriesDto)
 
                 emit(Resource.Success())
@@ -81,7 +85,7 @@ class ImageCategoriesRepositoryImpl @Inject constructor(
 
     override fun getImageCategories(): MutableList<ImageCategory> {
 
-        ImageCategoriesInstance.imageCategories?.let {imageCategories ->
+        ImageCategoriesInstance.imageCategories?.let { imageCategories ->
             return imageCategories
         }
 
@@ -102,8 +106,6 @@ class ImageCategoriesRepositoryImpl @Inject constructor(
     private fun updateImageCategoriesJsonString(
         imageCategoriesDto: ImageCategoriesDto
     ) {
-        ImageCategoriesInstance.imageCategories =
-            imageCategoriesDto.toImageCategoryList().toMutableList()
 
         val imageCategoriesJsonString =
             convertImageCategoriesToJsonString(imageCategoriesDto)

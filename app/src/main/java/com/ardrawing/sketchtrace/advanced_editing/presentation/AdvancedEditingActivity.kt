@@ -58,14 +58,15 @@ class AdvancedEditingActivity : AppCompatActivity(), SeekBar.OnSeekBarChangeList
         binding = ActivityAdvancedBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        if (advancedEditingState?.appData?.isSubscribed == true) {
-            binding.vipApply.visibility = View.GONE
-        }
-
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 advancedEditingViewModel.advancedEditingState.collect {
                     advancedEditingState = it
+
+                    if (advancedEditingState?.appData?.isSubscribed == true) {
+                        binding.vipApply.visibility = View.GONE
+                    }
+
                     updatedSelected()
                 }
             }
@@ -111,6 +112,12 @@ class AdvancedEditingActivity : AppCompatActivity(), SeekBar.OnSeekBarChangeList
         }
     }
 
+    override fun onResume() {
+        super.onResume()
+        if (advancedEditingState?.appData?.isSubscribed == true) {
+            binding.vipApply.visibility = View.GONE
+        }
+    }
 
     private fun showApplyAlertDialog() {
 
@@ -139,10 +146,6 @@ class AdvancedEditingActivity : AppCompatActivity(), SeekBar.OnSeekBarChangeList
             }.create()
 
         alertDialog.show()
-    }
-
-    override fun onBackPressed() {
-        showApplyAlertDialog()
     }
 
     private fun updatedSelected() {
@@ -415,6 +418,9 @@ class AdvancedEditingActivity : AppCompatActivity(), SeekBar.OnSeekBarChangeList
         return (end - start) * finePercentage.toFloat() / 100.0f + start
     }
 
+    override fun onBackPressed() {
+        showApplyAlertDialog()
+    }
 }
 
 

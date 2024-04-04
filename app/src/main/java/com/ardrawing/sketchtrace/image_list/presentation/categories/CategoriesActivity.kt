@@ -94,12 +94,17 @@ class CategoriesActivity : AppCompatActivity() {
 
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
+
                 categoriesViewModel.appData.collect { appData ->
                     categoriesAdapter = CategoriesAdapter(
                         activity = this@CategoriesActivity,
                         imageCategoryList = categoriesState?.imageCategoryList ?: emptyList(),
                         appData = appData
                     )
+
+                    initAdapterClicks()
+                    binding.recyclerView.adapter = categoriesAdapter
+
                 }
             }
         }
@@ -151,6 +156,11 @@ class CategoriesActivity : AppCompatActivity() {
                 helpScreen2()
             }
         }
+
+        writeStoragePermission()
+    }
+
+    private fun initAdapterClicks() {
 
         categoriesAdapter?.setClickListener(object : CategoriesAdapter.ClickListener {
             override fun oClick(categoryPosition: Int, imagePosition: Int) {
@@ -212,12 +222,7 @@ class CategoriesActivity : AppCompatActivity() {
                     })
             }
         })
-
-        binding.recyclerView.adapter = categoriesAdapter
-
-        writeStoragePermission()
     }
-
 
     private fun rewarded(
         onRewComplete: () -> Unit

@@ -112,13 +112,6 @@ class AdvancedEditingActivity : AppCompatActivity(), SeekBar.OnSeekBarChangeList
         }
     }
 
-    override fun onResume() {
-        super.onResume()
-        if (advancedEditingState?.appData?.isSubscribed == true) {
-            binding.vipApply.visibility = View.GONE
-        }
-    }
-
     private fun showApplyAlertDialog() {
 
         val alertDialog = AlertDialog.Builder(this)
@@ -416,6 +409,14 @@ class AdvancedEditingActivity : AppCompatActivity(), SeekBar.OnSeekBarChangeList
     private fun range(percentage: Int, start: Float, end: Float): Float {
         val finePercentage = percentage / 2
         return (end - start) * finePercentage.toFloat() / 100.0f + start
+    }
+
+    override fun onResume() {
+        super.onResume()
+        advancedEditingViewModel.onEvent(AdvancedEditingUiEvent.UpdateAppData)
+        if (advancedEditingState?.appData?.isSubscribed == true) {
+            binding.vipApply.visibility = View.GONE
+        }
     }
 
     override fun onBackPressed() {

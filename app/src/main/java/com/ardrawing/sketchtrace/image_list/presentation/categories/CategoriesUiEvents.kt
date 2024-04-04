@@ -1,5 +1,7 @@
 package com.ardrawing.sketchtrace.image_list.presentation.categories
 
+import com.ardrawing.sketchtrace.advanced_editing.presentation.AdvancedEditingUiEvent
+
 /**
  * @author Ahmed Guedmioui
  */
@@ -18,4 +20,6 @@ sealed class CategoriesUiEvents {
     ) : CategoriesUiEvents()
 
     object UnlockImage : CategoriesUiEvents()
+    object UpdateAppData: CategoriesUiEvents()
+
 }

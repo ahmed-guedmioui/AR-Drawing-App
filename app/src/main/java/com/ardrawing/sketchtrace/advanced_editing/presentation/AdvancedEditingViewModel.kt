@@ -79,6 +79,14 @@ class AdvancedEditingViewModel @Inject constructor(
                     )
                 }
             }
+
+            AdvancedEditingUiEvent.UpdateAppData -> {
+                _advancedEditingState.update {
+                    it.copy(
+                        appData = appDataRepository.getAppData()
+                    )
+                }
+            }
         }
     }
 }

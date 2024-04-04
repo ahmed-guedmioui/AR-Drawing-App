@@ -13,6 +13,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.GridLayoutManager
 import com.ardrawing.sketchtrace.R
 import com.ardrawing.sketchtrace.databinding.ActivityCategoryBinding
+import com.ardrawing.sketchtrace.image_list.presentation.categories.CategoriesUiEvents
 import com.ardrawing.sketchtrace.paywall.presentation.PaywallActivity
 import com.ardrawing.sketchtrace.sketch.presentation.SketchActivity
 import com.ardrawing.sketchtrace.trace.presentation.TraceActivity
@@ -156,7 +157,7 @@ class CategoryActivity : AppCompatActivity() {
     private fun rewarded(
         onRewComplete: () -> Unit
     ) {
-
+        RewardedManager.appData = categoryState?.appData
         RewardedManager.showRewarded(
             activity = this,
             adClosedListener = object : RewardedManager.OnAdClosedListener {
@@ -184,6 +185,7 @@ class CategoryActivity : AppCompatActivity() {
     }
 
     private fun traceDrawingScreen(imagePath: String) {
+        InterManager.appData = categoryState?.appData
         InterManager.showInterstitial(this, object : InterManager.OnAdClosedListener {
             override fun onAdClosed() {
                 val intent = Intent(this@CategoryActivity, TraceActivity::class.java)
@@ -194,6 +196,7 @@ class CategoryActivity : AppCompatActivity() {
     }
 
     private fun sketchDrawingScreen(imagePath: String) {
+        InterManager.appData = categoryState?.appData
         InterManager.showInterstitial(this, object : InterManager.OnAdClosedListener {
             override fun onAdClosed() {
                 val intent = Intent(this@CategoryActivity, SketchActivity::class.java)
@@ -203,4 +206,8 @@ class CategoryActivity : AppCompatActivity() {
         })
     }
 
+    override fun onResume() {
+        super.onResume()
+        categoryViewModel.onEvent(CategoryUiEvents.UpdateAppData)
+    }
 }

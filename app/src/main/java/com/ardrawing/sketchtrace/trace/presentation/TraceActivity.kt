@@ -146,12 +146,12 @@ class TraceActivity : AppCompatActivity() {
 
         val window = window
         binding.brightnessSeek.max = 255
-        binding.brightnessSeek.progress = 255
         binding.brightnessSeek.keyProgressIncrement = 1
         try {
             brightness = Settings.System.getInt(
                 contentResolver, getString(R.string.screen_brightness)
             )
+            binding.brightnessSeek.progress = brightness / 255
         } catch (e: Settings.SettingNotFoundException) {
             e.printStackTrace()
         }
@@ -161,7 +161,11 @@ class TraceActivity : AppCompatActivity() {
                 seekBar: SeekBar, progress: Int, fromUser: Boolean
             ) {
                 brightness = progress
-                window.attributes.screenBrightness = progress / 255.0f
+
+                val attributes = window.attributes
+                attributes.screenBrightness = brightness / 255.0f
+                window.attributes = attributes
+
             }
 
             override fun onStartTrackingTouch(seekBar: SeekBar) {}
@@ -210,6 +214,7 @@ class TraceActivity : AppCompatActivity() {
     }
 
     private fun rewarded(onRewDone: () -> Unit) {
+        RewardedManager.appData = appDataRepository.getAppData()
         RewardedManager.showRewarded(
             activity = this,
             adClosedListener = object : RewardedManager.OnAdClosedListener {

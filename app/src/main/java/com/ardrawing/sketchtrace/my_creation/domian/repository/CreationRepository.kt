@@ -16,7 +16,7 @@ interface CreationRepository {
         file: File, isFast: Boolean
     ): Boolean
 
-    suspend fun deleteCreation(uri: String)
+    suspend fun deleteCreation(uri: String): Boolean
 
     suspend fun deleteTempCreation(uri: String): Boolean
 

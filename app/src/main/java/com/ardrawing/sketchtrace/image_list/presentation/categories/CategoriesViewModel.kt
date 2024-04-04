@@ -107,6 +107,13 @@ class CategoriesViewModel @Inject constructor(
                 }
             }
 
+            CategoriesUiEvents.UpdateAppData -> {
+                _categoriesState.update {
+                    it.copy(
+                        appData = appDataRepository.getAppData()
+                    )
+                }
+            }
         }
     }
 }

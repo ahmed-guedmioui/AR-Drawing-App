@@ -69,7 +69,6 @@ class MyCreationListActivity : AppCompatActivity() {
         myCreationListAdapter.setClickListener(object :
             MyCreationListAdapter.ClickListener {
             override fun oClick(uri: String, isVideo: Boolean) {
-
                 InterManager.showInterstitial(
                     this@MyCreationListActivity,
                     object : InterManager.OnAdClosedListener {

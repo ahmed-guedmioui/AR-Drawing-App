@@ -42,8 +42,8 @@ class MyCreationRepositoryImpl @Inject constructor(
     private val application: Application
 ) : CreationRepository {
 
-    val photosFolderName = "AR Drawing Photos"
-    val videosFolderName = "AR Drawing Videos"
+    private val photosFolderName = "AR Drawing Photos"
+    private val videosFolderName = "AR Drawing Videos"
 
     private fun notifyMediaScanner(file: File, isVideo: Boolean) {
 
@@ -232,8 +232,9 @@ class MyCreationRepositoryImpl @Inject constructor(
         return false
     }
 
-    override suspend fun deleteCreation(uri: String) {
+    override suspend fun deleteCreation(uri: String): Boolean {
         try {
+            Log.d("TAG_CREATION", "uri: $uri")
             val contentUri = Uri.parse(uri)
             val contentResolver = application.contentResolver
 
@@ -245,22 +246,33 @@ class MyCreationRepositoryImpl @Inject constructor(
             mediaScanIntent.data = contentUri
             application.sendBroadcast(mediaScanIntent)
 
-            // Optional: Delete the physical file if needed
-            // Note: Deleting the file is optional because `MediaStore` already removes the entry
-            // from its database. You may choose to delete the physical file as well if necessary.
-
             // Get the file path from the content URI
             val filePath = getFilePathFromContentUri(contentUri)
 
             // Check if the file path is not null and delete the file
-            if (filePath != null) {
+            return if (filePath != null) {
                 val fileToDelete = File(filePath)
                 if (fileToDelete.exists()) {
                     fileToDelete.delete()
+                    Log.d("TAG_CREATION", "delete")
+
+                    true
+                } else {
+                    Log.d("TAG_CREATION", "!exists")
+
+                    false
                 }
+            } else {
+                Log.d("TAG_CREATION", "filePath null")
+
+                false
             }
+
         } catch (e: Exception) {
             e.printStackTrace()
+            Log.d("TAG_CREATION", "Exception: ${e.stackTrace}")
+
+            return false
         }
     }
 

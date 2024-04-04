@@ -208,6 +208,7 @@ class CategoriesActivity : AppCompatActivity() {
         categoriesAdapter?.setViewMoreClickListener(object :
             CategoriesAdapter.ViewMoreClickListener {
             override fun oClick(categoryPosition: Int) {
+                InterManager.appData = categoriesState?.appData
                 InterManager.showInterstitial(
                     this@CategoriesActivity,
                     object : InterManager.OnAdClosedListener {
@@ -227,7 +228,7 @@ class CategoriesActivity : AppCompatActivity() {
     private fun rewarded(
         onRewComplete: () -> Unit
     ) {
-
+        RewardedManager.appData = categoriesState?.appData
         RewardedManager.showRewarded(
             activity = this,
             adClosedListener = object : RewardedManager.OnAdClosedListener {
@@ -369,6 +370,7 @@ class CategoriesActivity : AppCompatActivity() {
         }
 
     private fun traceDrawingScreen(imagePath: String) {
+        InterManager.appData = categoriesState?.appData
         InterManager.showInterstitial(this, object : InterManager.OnAdClosedListener {
             override fun onAdClosed() {
                 Intent(
@@ -382,6 +384,7 @@ class CategoriesActivity : AppCompatActivity() {
     }
 
     private fun sketchDrawingScreen(imagePath: String) {
+        InterManager.appData = categoriesState?.appData
         InterManager.showInterstitial(this, object : InterManager.OnAdClosedListener {
             override fun onAdClosed() {
                 Intent(
@@ -392,6 +395,11 @@ class CategoriesActivity : AppCompatActivity() {
                 }
             }
         })
+    }
+
+    override fun onResume() {
+        super.onResume()
+        categoriesViewModel.onEvent(CategoriesUiEvents.UpdateAppData)
     }
 
 }

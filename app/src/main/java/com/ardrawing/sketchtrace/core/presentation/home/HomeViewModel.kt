@@ -35,6 +35,11 @@ class HomeViewModel @Inject constructor(
     val closeChannel = _closeChannel.receiveAsFlow()
 
     init {
+        _homeState.update {
+            it.copy(
+                appData = appDataRepository.getAppData()
+            )
+        }
         _appData.update {
             appDataRepository.getAppData()
         }

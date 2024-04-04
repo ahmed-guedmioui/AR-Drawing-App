@@ -88,6 +88,7 @@ class GetStartedActivity : AppCompatActivity() {
 
 
         binding.getStarted.setOnClickListener {
+            InterManager.appData = getStartedState?.appData
             InterManager.showInterstitial(this, object : InterManager.OnAdClosedListener {
                 override fun onAdClosed() {
                     prefs.edit().putBoolean("getStartedShown", true).apply()

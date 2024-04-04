@@ -10,6 +10,9 @@ import androidx.activity.viewModels
 import androidx.annotation.OptIn
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.common.Player.STATE_READY
@@ -25,6 +28,8 @@ import com.ardrawing.sketchtrace.databinding.ActivityMyCreationDetailsBinding
 import com.ardrawing.sketchtrace.my_creation.domian.model.Creation
 import com.ardrawing.sketchtrace.my_creation.presentation.my_creation_list.MyCreationListActivity
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 /**
@@ -45,12 +50,27 @@ class MyCreationDetailsActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        
+
         val languageCode = prefs.getString("language", "en") ?: "en"
         LanguageChanger.changeAppLanguage(languageCode, this)
         binding = ActivityMyCreationDetailsBinding.inflate(layoutInflater)
         val view: View = binding.root
         setContentView(view)
+
+//        lifecycleScope.launch {
+//            repeatOnLifecycle(Lifecycle.State.STARTED) {
+//                myCreationDetailsViewModel.deleteResult.collectLatest { isDeleted ->
+//
+//                    Toast.makeText(
+//                        this@MyCreationDetailsActivity,
+//                        if (isDeleted) getString(R.string.creation_deleted)
+//                        else getString(R.string.error_while_deleting_creation),
+//                        Toast.LENGTH_SHORT
+//                    ).show()
+//
+//                }
+//            }
+//        }
 
         binding.back.setOnClickListener {
             Intent(this, MyCreationListActivity::class.java).also {
@@ -62,11 +82,11 @@ class MyCreationDetailsActivity : AppCompatActivity() {
         val uri = intent.getStringExtra("uri")
         val isVideo = intent.getBooleanExtra("isVideo", false)
 
-        uri.let { creationUri ->
+        uri?.let { creationUri ->
             if (isVideo) {
-                initializePlayer(creationUri!!)
+                initializePlayer(creationUri)
             } else {
-                initImage(creationUri!!)
+                initImage(creationUri)
             }
 
             binding.delete.setOnClickListener {
@@ -116,9 +136,6 @@ class MyCreationDetailsActivity : AppCompatActivity() {
         myCreationDetailsViewModel.onEvent(
             MyCreationDetailsUiEvent.DeleteCreation(creationUri)
         )
-        Toast.makeText(
-            this, getString(R.string.creation_deleted), Toast.LENGTH_SHORT
-        ).show()
 
         Intent(this, MyCreationListActivity::class.java).also {
             startActivity(it)

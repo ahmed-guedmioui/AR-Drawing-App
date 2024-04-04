@@ -1,8 +1,12 @@
 package com.ardrawing.sketchtrace.core.presentation.settings
 
+import com.ardrawing.sketchtrace.image_list.presentation.category.CategoryUiEvents
+
 /**
  * @author Ahmed Guedmioui
  */
-sealed interface SettingsUiEvent {
-    object ShowHidePrivacyDialog : SettingsUiEvent
+sealed class SettingsUiEvent() {
+    object ShowHidePrivacyDialog : SettingsUiEvent()
+    object UpdateAppData: SettingsUiEvent()
+
 }

@@ -189,4 +189,6 @@
     <string name="error_picking_image">Error picking image</string>
     <string name="error_loading_images">Error loading images</string>
     <string name="error_loading_data">Error loading data</string>
+    <string name="saving_image">Saving Image...</string>
+    <string name="error_while_deleting_creation">Error while deleting creation</string>
 </resources>

@@ -139,7 +139,6 @@ class TipsActivity : AppCompatActivity() {
             }
 
             5 -> {
-
                 InterManager.showInterstitial(this, object : InterManager.OnAdClosedListener {
                     override fun onAdClosed() {
                         if (isFromSplash) {

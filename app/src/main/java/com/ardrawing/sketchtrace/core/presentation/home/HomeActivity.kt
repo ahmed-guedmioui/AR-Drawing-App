@@ -214,6 +214,7 @@ class HomeActivity : AppCompatActivity() {
     }
 
     private fun drawingListScreen(isTrace: Boolean) {
+        InterManager.appData = homeState?.appData
         InterManager.showInterstitial(this, object : InterManager.OnAdClosedListener {
             override fun onAdClosed() {
                 val intent = Intent(this@HomeActivity, CategoriesActivity::class.java)

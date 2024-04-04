@@ -207,6 +207,8 @@ class SettingsActivity : AppCompatActivity() {
             Constants.languageChanged1 = false
         }
 
+        settingsViewModel.onEvent(SettingsUiEvent.UpdateAppData)
+
         if (settingsState?.appData?.isSubscribed == true) {
             binding.subscribeInfo.text = getString(
                 R.string.your_subscription_will_expire_in_n,

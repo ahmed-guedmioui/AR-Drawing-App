@@ -595,7 +595,7 @@ class SketchActivity : AppCompatActivity() {
         // Update your TextView with the timerText
         binding.mainTemp.text = timerText
 
-        if (millisUntilFinished <= 500000) {
+        if (millisUntilFinished <= 120000) {
             binding.theDrawingIsReadyBtn.visibility = View.VISIBLE
         }
     }
@@ -758,7 +758,14 @@ class SketchActivity : AppCompatActivity() {
     private fun saveImage(bitmap: Bitmap) {
         lifecycleScope.launch {
 
-            val isSaved = async { creationRepository.insertPhotoCreation(bitmap) }
+            val isSaved = async {
+                creationRepository.insertPhotoCreation(bitmap)
+            }
+
+            val progressDialog = ProgressDialog(this@SketchActivity)
+            progressDialog.setMessage(getString(R.string.saving_image))
+            progressDialog.setCancelable(false)
+            progressDialog.show()
 
             Toast.makeText(
                 this@SketchActivity,
@@ -768,6 +775,7 @@ class SketchActivity : AppCompatActivity() {
             ).show()
 
             if (isSaved.await()) {
+                progressDialog.dismiss()
                 inAppReview()
             }
 

@@ -102,6 +102,14 @@ class CategoryViewModel @Inject constructor(
 
                 }
             }
+
+            CategoryUiEvents.UpdateAppData -> {
+                _categoryState.update {
+                    it.copy(
+                        appData = appDataRepository.getAppData()
+                    )
+                }
+            }
         }
     }
 }

@@ -41,6 +41,14 @@ class SettingsViewModel @Inject constructor(
                     it.copy(showPrivacyDialog = !settingsState.value.showPrivacyDialog)
                 }
             }
+
+            SettingsUiEvent.UpdateAppData -> {
+                _settingsState.update {
+                    it.copy(
+                        appData = appDataRepository.getAppData()
+                    )
+                }
+            }
         }
     }
 

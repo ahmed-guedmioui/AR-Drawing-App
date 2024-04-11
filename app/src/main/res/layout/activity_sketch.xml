@@ -205,7 +205,7 @@
         android:layout_above="@+id/bottom_bar"
         android:layout_below="@+id/top_bar">
 
-        <androidx.appcompat.widget.AppCompatImageView
+        <com.ardrawing.sketchtrace.util.ui_utils.MultiTouchImageView
             android:id="@+id/objImage"
             android:layout_width="match_parent"
             android:layout_height="match_parent"

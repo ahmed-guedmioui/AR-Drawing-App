@@ -186,10 +186,12 @@ class ImageCategoriesRepositoryImpl @Inject constructor(
         )
 
         appDataRepository.getAppData().nativeRate.let { nativeRate ->
-            var index = nativeRate
-            while (index < getImageCategories().size) {
-                getImageCategories().add(index, nativeItem)
-                index += nativeRate + 1
+            if (nativeRate > 0) {
+                var index = nativeRate
+                while (index < getImageCategories().size) {
+                    getImageCategories().add(index, nativeItem)
+                    index += nativeRate + 1
+                }
             }
         }
 

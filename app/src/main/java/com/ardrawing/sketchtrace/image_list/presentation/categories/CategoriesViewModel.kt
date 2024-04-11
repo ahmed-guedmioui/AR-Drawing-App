@@ -1,6 +1,5 @@
 package com.ardrawing.sketchtrace.image_list.presentation.categories
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ardrawing.sketchtrace.core.domain.model.app_data.AppData

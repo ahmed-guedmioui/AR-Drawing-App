@@ -18,7 +18,6 @@ import com.revenuecat.purchases.CustomerInfo
 import com.revenuecat.purchases.Purchases
 import com.revenuecat.purchases.PurchasesError
 import com.revenuecat.purchases.interfaces.ReceiveCustomerInfoCallback
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import retrofit2.HttpException
@@ -42,7 +41,8 @@ class AppDataRepositoryImpl @Inject constructor(
             emit(Resource.Loading(true))
 
             val appDataDto = try {
-                appDataApi.getAppData()
+//                appDataApi.getAppData()
+                getDefaultAppData()
             } catch (e: IOException) {
                 e.printStackTrace()
                 emit(
@@ -94,7 +94,7 @@ class AppDataRepositoryImpl @Inject constructor(
             return appData
         }
 
-        return getDefaultAppData()
+        return getDefaultAppData().toAppData()
     }
 
     override fun updateIsSubscribed(
@@ -200,26 +200,7 @@ class AppDataRepositoryImpl @Inject constructor(
         })
     }
 
-
-    // Only for testing
-    suspend fun loadTestAppData(): Flow<Resource<Unit>> {
-        return flow {
-
-            emit(Resource.Loading(true))
-            delay(3000)
-
-            prefs.edit()
-                .putString("admobOpenApp", getDefaultAppData().admobOpenApp)
-                .apply()
-
-            subscription()
-
-            emit(Resource.Success())
-            emit(Resource.Loading(false))
-        }
-    }
-
-    private fun getDefaultAppData(): AppData = AppDataDto(
+    private fun getDefaultAppData(): AppDataDto = AppDataDto(
         null,
         null,
         null,
@@ -245,7 +226,7 @@ class AppDataRepositoryImpl @Inject constructor(
         null,
         null,
         null
-    ).toAppData()
+    )
 
 
 }

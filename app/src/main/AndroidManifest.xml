@@ -120,15 +120,15 @@
             android:screenOrientation="portrait"
             android:theme="@style/CameraActivityTheme" />
         <activity
-            android:name=".util.other.HelpActivity"
+            android:name=".util.ui_utils.HelpActivity"
             android:launchMode="singleTask"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".util.other.HelpActivity2"
+            android:name=".util.ui_utils.HelpActivity2"
             android:launchMode="singleTask"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".util.other.PrivacyPolicyActivity"
+            android:name=".util.ui_utils.PrivacyPolicyActivity"
             android:launchMode="singleTask"
             android:screenOrientation="portrait" />
         <activity

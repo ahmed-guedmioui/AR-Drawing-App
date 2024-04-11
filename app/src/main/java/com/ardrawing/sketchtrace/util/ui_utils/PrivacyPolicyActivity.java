@@ -1,4 +1,4 @@
-package com.ardrawing.sketchtrace.util.other;
+package com.ardrawing.sketchtrace.util.ui_utils;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;

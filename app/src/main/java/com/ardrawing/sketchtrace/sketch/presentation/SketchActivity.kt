@@ -39,7 +39,6 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.lifecycle.lifecycleScope
-import com.ardrawing.sketchtrace.App
 import com.ardrawing.sketchtrace.R
 import com.ardrawing.sketchtrace.advanced_editing.presentation.AdvancedEditingActivity
 import com.ardrawing.sketchtrace.databinding.ActivitySketchBinding
@@ -52,7 +51,7 @@ import com.ardrawing.sketchtrace.util.LanguageChanger
 import com.ardrawing.sketchtrace.util.PermissionUtils
 import com.ardrawing.sketchtrace.util.ads.NativeManager
 import com.ardrawing.sketchtrace.util.ads.RewardedManager
-import com.ardrawing.sketchtrace.util.other.MultiTouch
+import com.ardrawing.sketchtrace.util.ui_utils.MultiTouch
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.transition.Transition
@@ -162,13 +161,6 @@ class SketchActivity : AppCompatActivity() {
                 ) {
                     Constants.bitmap = resource
                     binding.objImage.apply {
-                        val i = Resources.getSystem().displayMetrics.widthPixels
-                        setOnTouchListener(
-                            MultiTouch(
-                                this, 1.0f, 1.0f, (i / 3.5).toInt().toFloat(), 600.0f
-                            )
-                        )
-
                         setImageBitmap(Constants.bitmap)
 
                         isEditSketch = false
@@ -333,13 +325,6 @@ class SketchActivity : AppCompatActivity() {
                         ) {
                             Constants.bitmap = resource
                             binding.objImage.apply {
-                                val i = Resources.getSystem().displayMetrics.widthPixels
-                                setOnTouchListener(
-                                    MultiTouch(
-                                        this, 1.0f, 1.0f, (i / 3.5).toInt().toFloat(), 600.0f
-                                    )
-                                )
-
                                 setImageBitmap(Constants.bitmap)
                                 isEditSketch = false
                                 binding.imgOutline.setImageResource(R.drawable.outline)

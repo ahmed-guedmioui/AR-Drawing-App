@@ -1,4 +1,4 @@
-package com.ardrawing.sketchtrace.util.other;
+package com.ardrawing.sketchtrace.util.ui_utils;
 
 import android.content.ContentUris;
 import android.content.Context;

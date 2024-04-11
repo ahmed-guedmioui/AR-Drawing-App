@@ -20,7 +20,6 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.ardrawing.sketchtrace.R
-import com.ardrawing.sketchtrace.core.domain.repository.AppDataRepository
 import com.ardrawing.sketchtrace.databinding.ActivityCategoriesBinding
 import com.ardrawing.sketchtrace.image_list.presentation.category.CategoryActivity
 import com.ardrawing.sketchtrace.paywall.presentation.PaywallActivity
@@ -30,10 +29,10 @@ import com.ardrawing.sketchtrace.util.LanguageChanger
 import com.ardrawing.sketchtrace.util.ads.InterManager
 import com.ardrawing.sketchtrace.util.ads.NativeManager
 import com.ardrawing.sketchtrace.util.ads.RewardedManager
-import com.ardrawing.sketchtrace.util.other.AppConstant
-import com.ardrawing.sketchtrace.util.other.FileUtils
-import com.ardrawing.sketchtrace.util.other.HelpActivity
-import com.ardrawing.sketchtrace.util.other.HelpActivity2
+import com.ardrawing.sketchtrace.util.ui_utils.AppConstant
+import com.ardrawing.sketchtrace.util.ui_utils.FileUtils
+import com.ardrawing.sketchtrace.util.ui_utils.HelpActivity
+import com.ardrawing.sketchtrace.util.ui_utils.HelpActivity2
 import com.github.dhaval2404.imagepicker.ImagePicker
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
@@ -50,7 +49,6 @@ class CategoriesActivity : AppCompatActivity() {
 
     private val categoriesViewModel: CategoriesViewModel by viewModels()
     private var categoriesState: CategoriesState? = null
-
 
     @Inject
     lateinit var prefs: SharedPreferences
@@ -72,13 +70,13 @@ class CategoriesActivity : AppCompatActivity() {
         val bundle = intent.extras
         if (bundle != null) {
             val isTrace = bundle.getBoolean("isTrace", true)
-
             categoriesViewModel.onEvent(CategoriesUiEvents.UpdateIsTrace(isTrace))
         }
 
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 categoriesViewModel.categoriesState.collect {
+                    categoriesState = it
                     categoriesState = it
 
                     categoriesAdapter?.notifyDataSetChanged()
@@ -387,6 +385,8 @@ class CategoriesActivity : AppCompatActivity() {
         InterManager.appData = categoriesState?.appData
         InterManager.showInterstitial(this, object : InterManager.OnAdClosedListener {
             override fun onAdClosed() {
+                Log.d("tag_anr", "CategoriesActivity onAdClosed")
+
                 Intent(
                     this@CategoriesActivity, SketchActivity::class.java
                 ).also {

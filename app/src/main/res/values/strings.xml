@@ -191,4 +191,5 @@
     <string name="error_loading_data">Error loading data</string>
     <string name="saving_image">Saving Image...</string>
     <string name="error_while_deleting_creation">Error while deleting creation</string>
+    <string name="ads_options">Ads Options</string>
 </resources>

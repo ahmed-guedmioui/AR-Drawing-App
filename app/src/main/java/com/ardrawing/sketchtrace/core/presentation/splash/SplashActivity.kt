@@ -81,10 +81,6 @@ class SplashActivity : AppCompatActivity() {
 
         consentInformation = UserMessagingPlatform.getConsentInformation(this)
 
-        // Show a privacy options button if required.
-        val isPrivacyOptionsRequired = consentInformation.privacyOptionsRequirementStatus ==
-                PrivacyOptionsRequirementStatus.REQUIRED
-
         AppAnimation().startRepeatingAnimation(binding.animationImage)
 
         lifecycleScope.launch {

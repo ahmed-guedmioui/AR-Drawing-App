@@ -7,6 +7,7 @@ import android.content.SharedPreferences
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
+import android.util.Log
 import android.view.Gravity
 import android.view.View
 import android.view.Window
@@ -36,8 +37,13 @@ import com.ardrawing.sketchtrace.util.ads.NativeManager
 import com.ardrawing.sketchtrace.util.openDeveloper
 import com.ardrawing.sketchtrace.util.rateApp
 import com.ardrawing.sketchtrace.util.shareApp
+import com.google.android.ump.ConsentDebugSettings
+import com.google.android.ump.ConsentInformation
+import com.google.android.ump.ConsentRequestParameters
+import com.google.android.ump.UserMessagingPlatform
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
+import java.util.concurrent.atomic.AtomicBoolean
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -48,6 +54,7 @@ class SettingsActivity : AppCompatActivity() {
     private var settingsState: SettingsState? = null
     private lateinit var binding: ActivitySettingsBinding
 
+    private lateinit var consentInformation: ConsentInformation
 
     @Inject
     lateinit var prefs: SharedPreferences
@@ -154,6 +161,62 @@ class SettingsActivity : AppCompatActivity() {
                 }
             }
         }
+
+        consentInformation = UserMessagingPlatform.getConsentInformation(this)
+        // Show a privacy options button if required.
+        val isPrivacyOptionsRequired = consentInformation.privacyOptionsRequirementStatus ==
+                ConsentInformation.PrivacyOptionsRequirementStatus.REQUIRED
+
+        if (isPrivacyOptionsRequired) {
+            binding.adsOptions.visibility = View.VISIBLE
+        }
+
+        binding.adsOptions.setOnClickListener {
+            getConsent()
+        }
+
+    }
+
+    private fun getConsent() {
+
+        val debugSettings = ConsentDebugSettings.Builder(this)
+            .setDebugGeography(ConsentDebugSettings.DebugGeography.DEBUG_GEOGRAPHY_EEA)
+            .addTestDeviceHashedId("EC63707298751E23CCEB09A07FCB3B1F")
+            .build()
+
+        val params = ConsentRequestParameters
+            .Builder()
+            .build()
+
+        consentInformation.requestConsentInfoUpdate(
+            this,
+            params,
+            {
+                UserMessagingPlatform.loadAndShowConsentFormIfRequired(
+                    this@SettingsActivity
+                ) { loadAndShowError ->
+                    // Consent gathering failed.
+                    if (loadAndShowError != null) {
+                        Log.d("tag_admob", loadAndShowError.message)
+                    }
+                    // Consent has been gathered.
+                    if (consentInformation.canRequestAds()) {
+                        Log.d("tag_admob", "canRequestAds 2")
+                        prefs.edit().putBoolean("can_show_ads", true).apply()
+
+                    } else {
+                        Log.d("tag_admob", "navigate 1")
+                        prefs.edit().putBoolean("can_show_ads", false).apply()
+                    }
+                }
+            },
+            { requestConsentError ->
+                // Consent gathering failed.
+                Log.d("tag_admob", requestConsentError.message)
+                Log.d("tag_admob", "navigate 2")
+                prefs.edit().putBoolean("can_show_ads", false).apply()
+            }
+        )
     }
 
     @SuppressLint("SetJavaScriptEnabled")

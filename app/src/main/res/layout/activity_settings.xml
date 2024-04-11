@@ -238,6 +238,31 @@
 
             </LinearLayout>
 
+            <LinearLayout
+                android:id="@+id/ads_options"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="16dp"
+                android:visibility="gone"
+                android:layout_marginBottom="22dp"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:src="@drawable/advertising" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="18dp"
+                    android:fontFamily="@font/font"
+                    android:text="@string/ads_options"
+                    android:textColor="@color/text"
+                    android:textSize="19sp" />
+
+            </LinearLayout>
+
             <TextView
                 android:id="@+id/subscribe_info"
                 android:layout_width="wrap_content"

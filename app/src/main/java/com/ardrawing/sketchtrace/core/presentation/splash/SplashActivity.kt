@@ -25,14 +25,13 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import com.ardrawing.sketchtrace.App
 import com.ardrawing.sketchtrace.BuildConfig
 import com.ardrawing.sketchtrace.R
-import com.ardrawing.sketchtrace.databinding.ActivitySplashBinding
 import com.ardrawing.sketchtrace.core.presentation.get_started.GetStartedActivity
 import com.ardrawing.sketchtrace.core.presentation.home.HomeActivity
 import com.ardrawing.sketchtrace.core.presentation.language.LanguageActivity
 import com.ardrawing.sketchtrace.core.presentation.tips.TipsActivity
+import com.ardrawing.sketchtrace.databinding.ActivitySplashBinding
 import com.ardrawing.sketchtrace.paywall.presentation.PaywallActivity
 import com.ardrawing.sketchtrace.util.AppAnimation
 import com.ardrawing.sketchtrace.util.LanguageChanger
@@ -42,7 +41,6 @@ import com.ardrawing.sketchtrace.util.ads.InterManager
 import com.google.android.gms.ads.MobileAds
 import com.google.android.ump.ConsentDebugSettings
 import com.google.android.ump.ConsentInformation
-import com.google.android.ump.ConsentInformation.PrivacyOptionsRequirementStatus
 import com.google.android.ump.ConsentRequestParameters
 import com.google.android.ump.UserMessagingPlatform
 import dagger.hilt.android.AndroidEntryPoint
@@ -77,7 +75,6 @@ class SplashActivity : AppCompatActivity() {
         binding = ActivitySplashBinding.inflate(layoutInflater)
         val view: View = binding.root
         setContentView(view)
-
 
         consentInformation = UserMessagingPlatform.getConsentInformation(this)
 

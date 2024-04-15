@@ -146,19 +146,6 @@ class ImageCategoriesRepositoryImpl @Inject constructor(
                     image.locked = false
                 }
             }
-
-            return
-        }
-
-        // When user is not subscribed unlock only the image the user manually unlocked by watching an ad
-        getImageCategories().forEach { categoryItem ->
-            categoryItem.imageList.forEach { image ->
-                if (image.locked) {
-                    prefs.getBoolean(image.prefsId, true).let { locked ->
-                        image.locked = locked
-                    }
-                }
-            }
         }
     }
 

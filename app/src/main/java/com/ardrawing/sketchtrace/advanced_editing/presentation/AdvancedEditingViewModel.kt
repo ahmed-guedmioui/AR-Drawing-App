@@ -19,7 +19,13 @@ class AdvancedEditingViewModel @Inject constructor(
     private val _advancedEditingState = MutableStateFlow(AdvancedEditingState())
     val advancedEditingState = _advancedEditingState.asStateFlow()
 
+    private val _languageCode = MutableStateFlow("en")
+    val languageCode = _languageCode.asStateFlow()
+
     init {
+        _languageCode.update {
+            appDataRepository.getLanguageCode()
+        }
         _advancedEditingState.update {
             it.copy(
                 appData = appDataRepository.getAppData()

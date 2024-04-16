@@ -50,27 +50,9 @@ class MyCreationDetailsActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        val languageCode = prefs.getString("language", "en") ?: "en"
-        LanguageChanger.changeAppLanguage(languageCode, this)
         binding = ActivityMyCreationDetailsBinding.inflate(layoutInflater)
         val view: View = binding.root
         setContentView(view)
-
-//        lifecycleScope.launch {
-//            repeatOnLifecycle(Lifecycle.State.STARTED) {
-//                myCreationDetailsViewModel.deleteResult.collectLatest { isDeleted ->
-//
-//                    Toast.makeText(
-//                        this@MyCreationDetailsActivity,
-//                        if (isDeleted) getString(R.string.creation_deleted)
-//                        else getString(R.string.error_while_deleting_creation),
-//                        Toast.LENGTH_SHORT
-//                    ).show()
-//
-//                }
-//            }
-//        }
 
         binding.back.setOnClickListener {
             Intent(this, MyCreationListActivity::class.java).also {

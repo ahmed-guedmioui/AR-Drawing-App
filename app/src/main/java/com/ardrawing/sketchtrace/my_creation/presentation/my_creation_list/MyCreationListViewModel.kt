@@ -2,6 +2,7 @@ package com.ardrawing.sketchtrace.my_creation.presentation.my_creation_list
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.ardrawing.sketchtrace.core.domain.repository.AppDataRepository
 import com.ardrawing.sketchtrace.my_creation.domian.repository.CreationRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -15,13 +16,20 @@ import javax.inject.Inject
  */
 @HiltViewModel
 class MyCreationListViewModel @Inject constructor(
-    private val creationRepository: CreationRepository
+    private val creationRepository: CreationRepository,
+    private val appDataRepository: AppDataRepository
 ) : ViewModel() {
 
     private val _myCreationListState = MutableStateFlow(MyCreationListState())
     val myCreationState = _myCreationListState.asStateFlow()
 
+    private val _languageCode = MutableStateFlow("en")
+    val languageCode = _languageCode.asStateFlow()
+
     init {
+        _languageCode.update {
+            appDataRepository.getLanguageCode()
+        }
         getCreationList()
     }
 

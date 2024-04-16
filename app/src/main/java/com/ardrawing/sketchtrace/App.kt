@@ -56,12 +56,9 @@ class App : Application() {
         )
 
         OneSignal.Debug.logLevel = com.onesignal.debug.LogLevel.VERBOSE
-        // OneSignal Initialization
         OneSignal.initWithContext(
             this.baseContext, "016473e9-27ee-4bc9-8789-d20057f3dea5"
         )
-        // requestPermission will show the native Android notification permission prompt.
-        // NOTE: It's recommended to use a OneSignal In-App Message to prompt instead.
         CoroutineScope(Dispatchers.IO).launch {
             OneSignal.Notifications.requestPermission(true)
         }
@@ -73,9 +70,8 @@ class App : Application() {
             "ar_drawing_med_prefs_file", Context.MODE_PRIVATE
         )
         val languageCode = prefs.getString("language", "en") ?: "en"
-        val newBase = LanguageChanger.changeAppLanguage(languageCode, base)
 
-        super.attachBaseContext(newBase)
+        super.attachBaseContext(LanguageChanger.changeAppLanguage(languageCode, base))
 
     }
 

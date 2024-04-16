@@ -26,6 +26,9 @@ class CategoryViewModel @Inject constructor(
     private val _categoryState = MutableStateFlow(CategoryState())
     val categoryState = _categoryState.asStateFlow()
 
+    private val _languageCode = MutableStateFlow("en")
+    val languageCode = _languageCode.asStateFlow()
+
     private val _navigateToDrawingChannel = Channel<Boolean>()
     val navigateToDrawingChannel = _navigateToDrawingChannel.receiveAsFlow()
 
@@ -36,6 +39,9 @@ class CategoryViewModel @Inject constructor(
     val appData = _appData.asStateFlow()
 
     init {
+        _languageCode.update {
+            appDataRepository.getLanguageCode()
+        }
         viewModelScope.launch {
             _categoryState.update {
                 it.copy(

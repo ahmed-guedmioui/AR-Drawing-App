@@ -20,10 +20,16 @@ class SettingsViewModel @Inject constructor(
     private val _settingsState = MutableStateFlow(SettingsState())
     val settingsState = _settingsState.asStateFlow()
 
+    private val _languageCode = MutableStateFlow("en")
+    val languageCode = _languageCode.asStateFlow()
+
     private val _appData = MutableStateFlow<AppData?>(null)
     val appData = _appData.asStateFlow()
 
     init {
+        _languageCode.update {
+            appDataRepository.getLanguageCode()
+        }
         _settingsState.update {
             it.copy(
                 appData = appDataRepository.getAppData()

@@ -119,6 +119,10 @@ class AppDataRepositoryImpl @Inject constructor(
         )
     }
 
+    override fun getLanguageCode(): String {
+       return prefs.getString("language", "en") ?: "en"
+    }
+
     private fun updateAppDataJsonString(appData: AppData) {
         val appDataJsonString = convertAppDataToJsonString(appData)
         prefs.edit()

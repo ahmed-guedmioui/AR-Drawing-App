@@ -27,6 +27,8 @@ class SplashViewModel @Inject constructor(
     private val _splashState = MutableStateFlow(SplashState())
     val splashState = _splashState.asStateFlow()
 
+    private val _languageCode = MutableStateFlow("en")
+    val languageCode = _languageCode.asStateFlow()
 
     private val _updateDialogState = MutableStateFlow(-1)
     val updateDialogState = _updateDialogState.asStateFlow()
@@ -38,6 +40,9 @@ class SplashViewModel @Inject constructor(
     val showErrorToastChannel = _showErrorToastChannel.receiveAsFlow()
 
     init {
+        _languageCode.update {
+            appDataRepository.getLanguageCode()
+        }
         getData()
         getImages()
     }

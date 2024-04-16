@@ -83,7 +83,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".core.presentation.tips.TipsActivity"
+            android:name=".core.presentation.onboarding.OnboardingActivity"
             android:launchMode="singleTask"
             android:screenOrientation="portrait" />
         <activity

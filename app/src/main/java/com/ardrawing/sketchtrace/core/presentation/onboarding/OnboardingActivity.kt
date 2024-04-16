@@ -1,4 +1,4 @@
-package com.ardrawing.sketchtrace.core.presentation.tips
+package com.ardrawing.sketchtrace.core.presentation.onboarding
 
 import android.content.Intent
 import android.content.SharedPreferences
@@ -15,10 +15,8 @@ import com.ardrawing.sketchtrace.R
 import com.ardrawing.sketchtrace.core.presentation.get_started.GetStartedActivity
 import com.ardrawing.sketchtrace.databinding.ActivityTipsBinding
 import com.ardrawing.sketchtrace.util.AppAnimation
-import com.ardrawing.sketchtrace.util.LanguageChanger
 import com.ardrawing.sketchtrace.util.ads.InterManager
 import com.ardrawing.sketchtrace.util.ads.NativeManager
-import com.ardrawing.sketchtrace.util.ads.RewardedManager
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -27,10 +25,10 @@ import javax.inject.Inject
  * @author Ahmed Guedmioui
  */
 @AndroidEntryPoint
-class TipsActivity : AppCompatActivity() {
+class OnboardingActivity : AppCompatActivity() {
 
-    private val tipsViewModel: TipsViewModel by viewModels()
-    private var tipsState: TipsState? = null
+    private val onboardingViewModel: OnboardingViewModel by viewModels()
+    private var onboardingState: OnboardingState? = null
 
     private lateinit var binding: ActivityTipsBinding
 
@@ -41,9 +39,6 @@ class TipsActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        val languageCode = prefs.getString("language", "en") ?: "en"
-        LanguageChanger.changeAppLanguage(languageCode, this)
         binding = ActivityTipsBinding.inflate(layoutInflater)
         val view: View = binding.root
         setContentView(view)
@@ -52,20 +47,20 @@ class TipsActivity : AppCompatActivity() {
 
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
-                tipsViewModel.tipsState.collect {
-                    tipsState = it
+                onboardingViewModel.tipsState.collect {
+                    onboardingState = it
                 }
             }
         }
 
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
-                tipsViewModel.appData.collect { appData ->
+                onboardingViewModel.appData.collect { appData ->
                     NativeManager.loadNative(
                         appData,
                         findViewById(R.id.native_frame),
                         findViewById(R.id.native_temp),
-                        this@TipsActivity, false
+                        this@OnboardingActivity, false
                     )
                 }
             }
@@ -73,12 +68,12 @@ class TipsActivity : AppCompatActivity() {
 
         changeTip()
         binding.nextStart.setOnClickListener {
-            tipsViewModel.onEvent(TipsUiEvent.NextTip)
+            onboardingViewModel.onEvent(OnboardingUiEvent.NextTip)
             changeTip()
         }
 
         binding.back.setOnClickListener {
-            tipsViewModel.onEvent(TipsUiEvent.Back)
+            onboardingViewModel.onEvent(OnboardingUiEvent.Back)
             changeTip()
         }
 
@@ -87,7 +82,7 @@ class TipsActivity : AppCompatActivity() {
     private fun changeTip() {
 
         changeDotsColor()
-        when (tipsState?.tipNum) {
+        when (onboardingState?.tipNum) {
             1 -> {
                 binding.tipTitle.text = getString(R.string.tip_title_1)
                 binding.tipDesc.text = getString(R.string.tip_desc_1)
@@ -143,7 +138,7 @@ class TipsActivity : AppCompatActivity() {
                     override fun onAdClosed() {
                         if (isFromSplash) {
                             prefs.edit().putBoolean("tipsShown", true).apply()
-                            startActivity(Intent(this@TipsActivity, GetStartedActivity::class.java))
+                            startActivity(Intent(this@OnboardingActivity, GetStartedActivity::class.java))
                         }
                         finish()
                     }
@@ -159,7 +154,7 @@ class TipsActivity : AppCompatActivity() {
         findViewById<CardView>(R.id.dot_3).setCardBackgroundColor(getColor(R.color.primary_2))
         findViewById<CardView>(R.id.dot_4).setCardBackgroundColor(getColor(R.color.primary_2))
 
-        when (tipsState?.tipNum) {
+        when (onboardingState?.tipNum) {
             1 -> {
                 findViewById<CardView>(R.id.dot_1).setCardBackgroundColor(getColor(R.color.primary_3))
             }

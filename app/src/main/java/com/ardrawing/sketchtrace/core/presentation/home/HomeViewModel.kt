@@ -25,6 +25,9 @@ class HomeViewModel @Inject constructor(
     private val _homeState = MutableStateFlow(HomeState())
     val homeState = _homeState.asStateFlow()
 
+    private val _languageCode = MutableStateFlow("en")
+    val languageCode = _languageCode.asStateFlow()
+
     private val _appData = MutableStateFlow<AppData?>(null)
     val appData = _appData.asStateFlow()
 
@@ -35,6 +38,9 @@ class HomeViewModel @Inject constructor(
     val closeChannel = _closeChannel.receiveAsFlow()
 
     init {
+        _languageCode.update {
+            appDataRepository.getLanguageCode()
+        }
         _homeState.update {
             it.copy(
                 appData = appDataRepository.getAppData()

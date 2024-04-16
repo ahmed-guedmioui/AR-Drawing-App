@@ -20,14 +20,21 @@ class LanguageViewModel @Inject constructor(
     private val _languageState = MutableStateFlow(LanguageState())
     val languageState = _languageState.asStateFlow()
 
+    private val _languageCode = MutableStateFlow("en")
+    val languageCode = _languageCode.asStateFlow()
+
     private val _appData = MutableStateFlow<AppData?>(null)
     val appData = _appData.asStateFlow()
 
     init {
+        _languageCode.update {
+            appDataRepository.getLanguageCode()
+        }
         _appData.update {
             appDataRepository.getAppData()
         }
     }
+
 
     fun onEvent(languageUiEvent: LanguageUiEvent) {
         when (languageUiEvent) {

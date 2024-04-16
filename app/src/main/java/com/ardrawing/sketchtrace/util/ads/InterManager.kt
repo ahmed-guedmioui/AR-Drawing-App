@@ -6,6 +6,7 @@ import android.content.Context
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
+import com.ardrawing.sketchtrace.R
 import com.ardrawing.sketchtrace.core.domain.model.app_data.AppData
 import com.facebook.ads.Ad
 import com.facebook.ads.AdError
@@ -66,7 +67,7 @@ object InterManager {
 
             val progressDialog = ProgressDialog(activity)
             progressDialog.setCancelable(false)
-            progressDialog.setMessage("Loading Ads...")
+            progressDialog.setMessage(activity.getString(R.string.loading_ads))
             progressDialog.show()
 
             Handler(Looper.getMainLooper()).postDelayed({

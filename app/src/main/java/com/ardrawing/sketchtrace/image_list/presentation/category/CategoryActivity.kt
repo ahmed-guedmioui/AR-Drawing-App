@@ -43,9 +43,6 @@ class CategoryActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        val languageCode = prefs.getString("language", "en") ?: "en"
-        LanguageChanger.changeAppLanguage(languageCode, this)
         binding = ActivityCategoryBinding.inflate(layoutInflater)
         val view: View = binding.root
         setContentView(view)

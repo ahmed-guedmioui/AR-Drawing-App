@@ -29,11 +29,9 @@ import com.ardrawing.sketchtrace.databinding.ActivitySettingsBinding
 import com.ardrawing.sketchtrace.core.presentation.follow.FollowActivity
 import com.ardrawing.sketchtrace.core.presentation.language.LanguageActivity
 import com.ardrawing.sketchtrace.core.presentation.settings.adapter.RecommendedAppsAdapter
-import com.ardrawing.sketchtrace.core.presentation.tips.TipsActivity
+import com.ardrawing.sketchtrace.core.presentation.onboarding.OnboardingActivity
 import com.ardrawing.sketchtrace.paywall.presentation.PaywallActivity
 import com.ardrawing.sketchtrace.util.Constants
-import com.ardrawing.sketchtrace.util.LanguageChanger
-import com.ardrawing.sketchtrace.util.ads.NativeManager
 import com.ardrawing.sketchtrace.util.openDeveloper
 import com.ardrawing.sketchtrace.util.rateApp
 import com.ardrawing.sketchtrace.util.shareApp
@@ -43,7 +41,6 @@ import com.google.android.ump.ConsentRequestParameters
 import com.google.android.ump.UserMessagingPlatform
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
-import java.util.concurrent.atomic.AtomicBoolean
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -61,9 +58,6 @@ class SettingsActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        val languageCode = prefs.getString("language", "en") ?: "en"
-        LanguageChanger.changeAppLanguage(languageCode, this)
         binding = ActivitySettingsBinding.inflate(layoutInflater)
         val view: View = binding.root
         setContentView(view)
@@ -135,7 +129,7 @@ class SettingsActivity : AppCompatActivity() {
         }
 
         binding.tips.setOnClickListener {
-            val intent = Intent(this, TipsActivity::class.java)
+            val intent = Intent(this, OnboardingActivity::class.java)
             intent.putExtra("from_splash", false)
             startActivity(intent)
         }

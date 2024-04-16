@@ -12,7 +12,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.ardrawing.sketchtrace.R
 import com.ardrawing.sketchtrace.databinding.ActivityLanguageBinding
-import com.ardrawing.sketchtrace.core.presentation.tips.TipsActivity
+import com.ardrawing.sketchtrace.core.presentation.onboarding.OnboardingActivity
 import com.ardrawing.sketchtrace.util.Constants
 import com.ardrawing.sketchtrace.util.LanguageChanger
 import com.ardrawing.sketchtrace.util.ads.InterManager
@@ -45,9 +45,6 @@ class LanguageActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        val languageCode = prefs.getString("language", "en") ?: "en"
-        LanguageChanger.changeAppLanguage(languageCode, this)
         binding = ActivityLanguageBinding.inflate(layoutInflater)
         val view: View = binding.root
         setContentView(view)
@@ -96,7 +93,7 @@ class LanguageActivity : AppCompatActivity() {
                         )
 
                         if (fromSplash == true) {
-                            startActivity(Intent(this@LanguageActivity, TipsActivity::class.java))
+                            startActivity(Intent(this@LanguageActivity, OnboardingActivity::class.java))
                         } else {
                             Constants.languageChanged1 = true
                             Constants.languageChanged2 = true

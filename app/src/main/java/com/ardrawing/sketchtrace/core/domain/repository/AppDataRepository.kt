@@ -20,4 +20,5 @@ interface AppDataRepository {
         subscriptionExpireDate: String
     )
     fun updateShowAdsForThisUser()
+    fun getLanguageCode(): String
 }

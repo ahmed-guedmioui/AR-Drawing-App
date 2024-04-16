@@ -2,10 +2,12 @@ package com.ardrawing.sketchtrace.my_creation.presentation.my_creation_details
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.ardrawing.sketchtrace.core.domain.repository.AppDataRepository
 import com.ardrawing.sketchtrace.my_creation.domian.repository.CreationRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -14,21 +16,27 @@ import javax.inject.Inject
  */
 @HiltViewModel
 class MyCreationDetailsViewModel @Inject constructor(
-    private val creationRepository: CreationRepository
+    private val creationRepository: CreationRepository,
+    private val appDataRepository: AppDataRepository
 ) : ViewModel() {
 
-    private val _deleteResult = Channel<Boolean>()
-    val deleteResult = _deleteResult.receiveAsFlow()
+    private val _languageCode = MutableStateFlow("en")
+    val languageCode = _languageCode.asStateFlow()
+
+
+    init {
+        _languageCode.update {
+            appDataRepository.getLanguageCode()
+        }
+    }
 
     fun onEvent(myCreationDetailsUiEvent: MyCreationDetailsUiEvent) {
         when (myCreationDetailsUiEvent) {
             is MyCreationDetailsUiEvent.DeleteCreation -> {
                 viewModelScope.launch {
-                   val isDeleted = creationRepository.deleteCreation(
+                    creationRepository.deleteCreation(
                         myCreationDetailsUiEvent.creationUri
                     )
-
-                    _deleteResult.send(isDeleted)
                 }
             }
         }

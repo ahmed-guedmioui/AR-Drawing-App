@@ -36,9 +36,6 @@ class MyCreationListActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        val languageCode = prefs.getString("language", "en") ?: "en"
-        LanguageChanger.changeAppLanguage(languageCode, this)
         binding = ActivityMyCreationLsitBinding.inflate(layoutInflater)
         val view: View = binding.root
         setContentView(view)

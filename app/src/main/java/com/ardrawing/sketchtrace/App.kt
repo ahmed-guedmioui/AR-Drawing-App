@@ -2,11 +2,13 @@ package com.ardrawing.sketchtrace
 
 import android.app.Application
 import android.content.Context
+import android.content.ContextWrapper
 import com.ardrawing.sketchtrace.core.domain.model.app_data.AppData
 import com.ardrawing.sketchtrace.core.domain.repository.AppDataRepository
 import com.ardrawing.sketchtrace.databinding.ActivitySketchBinding
 import com.ardrawing.sketchtrace.image_list.domain.model.images.ImageCategory
 import com.ardrawing.sketchtrace.util.LanguageChanger
+import com.ardrawing.sketchtrace.util.PrefsConstants
 import com.facebook.ads.AudienceNetworkAds
 import com.google.android.gms.ads.MobileAds
 import com.google.firebase.FirebaseApp
@@ -21,6 +23,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import java.io.File
+import java.util.Locale
 import javax.inject.Inject
 
 /**
@@ -65,14 +68,9 @@ class App : Application() {
     }
 
     override fun attachBaseContext(base: Context) {
-
-        val prefs = base.getSharedPreferences(
-            "ar_drawing_med_prefs_file", Context.MODE_PRIVATE
+        super.attachBaseContext(
+            LanguageChanger.changeAppLanguage(base)
         )
-        val languageCode = prefs.getString("language", "en") ?: "en"
-
-        super.attachBaseContext(LanguageChanger.changeAppLanguage(languageCode, base))
-
     }
 
     private fun trimCache() {

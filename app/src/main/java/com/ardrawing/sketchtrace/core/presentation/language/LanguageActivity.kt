@@ -40,11 +40,9 @@ class LanguageActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityLanguageBinding
 
-    @Inject
-    lateinit var prefs: SharedPreferences
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        LanguageChanger.changeAppLanguage(this)
         binding = ActivityLanguageBinding.inflate(layoutInflater)
         val view: View = binding.root
         setContentView(view)
@@ -53,6 +51,7 @@ class LanguageActivity : AppCompatActivity() {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 languageViewModel.languageState.collect {
                     languageState = it
+                    changeLanguage()
                 }
             }
         }
@@ -84,16 +83,14 @@ class LanguageActivity : AppCompatActivity() {
                 this,
                 object : InterManager.OnAdClosedListener {
                     override fun onAdClosed() {
-                        prefs.edit().putString("language", languageState?.language ?: en).apply()
-                        prefs.edit().putBoolean("language_chosen", true).apply()
-
-                        LanguageChanger.changeAppLanguage(
-                            languageState?.language ?: en,
-                            this@LanguageActivity
-                        )
+                        languageViewModel.onEvent(LanguageUiEvent.Navigate)
 
                         if (fromSplash == true) {
-                            startActivity(Intent(this@LanguageActivity, OnboardingActivity::class.java))
+                            Intent(
+                                this@LanguageActivity, OnboardingActivity::class.java
+                            ).also {
+                                startActivity(it)
+                            }
                         } else {
                             Constants.languageChanged1 = true
                             Constants.languageChanged2 = true
@@ -105,43 +102,32 @@ class LanguageActivity : AppCompatActivity() {
             )
         }
 
-        val language = prefs.getString("language", en)
-        languageViewModel.onEvent(LanguageUiEvent.ChangeLanguage(language ?: en))
-        changeLanguage()
-
         binding.english.setOnClickListener {
             languageViewModel.onEvent(LanguageUiEvent.ChangeLanguage(en))
-            changeLanguage()
         }
 
         binding.germany.setOnClickListener {
             languageViewModel.onEvent(LanguageUiEvent.ChangeLanguage(de))
-            changeLanguage()
         }
 
         binding.chinese.setOnClickListener {
             languageViewModel.onEvent(LanguageUiEvent.ChangeLanguage(zh_rCN))
-            changeLanguage()
         }
 
         binding.korean.setOnClickListener {
             languageViewModel.onEvent(LanguageUiEvent.ChangeLanguage(ko))
-            changeLanguage()
         }
 
         binding.spanish.setOnClickListener {
             languageViewModel.onEvent(LanguageUiEvent.ChangeLanguage(es))
-            changeLanguage()
         }
 
         binding.french.setOnClickListener {
             languageViewModel.onEvent(LanguageUiEvent.ChangeLanguage(fr))
-            changeLanguage()
         }
 
         binding.japanese.setOnClickListener {
             languageViewModel.onEvent(LanguageUiEvent.ChangeLanguage(ja))
-            changeLanguage()
         }
 
     }

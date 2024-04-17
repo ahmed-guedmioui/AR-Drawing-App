@@ -21,13 +21,10 @@ class TraceViewModel @Inject constructor(
     private val _traceState = MutableStateFlow(TraceState())
     val traceState = _traceState.asStateFlow()
 
-    private val _languageCode = MutableStateFlow("en")
-    val languageCode = _languageCode.asStateFlow()
+    
 
     init {
-        _languageCode.update {
-            appDataRepository.getLanguageCode()
-        }
+        
         viewModelScope.launch {
             _traceState.update {
                 it.copy(

@@ -20,7 +20,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import com.ardrawing.sketchtrace.App
 import com.ardrawing.sketchtrace.R
 import com.ardrawing.sketchtrace.core.domain.model.app_data.AppData
 import com.ardrawing.sketchtrace.databinding.ActivityGetStartedBinding
@@ -44,12 +43,9 @@ class GetStartedActivity : AppCompatActivity() {
     private var getStartedState: GetStartedState? = null
     private lateinit var binding: ActivityGetStartedBinding
 
-
-    @Inject
-    lateinit var prefs: SharedPreferences
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        LanguageChanger.changeAppLanguage(this)
         binding = ActivityGetStartedBinding.inflate(layoutInflater)
         val view: View = binding.root
         setContentView(view)
@@ -88,15 +84,15 @@ class GetStartedActivity : AppCompatActivity() {
             InterManager.appData = getStartedState?.appData
             InterManager.showInterstitial(this, object : InterManager.OnAdClosedListener {
                 override fun onAdClosed() {
-                    prefs.edit().putBoolean("getStartedShown", true).apply()
-                    move()
+                    getStartedViewModel.onEvent(GetStartedUiEvent.Navigate)
+                    navigate()
                 }
             })
         }
 
     }
 
-    private fun move() {
+    private fun navigate() {
         if (getStartedState?.appData?.isSubscribed == true) {
             goToHome()
         } else {

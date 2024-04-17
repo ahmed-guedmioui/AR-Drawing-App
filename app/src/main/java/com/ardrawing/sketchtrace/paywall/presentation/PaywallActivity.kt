@@ -60,9 +60,6 @@ import kotlin.properties.Delegates
 @AndroidEntryPoint
 class PaywallActivity : AppCompatActivity() {
 
-    @Inject
-    lateinit var prefs: SharedPreferences
-
     private lateinit var reviews: List<String>
     private lateinit var images: List<Drawable?>
 
@@ -84,8 +81,7 @@ class PaywallActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val languageCode = prefs.getString("language", "en") ?: "en"
-        LanguageChanger.changeAppLanguage(languageCode, this)
+        LanguageChanger.changeAppLanguage(this)
 
         toHome = intent?.extras?.getBoolean("toHome") ?: false
 

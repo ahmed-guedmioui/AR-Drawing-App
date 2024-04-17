@@ -28,16 +28,13 @@ class PaywallViewModel @Inject constructor(
     private val _paywallState = MutableStateFlow(PaywallState())
     val paywallState = _paywallState.asStateFlow()
 
-    private val _languageCode = MutableStateFlow("en")
-    val languageCode = _languageCode.asStateFlow()
+    
 
     private val _finishActivityChannel = Channel<Boolean>()
     val finishActivityChannel = _finishActivityChannel.receiveAsFlow()
 
     init {
-        _languageCode.update {
-            appDataRepository.getLanguageCode()
-        }
+        
         try {
             Purchases.sharedInstance.getOfferingsWith(
                 onError = { error ->

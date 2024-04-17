@@ -50,6 +50,7 @@ class MyCreationDetailsActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        LanguageChanger.changeAppLanguage(this)
         binding = ActivityMyCreationDetailsBinding.inflate(layoutInflater)
         val view: View = binding.root
         setContentView(view)

@@ -6,4 +6,5 @@ package com.ardrawing.sketchtrace.core.presentation.onboarding
 sealed interface OnboardingUiEvent {
     object NextTip : OnboardingUiEvent
     object Back : OnboardingUiEvent
+    object Navigate : OnboardingUiEvent
 }

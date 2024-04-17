@@ -8,6 +8,7 @@ import android.os.Looper
 import android.util.Log
 import com.ardrawing.sketchtrace.R
 import com.ardrawing.sketchtrace.core.domain.model.app_data.AppData
+import com.ardrawing.sketchtrace.util.AdsConstants
 import com.facebook.ads.Ad
 import com.facebook.ads.AdError
 import com.facebook.ads.InterstitialAdListener
@@ -34,17 +35,14 @@ object InterManager {
     fun loadInterstitial(
         activity: Activity,
     ) {
-        val prefs = activity.getSharedPreferences(
-            "ar_drawing_med_prefs_file", Context.MODE_PRIVATE
-        )
 
-        if (appData?.showAdsForThisUser == false || !prefs.getBoolean("can_show_ads", true)) {
+        if (appData?.showAdsForThisUser == false ) {
             return
         }
 
         when (appData?.interstitial) {
-            AdType.admob -> loadAdmobInter(activity)
-            AdType.facebook -> loadFacebookInter(activity)
+            AdsConstants.ADMOB -> loadAdmobInter(activity)
+            AdsConstants.FACEBOOK -> loadFacebookInter(activity)
         }
     }
 
@@ -53,11 +51,8 @@ object InterManager {
         adClosedListener: OnAdClosedListener
     ) {
         onAdClosedListener = adClosedListener
-        val prefs = activity.getSharedPreferences(
-            "ar_drawing_med_prefs_file", Context.MODE_PRIVATE
-        )
 
-        if (appData?.showAdsForThisUser == false || !prefs.getBoolean("can_show_ads", true)) {
+        if (appData?.showAdsForThisUser == false) {
             onAdClosedListener.onAdClosed()
             return
         }
@@ -72,8 +67,8 @@ object InterManager {
 
             Handler(Looper.getMainLooper()).postDelayed({
                 when (appData?.interstitial) {
-                    AdType.admob -> showAdmobInter(activity)
-                    AdType.facebook -> showFacebookInter(activity)
+                    AdsConstants.ADMOB -> showAdmobInter(activity)
+                    AdsConstants.FACEBOOK -> showFacebookInter(activity)
                     else -> onAdClosedListener.onAdClosed()
                 }
                 try {
@@ -133,6 +128,15 @@ object InterManager {
     // Admob ---------------------------------------------------------------------------------------------------------------------
 
     private fun loadAdmobInter(activity: Activity) {
+
+        val prefs = activity.getSharedPreferences(
+            "ar_drawing_med_prefs_file", Context.MODE_PRIVATE
+        )
+
+        if (!prefs.getBoolean(AdsConstants.CAN_SHOW_ADMOB_ADS, true)) {
+            return
+        }
+
         isAdmobInterLoaded = false
 
         val adRequest = AdRequest.Builder().build()
@@ -171,6 +175,15 @@ object InterManager {
     }
 
     private fun showAdmobInter(activity: Activity) {
+
+        val prefs = activity.getSharedPreferences(
+            "ar_drawing_med_prefs_file", Context.MODE_PRIVATE
+        )
+
+        if (!prefs.getBoolean(AdsConstants.CAN_SHOW_ADMOB_ADS, true)) {
+            return
+        }
+
         if (isAdmobInterLoaded) {
             admobInterstitialAd.show(activity)
         } else {

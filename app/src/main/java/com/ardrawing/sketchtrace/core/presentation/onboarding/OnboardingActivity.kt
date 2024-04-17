@@ -15,6 +15,7 @@ import com.ardrawing.sketchtrace.R
 import com.ardrawing.sketchtrace.core.presentation.get_started.GetStartedActivity
 import com.ardrawing.sketchtrace.databinding.ActivityTipsBinding
 import com.ardrawing.sketchtrace.util.AppAnimation
+import com.ardrawing.sketchtrace.util.LanguageChanger
 import com.ardrawing.sketchtrace.util.ads.InterManager
 import com.ardrawing.sketchtrace.util.ads.NativeManager
 import dagger.hilt.android.AndroidEntryPoint
@@ -39,6 +40,7 @@ class OnboardingActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        LanguageChanger.changeAppLanguage(this)
         binding = ActivityTipsBinding.inflate(layoutInflater)
         val view: View = binding.root
         setContentView(view)
@@ -137,8 +139,12 @@ class OnboardingActivity : AppCompatActivity() {
                 InterManager.showInterstitial(this, object : InterManager.OnAdClosedListener {
                     override fun onAdClosed() {
                         if (isFromSplash) {
-                            prefs.edit().putBoolean("tipsShown", true).apply()
-                            startActivity(Intent(this@OnboardingActivity, GetStartedActivity::class.java))
+                            onboardingViewModel.onEvent(OnboardingUiEvent.Navigate)
+                            Intent(
+                                this@OnboardingActivity, GetStartedActivity::class.java
+                            ).also {
+                                startActivity(it)
+                            }
                         }
                         finish()
                     }

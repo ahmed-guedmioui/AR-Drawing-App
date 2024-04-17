@@ -56,9 +56,7 @@ class TraceActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        val languageCode = prefs.getString("language", "en") ?: "en"
-        LanguageChanger.changeAppLanguage(languageCode, this)
+        LanguageChanger.changeAppLanguage(this)
         binding = ActivityTraceBinding.inflate(layoutInflater)
         setContentView(binding.root)
 

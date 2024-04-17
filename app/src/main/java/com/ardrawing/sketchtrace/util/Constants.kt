@@ -12,3 +12,24 @@ object Constants {
     var languageChanged1 = false
     var languageChanged2 = false
 }
+
+
+// Do Not Edit These!
+object PrefsConstants {
+    const val LANGUAGE = "language"
+    const val IS_LANGUAGE_CHOSEN = "language_chosen"
+    const val IS_ONBOARDING_SHOWN = "tipsShown"
+    const val IS_GET_STARTED_SHOWN = "getStartedShown"
+}
+
+object AdsConstants {
+    const val CAN_SHOW_ADMOB_ADS = "can_show_ads"
+    const val FACEBOOK = "facebook"
+    const val ADMOB = "admob"
+}
+
+
+
+
+
+

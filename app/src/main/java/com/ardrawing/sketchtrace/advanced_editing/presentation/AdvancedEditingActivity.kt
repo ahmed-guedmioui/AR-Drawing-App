@@ -52,9 +52,7 @@ class AdvancedEditingActivity : AppCompatActivity(), SeekBar.OnSeekBarChangeList
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        val languageCode = prefs.getString("language", "en") ?: "en"
-        LanguageChanger.changeAppLanguage(languageCode, this)
+        LanguageChanger.changeAppLanguage(this)
         binding = ActivityAdvancedBinding.inflate(layoutInflater)
         setContentView(binding.root)
 

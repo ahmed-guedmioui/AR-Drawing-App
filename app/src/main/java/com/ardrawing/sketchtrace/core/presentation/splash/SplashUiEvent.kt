@@ -6,6 +6,9 @@ package com.ardrawing.sketchtrace.core.presentation.splash
 sealed interface SplashUiEvent {
     object TryAgain : SplashUiEvent
     object ContinueApp : SplashUiEvent
+    data class OnAdmobConsent(
+        val canShowAdmobAds: Boolean
+    ) : SplashUiEvent
 
     object AlreadySubscribed : SplashUiEvent
 }

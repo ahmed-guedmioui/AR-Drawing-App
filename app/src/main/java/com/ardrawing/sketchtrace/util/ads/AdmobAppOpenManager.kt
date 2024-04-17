@@ -3,6 +3,7 @@ package com.ardrawing.sketchtrace.util.ads
 import android.app.Activity
 import android.app.Application
 import android.app.Application.ActivityLifecycleCallbacks
+import android.content.Context
 import android.content.SharedPreferences
 import android.os.Bundle
 import android.util.Log
@@ -11,6 +12,7 @@ import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.OnLifecycleEvent
 import androidx.lifecycle.ProcessLifecycleOwner
 import com.ardrawing.sketchtrace.core.domain.model.app_data.AppData
+import com.ardrawing.sketchtrace.util.AdsConstants
 import com.google.android.gms.ads.AdError
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.FullScreenContentCallback
@@ -21,7 +23,6 @@ import java.util.Date
 
 class AdmobAppOpenManager(
     private val app: Application,
-    private var prefs: SharedPreferences
 ) : LifecycleObserver, ActivityLifecycleCallbacks {
 
     private var appOpenAd: AppOpenAd? = null
@@ -55,7 +56,13 @@ class AdmobAppOpenManager(
         if (isAdAvailable) {
             return
         }
+
+        val prefs = app.getSharedPreferences(
+            "ar_drawing_med_prefs_file", Context.MODE_PRIVATE
+        )
+
         val id = prefs.getString("admobOpenApp", "") ?: ""
+
         Log.d(LOG_TAG, "id = $id")
         loadCallback = object : AppOpenAdLoadCallback() {
             /**
@@ -199,8 +206,12 @@ class AdmobAppOpenManager(
         onAdClosed: () -> Unit
     ) {
 
+        val prefs = app.getSharedPreferences(
+            "ar_drawing_med_prefs_file", Context.MODE_PRIVATE
+        )
+
         if (
-            appData?.showAdsForThisUser == false || !prefs.getBoolean("can_show_ads", true)
+            appData?.showAdsForThisUser == false || !prefs.getBoolean(AdsConstants.CAN_SHOW_ADMOB_ADS, true)
         ) {
             onAdClosed()
             return

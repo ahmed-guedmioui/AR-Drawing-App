@@ -20,14 +20,11 @@ class MyCreationDetailsViewModel @Inject constructor(
     private val appDataRepository: AppDataRepository
 ) : ViewModel() {
 
-    private val _languageCode = MutableStateFlow("en")
-    val languageCode = _languageCode.asStateFlow()
+    
 
 
     init {
-        _languageCode.update {
-            appDataRepository.getLanguageCode()
-        }
+        
     }
 
     fun onEvent(myCreationDetailsUiEvent: MyCreationDetailsUiEvent) {

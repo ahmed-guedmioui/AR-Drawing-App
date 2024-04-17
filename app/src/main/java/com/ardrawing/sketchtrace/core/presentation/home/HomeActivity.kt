@@ -57,6 +57,7 @@ class HomeActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        LanguageChanger.changeAppLanguage(this)
         binding = ActivityHomeBinding.inflate(layoutInflater)
         val view: View = binding.root
         setContentView(view)
@@ -236,7 +237,6 @@ class HomeActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-
         if (Constants.languageChanged2) {
             recreate()
             Constants.languageChanged2 = false

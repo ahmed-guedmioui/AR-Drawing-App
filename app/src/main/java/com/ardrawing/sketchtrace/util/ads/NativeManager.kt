@@ -25,6 +25,7 @@ import com.google.android.gms.ads.nativead.NativeAd
 import com.google.android.gms.ads.nativead.NativeAdView
 import com.ardrawing.sketchtrace.R
 import com.ardrawing.sketchtrace.core.domain.model.app_data.AppData
+import com.ardrawing.sketchtrace.util.AdsConstants
 
 object NativeManager {
 
@@ -38,21 +39,17 @@ object NativeManager {
         isButtonTop: Boolean = false
     ) {
 
-        val prefs = activity.getSharedPreferences(
-            "ar_drawing_med_prefs_file", Context.MODE_PRIVATE
-        )
-
-        if (appData?.showAdsForThisUser == false || !prefs.getBoolean("can_show_ads", true)) {
+        if (appData?.showAdsForThisUser == false) {
             nativeTemp.visibility = View.GONE
             return
         }
 
         when (appData?.native) {
-            AdType.admob -> loadAdmobNative(
+            AdsConstants.ADMOB -> loadAdmobNative(
                 appData, nativeFrame, nativeTemp, activity, isButtonTop
             )
 
-            AdType.facebook -> loadFacebookNative(
+            AdsConstants.FACEBOOK -> loadFacebookNative(
                 appData, nativeFrame, nativeTemp, activity, isButtonTop
             )
 
@@ -73,6 +70,14 @@ object NativeManager {
         activity: Activity,
         isButtonTop: Boolean
     ) {
+
+        val prefs = activity.getSharedPreferences(
+            "ar_drawing_med_prefs_file", Context.MODE_PRIVATE
+        )
+
+        if (!prefs.getBoolean(AdsConstants.CAN_SHOW_ADMOB_ADS, true)) {
+            return
+        }
 
         val builder = AdLoader.Builder(
             activity,

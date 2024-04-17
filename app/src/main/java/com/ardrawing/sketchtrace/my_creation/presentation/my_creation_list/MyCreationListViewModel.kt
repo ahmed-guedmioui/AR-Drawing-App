@@ -23,13 +23,10 @@ class MyCreationListViewModel @Inject constructor(
     private val _myCreationListState = MutableStateFlow(MyCreationListState())
     val myCreationState = _myCreationListState.asStateFlow()
 
-    private val _languageCode = MutableStateFlow("en")
-    val languageCode = _languageCode.asStateFlow()
+    
 
     init {
-        _languageCode.update {
-            appDataRepository.getLanguageCode()
-        }
+        
         getCreationList()
     }
 

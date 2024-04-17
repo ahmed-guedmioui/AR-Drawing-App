@@ -5,5 +5,5 @@ package com.ardrawing.sketchtrace.core.presentation.get_started
  */
 sealed interface GetStartedUiEvent {
     object ShowHidePrivacyDialog : GetStartedUiEvent
-
+    object Navigate : GetStartedUiEvent
 }

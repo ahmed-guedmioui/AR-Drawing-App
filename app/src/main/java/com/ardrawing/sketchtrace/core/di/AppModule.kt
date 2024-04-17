@@ -14,13 +14,12 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import javax.inject.Singleton
 
-
 /**
  * @author Ahmed Guedmioui
  */
 @Module
 @InstallIn(SingletonComponent::class)
-object AppDataModule {
+object AppModule {
 
     private val interceptor: HttpLoggingInterceptor = HttpLoggingInterceptor().apply {
         level = HttpLoggingInterceptor.Level.BODY

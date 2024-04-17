@@ -19,6 +19,7 @@ import com.google.android.gms.ads.LoadAdError
 import com.google.android.gms.ads.rewarded.RewardedAdLoadCallback
 import com.ardrawing.sketchtrace.R
 import com.ardrawing.sketchtrace.core.domain.model.app_data.AppData
+import com.ardrawing.sketchtrace.util.AdsConstants
 
 object RewardedManager {
 
@@ -34,17 +35,14 @@ object RewardedManager {
 
 
     fun loadRewarded(activity: Activity) {
-        val prefs = activity.getSharedPreferences(
-            "ar_drawing_med_prefs_file", Context.MODE_PRIVATE
-        )
 
-        if (appData?.showAdsForThisUser == false || !prefs.getBoolean("can_show_ads", true)) {
+        if (appData?.showAdsForThisUser == false) {
             return
         }
 
         when (appData?.rewarded) {
-            AdType.admob -> loadAdmobRewarded(activity)
-            AdType.facebook -> loadFacebookRewarded(activity)
+            AdsConstants.ADMOB -> loadAdmobRewarded(activity)
+            AdsConstants.FACEBOOK -> loadFacebookRewarded(activity)
         }
     }
 
@@ -56,11 +54,7 @@ object RewardedManager {
     ) {
         onAdClosedListener = adClosedListener
 
-        val prefs = activity.getSharedPreferences(
-            "ar_drawing_med_prefs_file", Context.MODE_PRIVATE
-        )
-
-        if (appData?.showAdsForThisUser == false || !prefs.getBoolean("can_show_ads", true)) {
+        if (appData?.showAdsForThisUser == false) {
             onAdClosedListener.onRewClosed()
             onAdClosedListener.onRewComplete()
             return
@@ -98,8 +92,8 @@ object RewardedManager {
 
         dialog.findViewById<CardView>(R.id.watch).setOnClickListener {
             when (appData?.rewarded) {
-                AdType.admob -> showAdmobRewarded(activity)
-                AdType.facebook -> showFacebookRewarded(activity)
+                AdsConstants.ADMOB -> showAdmobRewarded(activity)
+                AdsConstants.FACEBOOK -> showFacebookRewarded(activity)
                 else -> onAdClosedListener.onRewFailedToShow()
             }
             dialog.dismiss()
@@ -116,6 +110,14 @@ object RewardedManager {
     // Admob ---------------------------------------------------------------------------------------------------------------------
 
     private fun loadAdmobRewarded(activity: Activity) {
+
+        val prefs = activity.getSharedPreferences(
+            "ar_drawing_med_prefs_file", Context.MODE_PRIVATE
+        )
+
+        if (!prefs.getBoolean(AdsConstants.CAN_SHOW_ADMOB_ADS, true)) {
+            return
+        }
 
         isAdmobRewardedLoaded = false
 
@@ -153,6 +155,15 @@ object RewardedManager {
     }
 
     private fun showAdmobRewarded(activity: Activity) {
+
+        val prefs = activity.getSharedPreferences(
+            "ar_drawing_med_prefs_file", Context.MODE_PRIVATE
+        )
+
+        if (!prefs.getBoolean(AdsConstants.CAN_SHOW_ADMOB_ADS, true)) {
+            return
+        }
+
         if (isAdmobRewardedLoaded) {
             admobRewardedAd.show(activity) {
                 isAdmobRewardedLoaded = false

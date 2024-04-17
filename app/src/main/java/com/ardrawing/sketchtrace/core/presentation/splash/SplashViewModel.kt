@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ardrawing.sketchtrace.image_list.domain.repository.ImageCategoriesRepository
 import com.ardrawing.sketchtrace.core.domain.repository.AppDataRepository
+import com.ardrawing.sketchtrace.core.domain.repository.CoreRepository
 import com.ardrawing.sketchtrace.core.presentation.splash.util.ShouldShowUpdateDialog
 import com.ardrawing.sketchtrace.util.Resource
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -20,15 +21,14 @@ import javax.inject.Inject
  */
 @HiltViewModel
 class SplashViewModel @Inject constructor(
+    private val coreRepository: CoreRepository,
     private val appDataRepository: AppDataRepository,
-    private val imageCategoriesRepository: ImageCategoriesRepository
+    private val imageCategoriesRepository: ImageCategoriesRepository,
 ) : ViewModel() {
 
     private val _splashState = MutableStateFlow(SplashState())
     val splashState = _splashState.asStateFlow()
 
-    private val _languageCode = MutableStateFlow("en")
-    val languageCode = _languageCode.asStateFlow()
 
     private val _updateDialogState = MutableStateFlow(-1)
     val updateDialogState = _updateDialogState.asStateFlow()
@@ -40,9 +40,7 @@ class SplashViewModel @Inject constructor(
     val showErrorToastChannel = _showErrorToastChannel.receiveAsFlow()
 
     init {
-        _languageCode.update {
-            appDataRepository.getLanguageCode()
-        }
+        navigationValidator()
         getData()
         getImages()
     }
@@ -67,6 +65,20 @@ class SplashViewModel @Inject constructor(
                     imageCategoriesRepository.setNativeItems()
                 }
             }
+
+            is SplashUiEvent.OnAdmobConsent -> {
+                coreRepository.updateCanShowAdmobAds(splashUiEvent.canShowAdmobAds)
+            }
+        }
+    }
+
+    private fun navigationValidator() {
+        _splashState.update {
+            it.copy(
+                isLanguageChosen = coreRepository.isLanguageChosen(),
+                isOnboardingShown = coreRepository.isOnboardingShown(),
+                isGetStartedShown = coreRepository.isGetStartedShown(),
+            )
         }
     }
 

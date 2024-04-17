@@ -3,6 +3,7 @@ package com.ardrawing.sketchtrace.core.presentation.get_started
 import androidx.lifecycle.ViewModel
 import com.ardrawing.sketchtrace.core.domain.model.app_data.AppData
 import com.ardrawing.sketchtrace.core.domain.repository.AppDataRepository
+import com.ardrawing.sketchtrace.core.domain.repository.CoreRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -14,22 +15,20 @@ import javax.inject.Inject
  */
 @HiltViewModel
 class GetStartedViewModel @Inject constructor(
+    private val coreRepository: CoreRepository,
     private val appDataRepository: AppDataRepository
 ) : ViewModel() {
 
     private val _getStartedState = MutableStateFlow(GetStartedState())
     val getsStartedState = _getStartedState.asStateFlow()
 
-    private val _languageCode = MutableStateFlow("en")
-    val languageCode = _languageCode.asStateFlow()
+    
 
     private val _appData = MutableStateFlow<AppData?>(null)
     val appData = _appData.asStateFlow()
 
     init {
-        _languageCode.update {
-            appDataRepository.getLanguageCode()
-        }
+        
         _getStartedState.update {
             it.copy(
                 appData = appDataRepository.getAppData()
@@ -47,6 +46,10 @@ class GetStartedViewModel @Inject constructor(
                 _getStartedState.update {
                     it.copy(showPrivacyDialog = !getsStartedState.value.showPrivacyDialog)
                 }
+            }
+
+            GetStartedUiEvent.Navigate -> {
+                coreRepository.updateIsGetStartedShown()
             }
         }
     }

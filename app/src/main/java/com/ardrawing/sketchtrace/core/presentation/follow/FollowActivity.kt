@@ -51,10 +51,10 @@ class FollowActivity : AppCompatActivity() {
             openAppWithUserId("x")
         }
 
-        if (tiktok.isNotBlank()) binding.tiktok.visibility = View.GONE
-        if (facebook.isNotBlank()) binding.facebook.visibility = View.GONE
-        if (instagram.isNotBlank()) binding.instagram.visibility = View.GONE
-        if (x.isNotBlank()) binding.x.visibility = View.GONE
+        if (tiktok.isEmpty()) binding.tiktok.visibility = View.GONE
+        if (facebook.isEmpty()) binding.facebook.visibility = View.GONE
+        if (instagram.isEmpty()) binding.instagram.visibility = View.GONE
+        if (x.isEmpty()) binding.x.visibility = View.GONE
 
 
     }

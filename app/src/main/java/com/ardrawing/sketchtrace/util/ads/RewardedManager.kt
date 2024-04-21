@@ -10,6 +10,13 @@ import android.view.Window
 import android.view.WindowManager
 import android.widget.ImageView
 import androidx.cardview.widget.CardView
+import com.ardrawing.sketchtrace.R
+import com.ardrawing.sketchtrace.core.domain.model.app_data.AppData
+import com.ardrawing.sketchtrace.image_list.presentation.categories.CategoriesActivity
+import com.ardrawing.sketchtrace.image_list.presentation.category.CategoryActivity
+import com.ardrawing.sketchtrace.sketch.presentation.SketchActivity
+import com.ardrawing.sketchtrace.trace.presentation.TraceActivity
+import com.ardrawing.sketchtrace.util.AdsConstants
 import com.facebook.ads.Ad
 import com.facebook.ads.RewardedVideoAd
 import com.facebook.ads.RewardedVideoAdListener
@@ -17,11 +24,8 @@ import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.FullScreenContentCallback
 import com.google.android.gms.ads.LoadAdError
 import com.google.android.gms.ads.rewarded.RewardedAdLoadCallback
-import com.ardrawing.sketchtrace.R
-import com.ardrawing.sketchtrace.core.domain.model.app_data.AppData
-import com.ardrawing.sketchtrace.util.AdsConstants
 
-object RewardedManager {
+class RewardedManager {
 
     var appData: AppData? = null
 

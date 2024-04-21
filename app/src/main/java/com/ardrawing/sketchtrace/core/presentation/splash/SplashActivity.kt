@@ -58,7 +58,11 @@ class SplashActivity : AppCompatActivity() {
     private lateinit var splashState: SplashState
     private lateinit var binding: ActivitySplashBinding
 
-    private lateinit var admobAppOpenManager: AdmobAppOpenManager
+    @Inject
+    lateinit var admobAppOpenManager: AdmobAppOpenManager
+
+    @Inject
+    lateinit var interManager: InterManager
 
     private var isNotificationDialogCalled = AtomicBoolean(false)
     private var canShowAds = AtomicBoolean(false)
@@ -94,9 +98,9 @@ class SplashActivity : AppCompatActivity() {
         }
 
 
-        admobAppOpenManager = AdmobAppOpenManager(
-            this@SplashActivity.application
-        )
+//        admobAppOpenManager = AdmobAppOpenManager(
+//            this@SplashActivity.application
+//        )
 
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -230,8 +234,8 @@ class SplashActivity : AppCompatActivity() {
         )
 
         MobileAds.initialize(this)
-        InterManager.appData = splashState.appData
-        InterManager.loadInterstitial(
+        interManager.appData = splashState.appData
+        interManager.loadInterstitial(
             activity = this@SplashActivity,
         )
 

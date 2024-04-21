@@ -89,7 +89,10 @@ class SketchActivity : AppCompatActivity() {
     lateinit var imageCategoriesRepository: ImageCategoriesRepository
 
     @Inject
-    lateinit var prefs: SharedPreferences
+    lateinit var rewardedManager: RewardedManager
+
+    @Inject
+    lateinit var nativeManager: NativeManager
 
     private lateinit var binding: ActivitySketchBinding
 
@@ -138,7 +141,7 @@ class SketchActivity : AppCompatActivity() {
             binding.nativeParent.visibility = View.GONE
         }
 
-        NativeManager.loadNative(
+        nativeManager.loadNative(
             appDataRepository.getAppData(),
             findViewById(R.id.native_frame),
             findViewById(R.id.native_temp),
@@ -609,8 +612,8 @@ class SketchActivity : AppCompatActivity() {
     }
 
     private fun rewarded(onRewDone: () -> Unit) {
-        RewardedManager.appData = appDataRepository.getAppData()
-        RewardedManager.showRewarded(
+        rewardedManager.appData = appDataRepository.getAppData()
+        rewardedManager.showRewarded(
             activity = this,
             adClosedListener = object : RewardedManager.OnAdClosedListener {
                 override fun onRewClosed() {

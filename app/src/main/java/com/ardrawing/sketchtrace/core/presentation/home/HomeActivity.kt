@@ -53,6 +53,15 @@ class HomeActivity : AppCompatActivity() {
     private lateinit var binding: ActivityHomeBinding
 
     @Inject
+    lateinit var rewardedManager: RewardedManager
+
+    @Inject
+    lateinit var interManager: InterManager
+
+    @Inject
+    lateinit var nativeManager: NativeManager
+
+    @Inject
     lateinit var prefs: SharedPreferences
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -79,10 +88,10 @@ class HomeActivity : AppCompatActivity() {
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 homeViewModel.appData.collect { appData ->
-                    RewardedManager.appData = appData
-                    RewardedManager.loadRewarded(this@HomeActivity)
+                    rewardedManager.appData = appData
+                    rewardedManager.loadRewarded(this@HomeActivity)
 
-                    NativeManager.loadNative(
+                    nativeManager.loadNative(
                         appData,
                         findViewById(R.id.native_frame),
                         findViewById(R.id.native_temp),
@@ -212,8 +221,8 @@ class HomeActivity : AppCompatActivity() {
     }
 
     private fun drawingListScreen(isTrace: Boolean) {
-        InterManager.appData = homeState?.appData
-        InterManager.showInterstitial(this, object : InterManager.OnAdClosedListener {
+        interManager.appData = homeState?.appData
+        interManager.showInterstitial(this, object : InterManager.OnAdClosedListener {
             override fun onAdClosed() {
                 val intent = Intent(this@HomeActivity, CategoriesActivity::class.java)
                 intent.putExtra("isTrace", isTrace)

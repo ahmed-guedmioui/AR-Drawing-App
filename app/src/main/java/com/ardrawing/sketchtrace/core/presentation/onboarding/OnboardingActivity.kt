@@ -36,7 +36,10 @@ class OnboardingActivity : AppCompatActivity() {
     private var isFromSplash = true
 
     @Inject
-    lateinit var prefs: SharedPreferences
+    lateinit var interManager: InterManager
+
+    @Inject
+    lateinit var nativeManager: NativeManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -58,7 +61,7 @@ class OnboardingActivity : AppCompatActivity() {
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 onboardingViewModel.appData.collect { appData ->
-                    NativeManager.loadNative(
+                    nativeManager.loadNative(
                         appData,
                         findViewById(R.id.native_frame),
                         findViewById(R.id.native_temp),
@@ -136,7 +139,7 @@ class OnboardingActivity : AppCompatActivity() {
             }
 
             5 -> {
-                InterManager.showInterstitial(this, object : InterManager.OnAdClosedListener {
+                interManager.showInterstitial(this, object : InterManager.OnAdClosedListener {
                     override fun onAdClosed() {
                         if (isFromSplash) {
                             onboardingViewModel.onEvent(OnboardingUiEvent.Navigate)

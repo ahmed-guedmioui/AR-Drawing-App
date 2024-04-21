@@ -18,6 +18,7 @@ import com.ardrawing.sketchtrace.util.ads.InterManager
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import com.ardrawing.sketchtrace.util.LanguageChanger
+import com.ardrawing.sketchtrace.util.ads.NativeManager
 import javax.inject.Inject
 
 /**
@@ -27,7 +28,7 @@ import javax.inject.Inject
 class MyCreationListActivity : AppCompatActivity() {
 
     @Inject
-    lateinit var prefs: SharedPreferences
+    lateinit var interManager: InterManager
 
     private val myCreationListViewModel: MyCreationListViewModel by viewModels()
     private lateinit var myCreationListState: MyCreationListState
@@ -67,7 +68,7 @@ class MyCreationListActivity : AppCompatActivity() {
         myCreationListAdapter.setClickListener(object :
             MyCreationListAdapter.ClickListener {
             override fun oClick(uri: String, isVideo: Boolean) {
-                InterManager.showInterstitial(
+                interManager.showInterstitial(
                     this@MyCreationListActivity,
                     object : InterManager.OnAdClosedListener {
                         override fun onAdClosed() {

@@ -43,6 +43,12 @@ class GetStartedActivity : AppCompatActivity() {
     private var getStartedState: GetStartedState? = null
     private lateinit var binding: ActivityGetStartedBinding
 
+    @Inject
+    lateinit var interManager: InterManager
+
+    @Inject
+    lateinit var nativeManager: NativeManager
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         LanguageChanger.changeAppLanguage(this)
@@ -65,7 +71,7 @@ class GetStartedActivity : AppCompatActivity() {
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 getStartedViewModel.appData.collect { appData ->
-                    NativeManager.loadNative(
+                    nativeManager.loadNative(
                         appData,
                         findViewById(R.id.native_frame),
                         findViewById(R.id.native_temp),
@@ -81,8 +87,8 @@ class GetStartedActivity : AppCompatActivity() {
 
 
         binding.getStarted.setOnClickListener {
-            InterManager.appData = getStartedState?.appData
-            InterManager.showInterstitial(this, object : InterManager.OnAdClosedListener {
+            interManager.appData = getStartedState?.appData
+            interManager.showInterstitial(this, object : InterManager.OnAdClosedListener {
                 override fun onAdClosed() {
                     getStartedViewModel.onEvent(GetStartedUiEvent.Navigate)
                     navigate()

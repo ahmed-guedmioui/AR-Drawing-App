@@ -51,11 +51,18 @@ class CategoriesActivity : AppCompatActivity() {
     private var categoriesState: CategoriesState? = null
 
     @Inject
-    lateinit var prefs: SharedPreferences
+    lateinit var rewardedManager: RewardedManager
 
     private var categoriesAdapter: CategoriesAdapter? = null
 
     private lateinit var binding: ActivityCategoriesBinding
+
+    @Inject
+    lateinit var interManager: InterManager
+
+    @Inject
+    lateinit var nativeManager: NativeManager
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -94,7 +101,8 @@ class CategoriesActivity : AppCompatActivity() {
                     categoriesAdapter = CategoriesAdapter(
                         activity = this@CategoriesActivity,
                         imageCategoryList = categoriesState?.imageCategoryList ?: emptyList(),
-                        appData = appData
+                        appData = appData,
+                        nativeManager = nativeManager
                     )
 
                     initAdapterClicks()
@@ -203,8 +211,8 @@ class CategoriesActivity : AppCompatActivity() {
         categoriesAdapter?.setViewMoreClickListener(object :
             CategoriesAdapter.ViewMoreClickListener {
             override fun oClick(categoryPosition: Int) {
-                InterManager.appData = categoriesState?.appData
-                InterManager.showInterstitial(
+                interManager.appData = categoriesState?.appData
+                interManager.showInterstitial(
                     this@CategoriesActivity,
                     object : InterManager.OnAdClosedListener {
                         override fun onAdClosed() {
@@ -223,8 +231,9 @@ class CategoriesActivity : AppCompatActivity() {
     private fun rewarded(
         onRewComplete: () -> Unit
     ) {
-        RewardedManager.appData = categoriesState?.appData
-        RewardedManager.showRewarded(
+
+        rewardedManager.appData = categoriesState?.appData
+        rewardedManager.showRewarded(
             activity = this,
             adClosedListener = object : RewardedManager.OnAdClosedListener {
                 override fun onRewClosed() {}
@@ -365,8 +374,8 @@ class CategoriesActivity : AppCompatActivity() {
         }
 
     private fun traceDrawingScreen(imagePath: String) {
-        InterManager.appData = categoriesState?.appData
-        InterManager.showInterstitial(this, object : InterManager.OnAdClosedListener {
+        interManager.appData = categoriesState?.appData
+        interManager.showInterstitial(this, object : InterManager.OnAdClosedListener {
             override fun onAdClosed() {
                 Intent(
                     this@CategoriesActivity, TraceActivity::class.java
@@ -379,8 +388,8 @@ class CategoriesActivity : AppCompatActivity() {
     }
 
     private fun sketchDrawingScreen(imagePath: String) {
-        InterManager.appData = categoriesState?.appData
-        InterManager.showInterstitial(this, object : InterManager.OnAdClosedListener {
+        interManager.appData = categoriesState?.appData
+        interManager.showInterstitial(this, object : InterManager.OnAdClosedListener {
             override fun onAdClosed() {
                 Log.d("tag_anr", "CategoriesActivity onAdClosed")
 

@@ -52,7 +52,7 @@ class TraceActivity : AppCompatActivity() {
     private var bmOriginal: Bitmap? = null
 
     @Inject
-    lateinit var prefs: SharedPreferences
+    lateinit var rewardedManager: RewardedManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -236,8 +236,9 @@ class TraceActivity : AppCompatActivity() {
     }
 
     private fun rewarded(onRewDone: () -> Unit) {
-        RewardedManager.appData = traceState?.appData
-        RewardedManager.showRewarded(activity = this,
+        rewardedManager.appData = traceState?.appData
+        rewardedManager.showRewarded(
+            activity = this,
             adClosedListener = object : RewardedManager.OnAdClosedListener {
                 override fun onRewClosed() {
                     onRewDone()

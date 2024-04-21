@@ -27,7 +27,7 @@ import com.ardrawing.sketchtrace.R
 import com.ardrawing.sketchtrace.core.domain.model.app_data.AppData
 import com.ardrawing.sketchtrace.util.AdsConstants
 
-object NativeManager {
+class NativeManager {
 
     private var admobNativeAd: NativeAd? = null
 

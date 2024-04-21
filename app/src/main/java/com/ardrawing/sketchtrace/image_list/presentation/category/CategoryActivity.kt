@@ -37,7 +37,14 @@ class CategoryActivity : AppCompatActivity() {
     private var categoryState: CategoryState? = null
 
     @Inject
-    lateinit var prefs: SharedPreferences
+    lateinit var rewardedManager: RewardedManager
+
+    @Inject
+    lateinit var interManager: InterManager
+
+    @Inject
+    lateinit var nativeManager: NativeManager
+
 
     private lateinit var binding: ActivityCategoryBinding
 
@@ -79,7 +86,7 @@ class CategoryActivity : AppCompatActivity() {
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 categoryViewModel.appData.collect { appData ->
-                    NativeManager.loadNative(
+                    nativeManager.loadNative(
                         appData,
                         findViewById(R.id.native_frame),
                         findViewById(R.id.native_temp),
@@ -155,8 +162,8 @@ class CategoryActivity : AppCompatActivity() {
     private fun rewarded(
         onRewComplete: () -> Unit
     ) {
-        RewardedManager.appData = categoryState?.appData
-        RewardedManager.showRewarded(
+        rewardedManager.appData = categoryState?.appData
+        rewardedManager.showRewarded(
             activity = this,
             adClosedListener = object : RewardedManager.OnAdClosedListener {
                 override fun onRewClosed() {}
@@ -183,8 +190,8 @@ class CategoryActivity : AppCompatActivity() {
     }
 
     private fun traceDrawingScreen(imagePath: String) {
-        InterManager.appData = categoryState?.appData
-        InterManager.showInterstitial(this, object : InterManager.OnAdClosedListener {
+        interManager.appData = categoryState?.appData
+        interManager.showInterstitial(this, object : InterManager.OnAdClosedListener {
             override fun onAdClosed() {
                 val intent = Intent(this@CategoryActivity, TraceActivity::class.java)
                 intent.putExtra("imagePath", imagePath)
@@ -194,8 +201,8 @@ class CategoryActivity : AppCompatActivity() {
     }
 
     private fun sketchDrawingScreen(imagePath: String) {
-        InterManager.appData = categoryState?.appData
-        InterManager.showInterstitial(this, object : InterManager.OnAdClosedListener {
+        interManager.appData = categoryState?.appData
+        interManager.showInterstitial(this, object : InterManager.OnAdClosedListener {
             override fun onAdClosed() {
                 val intent = Intent(this@CategoryActivity, SketchActivity::class.java)
                 intent.putExtra("imagePath", imagePath)

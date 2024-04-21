@@ -18,7 +18,7 @@ import com.google.android.gms.ads.LoadAdError
 import com.google.android.gms.ads.interstitial.InterstitialAd
 import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback
 
-object InterManager {
+class InterManager {
 
     var appData: AppData? = null
 
@@ -147,18 +147,25 @@ object InterManager {
             adRequest,
             object : InterstitialAdLoadCallback() {
                 override fun onAdLoaded(interstitialAd: InterstitialAd) {
-                    Log.d("Ads_Tag", "onAdLoaded")
+                    Log.d("interstitialAd_Ads_Tag", "interstitialAd onAdLoaded")
                     isAdmobInterLoaded = true
                     admobInterstitialAd = interstitialAd
                     interstitialAd.fullScreenContentCallback =
                         object : FullScreenContentCallback() {
                             override fun onAdDismissedFullScreenContent() {
+                                Log.d("interstitialAd_Ads_Tag", "interstitialAd onAdDismissedFullScreenContent")
+
                                 isAdmobInterLoaded = false
                                 loadInterstitial(activity)
                                 onAdClosedListener.onAdClosed()
                             }
 
                             override fun onAdFailedToShowFullScreenContent(adError: com.google.android.gms.ads.AdError) {
+                                Log.d(
+                                    "interstitialAd_Ads_Tag",
+                                    "interstitialAd onAdFailedToShowFullScreenContent: $adError"
+                                )
+
                                 isAdmobInterLoaded = false
                                 loadInterstitial(activity)
                                 onAdClosedListener.onAdClosed()
@@ -169,6 +176,8 @@ object InterManager {
                 }
 
                 override fun onAdFailedToLoad(loadAdError: LoadAdError) {
+                    Log.d("interstitialAd_Ads_Tag", "interstitialAd onAdFailedToLoad: $loadAdError")
+
                     isAdmobInterLoaded = false
                 }
             })

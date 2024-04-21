@@ -1,9 +1,11 @@
 package com.ardrawing.sketchtrace.core.data.repository
 
+import android.content.Context
 import android.content.SharedPreferences
 import com.ardrawing.sketchtrace.core.domain.repository.CoreRepository
 import com.ardrawing.sketchtrace.util.AdsConstants
 import com.ardrawing.sketchtrace.util.PrefsConstants
+import dagger.hilt.android.qualifiers.ActivityContext
 import javax.inject.Inject
 
 
@@ -11,7 +13,7 @@ import javax.inject.Inject
  * @author Ahmed Guedmioui
  */
 class CoreRepositoryImpl @Inject constructor(
-    private val prefs: SharedPreferences
+    private val prefs: SharedPreferences,
 ) : CoreRepository {
 
     override fun getLanguageCode(): String {

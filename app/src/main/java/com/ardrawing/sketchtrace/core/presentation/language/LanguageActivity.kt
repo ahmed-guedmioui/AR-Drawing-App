@@ -40,6 +40,12 @@ class LanguageActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityLanguageBinding
 
+    @Inject
+    lateinit var interManager: InterManager
+
+    @Inject
+    lateinit var nativeManager: NativeManager
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         LanguageChanger.changeAppLanguage(this)
@@ -59,7 +65,7 @@ class LanguageActivity : AppCompatActivity() {
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 languageViewModel.appData.collect { appData ->
-                    NativeManager.loadNative(
+                    nativeManager.loadNative(
                         appData,
                         findViewById(R.id.native_frame),
                         findViewById(R.id.native_temp),
@@ -79,7 +85,7 @@ class LanguageActivity : AppCompatActivity() {
         }
 
         binding.apply.setOnClickListener {
-            InterManager.showInterstitial(
+            interManager.showInterstitial(
                 this,
                 object : InterManager.OnAdClosedListener {
                     override fun onAdClosed() {

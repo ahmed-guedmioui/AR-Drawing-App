@@ -7,12 +7,13 @@ import com.ardrawing.sketchtrace.BuildConfig
 import com.ardrawing.sketchtrace.R
 import com.ardrawing.sketchtrace.core.data.mapper.toAppData
 import com.ardrawing.sketchtrace.core.data.remote.AppDataApi
+import com.ardrawing.sketchtrace.core.data.remote.TestAppDataApi
 import com.ardrawing.sketchtrace.core.data.remote.respnod.app_data.AppDataDto
 import com.ardrawing.sketchtrace.core.domain.model.app_data.AppData
 import com.ardrawing.sketchtrace.core.domain.repository.AppDataRepository
 import com.ardrawing.sketchtrace.core.domain.usecase.UpdateSubscriptionExpireDate
-import com.ardrawing.sketchtrace.util.CountryChecker
-import com.ardrawing.sketchtrace.util.Resource
+import com.ardrawing.sketchtrace.core.data.util.CountryChecker
+import com.ardrawing.sketchtrace.core.data.util.Resource
 import com.google.gson.Gson
 import com.revenuecat.purchases.CustomerInfo
 import com.revenuecat.purchases.Purchases
@@ -42,7 +43,7 @@ class AppDataRepositoryImpl @Inject constructor(
 
             val appDataDto = try {
                 appDataApi.getAppData()
-//                getDefaultAppData()
+//                TestAppDataApi.getAppData()
             } catch (e: IOException) {
                 e.printStackTrace()
                 emit(
@@ -200,20 +201,20 @@ class AppDataRepositoryImpl @Inject constructor(
     }
 
     private fun getDefaultAppData(): AppDataDto = AppDataDto(
-        "admob",
-        "admob",
-        "admob",
-        "admob",
-        null,
-        "ca-app-pub-3940256099942544/1033173712",
-        "ca-app-pub-3940256099942544/2247696110",
-        "ca-app-pub-3940256099942544/9257395921",
-        "ca-app-pub-3940256099942544/5224354917",
         null,
         null,
         null,
-        2,
-        3,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
         null,
         null,
         null,
@@ -226,8 +227,6 @@ class AppDataRepositoryImpl @Inject constructor(
         null,
         null
     )
-
-
 }
 
 

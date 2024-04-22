@@ -1,5 +1,7 @@
 package com.ardrawing.sketchtrace.core.domain.model.app_data
 
+import com.ardrawing.sketchtrace.settings.domain.model.RecommendedApp
+
 data class AppData(
     val interstitial: String,
     val native: String,

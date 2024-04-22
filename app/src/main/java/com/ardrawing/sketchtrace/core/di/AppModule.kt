@@ -1,20 +1,17 @@
 package com.ardrawing.sketchtrace.core.di
 
-import android.app.Activity
 import android.app.Application
 import android.content.Context
 import android.content.SharedPreferences
 import com.ardrawing.sketchtrace.core.data.remote.AppDataApi
-import com.ardrawing.sketchtrace.util.ads.AdmobAppOpenManager
-import com.ardrawing.sketchtrace.util.ads.InterManager
-import com.ardrawing.sketchtrace.util.ads.NativeManager
-import com.ardrawing.sketchtrace.util.ads.RewardedManager
-import dagger.Binds
+import com.ardrawing.sketchtrace.core.data.repository.ads.AdmobAppOpenRepositoryImpl
+import com.ardrawing.sketchtrace.core.data.repository.ads.InterRepositoryImpl
+import com.ardrawing.sketchtrace.core.data.repository.ads.NativeRepositoryImpl
+import com.ardrawing.sketchtrace.core.data.repository.ads.RewardedManagerImpl
+import com.ardrawing.sketchtrace.core.domain.repository.AppDataRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
-import dagger.hilt.android.components.ActivityComponent
-import dagger.hilt.android.scopes.ActivityScoped
 import dagger.hilt.components.SingletonComponent
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -59,27 +56,38 @@ object AppModule {
     @Provides
     @Singleton
     fun providesAdmobAppOpenManager(
+        appDataRepository: AppDataRepository,
+        prefs: SharedPreferences,
         app: Application
-    ): AdmobAppOpenManager {
-        return AdmobAppOpenManager(app)
+    ): AdmobAppOpenRepositoryImpl {
+        return AdmobAppOpenRepositoryImpl(appDataRepository, prefs, app)
     }
 
     @Provides
     @Singleton
-    fun providesRewardedManager(): RewardedManager {
-        return RewardedManager()
+    fun providesRewardedManager(
+        appDataRepository: AppDataRepository,
+        prefs: SharedPreferences
+    ): RewardedManagerImpl {
+        return RewardedManagerImpl(appDataRepository, prefs)
     }
 
     @Provides
     @Singleton
-    fun providesInterManager(): InterManager {
-        return InterManager()
+    fun providesInterManager(
+        appDataRepository: AppDataRepository,
+        prefs: SharedPreferences
+    ): InterRepositoryImpl {
+        return InterRepositoryImpl(appDataRepository, prefs)
     }
 
     @Provides
     @Singleton
-    fun providesNativeManager(): NativeManager {
-        return NativeManager()
+    fun providesNativeManager(
+        appDataRepository: AppDataRepository,
+        prefs: SharedPreferences
+    ): NativeRepositoryImpl {
+        return NativeRepositoryImpl(appDataRepository, prefs)
     }
 
 }

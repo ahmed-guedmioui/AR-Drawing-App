@@ -3,7 +3,7 @@ package com.ardrawing.sketchtrace.core.data.mapper
 import com.ardrawing.sketchtrace.core.data.remote.respnod.app_data.AppDataDto
 import com.ardrawing.sketchtrace.core.data.remote.respnod.app_data.RecommendedAppDto
 import com.ardrawing.sketchtrace.core.domain.model.app_data.AppData
-import com.ardrawing.sketchtrace.core.domain.model.app_data.RecommendedApp
+import com.ardrawing.sketchtrace.settings.domain.model.RecommendedApp
 
 /**
  * @author Ahmed Guedmioui

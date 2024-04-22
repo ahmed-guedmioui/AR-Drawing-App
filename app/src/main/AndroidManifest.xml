@@ -73,7 +73,7 @@
             android:value="ca-app-pub-3940256099942544~3347511713" />
 
         <activity
-            android:name=".core.presentation.splash.SplashActivity"
+            android:name=".splash.presentation.SplashActivity"
             android:exported="true"
             android:screenOrientation="portrait">
             <intent-filter>
@@ -83,31 +83,31 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".core.presentation.onboarding.OnboardingActivity"
+            android:name=".onboarding.presentation.OnboardingActivity"
             android:launchMode="singleTask"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".core.presentation.get_started.GetStartedActivity"
+            android:name=".get_started.presentation.GetStartedActivity"
             android:launchMode="singleTask"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".core.presentation.home.HomeActivity"
+            android:name=".home.presentation.HomeActivity"
             android:launchMode="singleTask"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".core.presentation.settings.SettingsActivity"
+            android:name=".settings.presentation.SettingsActivity"
             android:launchMode="singleTask"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".core.presentation.follow.FollowActivity"
+            android:name=".follow.presentation.FollowActivity"
             android:launchMode="singleTask"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".image_list.presentation.categories.CategoriesActivity"
+            android:name=".images.presentation.categories.CategoriesActivity"
             android:launchMode="singleTask"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".image_list.presentation.category.CategoryActivity"
+            android:name=".images.presentation.category.CategoryActivity"
             android:launchMode="singleTask"
             android:screenOrientation="portrait" />
         <activity
@@ -120,15 +120,15 @@
             android:screenOrientation="portrait"
             android:theme="@style/CameraActivityTheme" />
         <activity
-            android:name=".util.ui_utils.HelpActivity"
+            android:name=".util.other_util.HelpActivity"
             android:launchMode="singleTask"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".util.ui_utils.HelpActivity2"
+            android:name=".util.other_util.HelpActivity2"
             android:launchMode="singleTask"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".util.ui_utils.PrivacyPolicyActivity"
+            android:name=".util.other_util.PrivacyPolicyActivity"
             android:launchMode="singleTask"
             android:screenOrientation="portrait" />
         <activity
@@ -140,11 +140,11 @@
             android:launchMode="singleTask"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".core.presentation.language.LanguageActivity"
+            android:name=".language.presentation.LanguageActivity"
             android:launchMode="singleTask"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".advanced_editing.presentation.AdvancedEditingActivity"
+            android:name=".image_editor.presentation.ImageEditorActivity"
             android:launchMode="singleTask"
             android:screenOrientation="portrait" />
         <activity

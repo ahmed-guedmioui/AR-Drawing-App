@@ -2,15 +2,8 @@ package com.ardrawing.sketchtrace
 
 import android.app.Application
 import android.content.Context
-import android.content.ContextWrapper
-import com.ardrawing.sketchtrace.core.domain.model.app_data.AppData
-import com.ardrawing.sketchtrace.core.domain.repository.AppDataRepository
-import com.ardrawing.sketchtrace.databinding.ActivitySketchBinding
-import com.ardrawing.sketchtrace.image_list.domain.model.images.ImageCategory
-import com.ardrawing.sketchtrace.util.LanguageChanger
-import com.ardrawing.sketchtrace.util.PrefsConstants
+import com.ardrawing.sketchtrace.language.data.util.LanguageChanger
 import com.facebook.ads.AudienceNetworkAds
-import com.google.android.gms.ads.MobileAds
 import com.google.firebase.FirebaseApp
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.onesignal.OneSignal
@@ -21,10 +14,7 @@ import dagger.hilt.android.HiltAndroidApp
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import java.io.File
-import java.util.Locale
-import javax.inject.Inject
 
 /**
  * @author Ahmed Guedmioui

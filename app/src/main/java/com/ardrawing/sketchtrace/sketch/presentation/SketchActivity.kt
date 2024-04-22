@@ -5,8 +5,6 @@ import android.app.Dialog
 import android.app.ProgressDialog
 import android.content.Context
 import android.content.Intent
-import android.content.SharedPreferences
-import android.content.res.Resources
 import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.Matrix
@@ -40,18 +38,17 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.lifecycle.lifecycleScope
 import com.ardrawing.sketchtrace.R
-import com.ardrawing.sketchtrace.advanced_editing.presentation.AdvancedEditingActivity
+import com.ardrawing.sketchtrace.image_editor.presentation.ImageEditorActivity
 import com.ardrawing.sketchtrace.databinding.ActivitySketchBinding
-import com.ardrawing.sketchtrace.image_list.domain.repository.ImageCategoriesRepository
+import com.ardrawing.sketchtrace.images.domain.repository.ImageCategoriesRepository
 import com.ardrawing.sketchtrace.my_creation.domian.repository.CreationRepository
 import com.ardrawing.sketchtrace.paywall.presentation.PaywallActivity
 import com.ardrawing.sketchtrace.core.domain.repository.AppDataRepository
 import com.ardrawing.sketchtrace.util.Constants
-import com.ardrawing.sketchtrace.util.LanguageChanger
-import com.ardrawing.sketchtrace.util.PermissionUtils
-import com.ardrawing.sketchtrace.util.ads.NativeManager
-import com.ardrawing.sketchtrace.util.ads.RewardedManager
-import com.ardrawing.sketchtrace.util.ui_utils.MultiTouch
+import com.ardrawing.sketchtrace.language.data.util.LanguageChanger
+import com.ardrawing.sketchtrace.core.data.util.PermissionUtils
+import com.ardrawing.sketchtrace.core.domain.repository.ads.NativeRepository
+import com.ardrawing.sketchtrace.core.domain.repository.ads.RewardedRepository
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.transition.Transition
@@ -89,10 +86,10 @@ class SketchActivity : AppCompatActivity() {
     lateinit var imageCategoriesRepository: ImageCategoriesRepository
 
     @Inject
-    lateinit var rewardedManager: RewardedManager
+    lateinit var rewardedRepository: RewardedRepository
 
     @Inject
-    lateinit var nativeManager: NativeManager
+    lateinit var nativeRepository: NativeRepository
 
     private lateinit var binding: ActivitySketchBinding
 
@@ -141,11 +138,11 @@ class SketchActivity : AppCompatActivity() {
             binding.nativeParent.visibility = View.GONE
         }
 
-        nativeManager.loadNative(
-            appDataRepository.getAppData(),
+        nativeRepository.setActivity(this)
+        nativeRepository.loadNative(
             findViewById(R.id.native_frame),
             findViewById(R.id.native_temp),
-            this, true
+            isButtonTop = true
         )
 
         setupFlashButton()
@@ -212,7 +209,7 @@ class SketchActivity : AppCompatActivity() {
 
         binding.advanced.setOnClickListener {
             startActivity(
-                Intent(this, AdvancedEditingActivity::class.java)
+                Intent(this, ImageEditorActivity::class.java)
             )
         }
 
@@ -612,10 +609,9 @@ class SketchActivity : AppCompatActivity() {
     }
 
     private fun rewarded(onRewDone: () -> Unit) {
-        rewardedManager.appData = appDataRepository.getAppData()
-        rewardedManager.showRewarded(
+        rewardedRepository.showRewarded(
             activity = this,
-            adClosedListener = object : RewardedManager.OnAdClosedListener {
+            adClosedListener = object : RewardedRepository.OnAdClosedListener {
                 override fun onRewClosed() {
                     onRewDone()
                 }

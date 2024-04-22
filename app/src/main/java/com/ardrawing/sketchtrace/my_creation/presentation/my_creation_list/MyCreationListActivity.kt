@@ -1,9 +1,7 @@
 package com.ardrawing.sketchtrace.my_creation.presentation.my_creation_list
 
 import android.content.Intent
-import android.content.SharedPreferences
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
@@ -14,11 +12,10 @@ import androidx.recyclerview.widget.GridLayoutManager
 import com.ardrawing.sketchtrace.databinding.ActivityMyCreationLsitBinding
 import com.ardrawing.sketchtrace.my_creation.presentation.my_creation_details.MyCreationDetailsActivity
 import com.ardrawing.sketchtrace.my_creation.presentation.my_creation_list.adapter.MyCreationListAdapter
-import com.ardrawing.sketchtrace.util.ads.InterManager
+import com.ardrawing.sketchtrace.core.domain.repository.ads.InterRepository
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
-import com.ardrawing.sketchtrace.util.LanguageChanger
-import com.ardrawing.sketchtrace.util.ads.NativeManager
+import com.ardrawing.sketchtrace.language.data.util.LanguageChanger
 import javax.inject.Inject
 
 /**
@@ -28,7 +25,7 @@ import javax.inject.Inject
 class MyCreationListActivity : AppCompatActivity() {
 
     @Inject
-    lateinit var interManager: InterManager
+    lateinit var interRepository: InterRepository
 
     private val myCreationListViewModel: MyCreationListViewModel by viewModels()
     private lateinit var myCreationListState: MyCreationListState
@@ -68,9 +65,9 @@ class MyCreationListActivity : AppCompatActivity() {
         myCreationListAdapter.setClickListener(object :
             MyCreationListAdapter.ClickListener {
             override fun oClick(uri: String, isVideo: Boolean) {
-                interManager.showInterstitial(
+                interRepository.showInterstitial(
                     this@MyCreationListActivity,
-                    object : InterManager.OnAdClosedListener {
+                    object : InterRepository.OnAdClosedListener {
                         override fun onAdClosed() {
                             Intent(
                                 this@MyCreationListActivity,

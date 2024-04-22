@@ -1,7 +1,7 @@
 package com.ardrawing.sketchtrace.core.domain.repository
 
 import com.ardrawing.sketchtrace.core.domain.model.app_data.AppData
-import com.ardrawing.sketchtrace.util.Resource
+import com.ardrawing.sketchtrace.core.data.util.Resource
 import kotlinx.coroutines.flow.Flow
 
 /**

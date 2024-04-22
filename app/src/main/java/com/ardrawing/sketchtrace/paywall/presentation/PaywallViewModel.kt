@@ -2,7 +2,7 @@ package com.ardrawing.sketchtrace.paywall.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.ardrawing.sketchtrace.image_list.domain.repository.ImageCategoriesRepository
+import com.ardrawing.sketchtrace.images.domain.repository.ImageCategoriesRepository
 import com.ardrawing.sketchtrace.core.domain.repository.AppDataRepository
 import com.revenuecat.purchases.Purchases
 import com.revenuecat.purchases.getOfferingsWith
@@ -37,7 +37,7 @@ class PaywallViewModel @Inject constructor(
         
         try {
             Purchases.sharedInstance.getOfferingsWith(
-                onError = { error ->
+                onError = {
                     viewModelScope.launch {
                         _finishActivityChannel.send(true)
                     }
@@ -55,7 +55,6 @@ class PaywallViewModel @Inject constructor(
                 _finishActivityChannel.send(true)
             }
         }
-
     }
 
     fun onEvent(paywallUiEvent: PaywallUiEvent) {

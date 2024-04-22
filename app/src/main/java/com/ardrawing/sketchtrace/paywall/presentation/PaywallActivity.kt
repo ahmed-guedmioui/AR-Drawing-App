@@ -2,7 +2,6 @@ package com.ardrawing.sketchtrace.paywall.presentation
 
 import android.annotation.SuppressLint
 import android.content.Intent
-import android.content.SharedPreferences
 import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.os.Handler
@@ -25,10 +24,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.viewinterop.AndroidView
@@ -38,15 +33,14 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.viewpager2.widget.ViewPager2
 import com.ardrawing.sketchtrace.BuildConfig
 import com.ardrawing.sketchtrace.R
-import com.ardrawing.sketchtrace.databinding.ActivitySplashBinding
-import com.ardrawing.sketchtrace.core.presentation.home.HomeActivity
-import com.ardrawing.sketchtrace.paywall.theme.ArDrawingTheme
-import com.ardrawing.sketchtrace.util.LanguageChanger
+import com.ardrawing.sketchtrace.home.presentation.HomeActivity
+import com.ardrawing.sketchtrace.core.presentation.util.theme.ArDrawingTheme
+import com.ardrawing.sketchtrace.language.data.util.LanguageChanger
+import com.ardrawing.sketchtrace.paywall.presentation.adapter.ImagesViewPagerAdapter
+import com.ardrawing.sketchtrace.paywall.presentation.adapter.ReviewsViewPagerAdapter
 import com.revenuecat.purchases.CustomerInfo
 import com.revenuecat.purchases.Offering
-import com.revenuecat.purchases.Purchases
 import com.revenuecat.purchases.PurchasesError
-import com.revenuecat.purchases.getOfferingsWith
 import com.revenuecat.purchases.models.StoreTransaction
 import com.revenuecat.purchases.ui.revenuecatui.ExperimentalPreviewRevenueCatUIPurchasesAPI
 import com.revenuecat.purchases.ui.revenuecatui.PaywallFooter
@@ -54,7 +48,6 @@ import com.revenuecat.purchases.ui.revenuecatui.PaywallListener
 import com.revenuecat.purchases.ui.revenuecatui.PaywallOptions
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 import kotlin.properties.Delegates
 
 @AndroidEntryPoint
@@ -111,10 +104,11 @@ class PaywallActivity : AppCompatActivity() {
         setContent {
             ArDrawingTheme {
                 Surface(
-                    modifier = Modifier.background(MaterialTheme.colorScheme.background)
+                    modifier = Modifier
+                        .background(MaterialTheme.colorScheme.background)
                 ) {
 
-                    LaunchedEffect(paywallViewModel.finishActivityChannel) {
+                    LaunchedEffect(true) {
                         paywallViewModel.finishActivityChannel.collect { finish ->
                             if (finish) {
                                 finish()
@@ -124,13 +118,11 @@ class PaywallActivity : AppCompatActivity() {
 
                     paywallState.offering?.let {
                         PaywallDialogScreen2(it) {
-
                             if (toHome) {
-                                Intent(this, HomeActivity::class.java).also { intent ->
-                                    startActivity(intent)
+                                Intent(this, HomeActivity::class.java).also {
+                                    startActivity(it)
                                 }
                             }
-
                             finish()
                         }
                     }
@@ -142,7 +134,10 @@ class PaywallActivity : AppCompatActivity() {
 
     @OptIn(ExperimentalPreviewRevenueCatUIPurchasesAPI::class)
     @Composable
-    private fun PaywallDialogScreen2(offering: Offering, dismissRequest: () -> Unit) {
+    private fun PaywallDialogScreen2(
+        offering: Offering,
+        dismissRequest: () -> Unit
+    ) {
 
         PaywallFooter(
             condensed = true,

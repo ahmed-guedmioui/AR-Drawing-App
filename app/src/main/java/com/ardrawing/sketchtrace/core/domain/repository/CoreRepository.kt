@@ -5,10 +5,6 @@ package com.ardrawing.sketchtrace.core.domain.repository
  */
 interface CoreRepository {
 
-    fun getLanguageCode(): String
-    fun updateLanguageCode(code: String)
-
-
     fun updateCanShowAdmobAds(canShowAdmobAds: Boolean)
 
     fun updateIsLanguageChosen()
@@ -18,4 +14,7 @@ interface CoreRepository {
     fun isLanguageChosen(): Boolean
     fun isOnboardingShown(): Boolean
     fun isGetStartedShown(): Boolean
+
+
+    fun initPurchases()
 }

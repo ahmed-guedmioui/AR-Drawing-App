@@ -3,7 +3,6 @@ package com.ardrawing.sketchtrace.trace.presentation
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
-import android.content.SharedPreferences
 import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.Matrix
@@ -12,7 +11,6 @@ import android.os.Bundle
 import android.os.Environment
 import android.os.Handler
 import android.os.Looper
-import android.provider.Settings
 import android.util.Log
 import android.view.View
 import android.view.animation.AnimationUtils
@@ -28,15 +26,14 @@ import androidx.lifecycle.repeatOnLifecycle
 import com.ardrawing.sketchtrace.R
 import com.ardrawing.sketchtrace.databinding.ActivityTraceBinding
 import com.ardrawing.sketchtrace.paywall.presentation.PaywallActivity
-import com.ardrawing.sketchtrace.util.LanguageChanger
-import com.ardrawing.sketchtrace.util.ads.RewardedManager
+import com.ardrawing.sketchtrace.language.data.util.LanguageChanger
+import com.ardrawing.sketchtrace.core.domain.repository.ads.RewardedRepository
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.transition.Transition
 import com.github.dhaval2404.imagepicker.ImagePicker
 import com.thebluealliance.spectrum.SpectrumDialog
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -52,7 +49,7 @@ class TraceActivity : AppCompatActivity() {
     private var bmOriginal: Bitmap? = null
 
     @Inject
-    lateinit var rewardedManager: RewardedManager
+    lateinit var rewardedRepository: RewardedRepository
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -236,10 +233,9 @@ class TraceActivity : AppCompatActivity() {
     }
 
     private fun rewarded(onRewDone: () -> Unit) {
-        rewardedManager.appData = traceState?.appData
-        rewardedManager.showRewarded(
+        rewardedRepository.showRewarded(
             activity = this,
-            adClosedListener = object : RewardedManager.OnAdClosedListener {
+            adClosedListener = object : RewardedRepository.OnAdClosedListener {
                 override fun onRewClosed() {
                     onRewDone()
                 }

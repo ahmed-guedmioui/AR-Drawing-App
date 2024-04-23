@@ -38,7 +38,7 @@ class GetStartedViewModel @Inject constructor(
             }
 
             GetStartedUiEvent.Navigate -> {
-                coreRepository.updateIsGetStartedShown()
+                coreRepository.setGetStartedShown()
             }
         }
     }

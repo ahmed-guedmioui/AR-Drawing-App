@@ -13,6 +13,7 @@ import com.ardrawing.sketchtrace.R
 import com.ardrawing.sketchtrace.core.domain.repository.AppDataRepository
 import com.ardrawing.sketchtrace.core.domain.repository.ads.NativeRepository
 import com.ardrawing.sketchtrace.util.AdsConstants
+import com.ardrawing.sketchtrace.util.PrefsConstants
 import com.facebook.ads.Ad
 import com.facebook.ads.AdError
 import com.facebook.ads.AdOptionsView
@@ -78,7 +79,7 @@ class NativeRepositoryImpl @Inject constructor(
         isButtonTop: Boolean
     ) {
 
-        if (!prefs.getBoolean(AdsConstants.CAN_SHOW_ADMOB_ADS, true)) {
+        if (!prefs.getBoolean(PrefsConstants.CAN_SHOW_ADMOB_ADS, true)) {
             return
         }
 

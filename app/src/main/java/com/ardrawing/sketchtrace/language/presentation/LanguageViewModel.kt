@@ -37,7 +37,7 @@ class LanguageViewModel @Inject constructor(
             }
 
             LanguageUiEvent.Navigate -> {
-                coreRepository.updateIsLanguageChosen()
+                coreRepository.setLanguageShown()
             }
         }
     }

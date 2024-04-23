@@ -34,7 +34,7 @@ class OnboardingViewModel @Inject constructor(
             }
 
             OnboardingUiEvent.Navigate -> {
-                coreRepository.updateIsOnboardingShown()
+                coreRepository.setOnboardingShown()
             }
         }
     }

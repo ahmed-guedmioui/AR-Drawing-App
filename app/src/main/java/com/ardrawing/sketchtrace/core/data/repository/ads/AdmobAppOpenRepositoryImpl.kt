@@ -10,7 +10,7 @@ import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.ProcessLifecycleOwner
 import com.ardrawing.sketchtrace.core.domain.repository.ads.AdmobAppOpenRepository
 import com.ardrawing.sketchtrace.core.domain.repository.AppDataRepository
-import com.ardrawing.sketchtrace.util.AdsConstants
+import com.ardrawing.sketchtrace.util.PrefsConstants
 import com.google.android.gms.ads.AdError
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.FullScreenContentCallback
@@ -191,7 +191,7 @@ class AdmobAppOpenRepositoryImpl @Inject constructor(
 
         if (
             !appDataRepository.getAppData().showAdsForThisUser ||
-            !prefs.getBoolean(AdsConstants.CAN_SHOW_ADMOB_ADS, true)
+            !prefs.getBoolean(PrefsConstants.CAN_SHOW_ADMOB_ADS, true)
         ) {
             onAdClosed()
             return

@@ -19,9 +19,6 @@ import javax.inject.Inject
 @AndroidEntryPoint
 class FollowActivity : AppCompatActivity() {
 
-    @Inject
-    lateinit var prefs: SharedPreferences
-
     private lateinit var binding: ActivityFollowBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {

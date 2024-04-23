@@ -43,8 +43,12 @@
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
             android:layout_marginStart="16dp"
+            android:layout_marginEnd="6dp"
+            android:layout_toStartOf="@id/main_temp_container"
             android:layout_toEndOf="@id/icon"
+            android:ellipsize="end"
             android:fontFamily="@font/font"
+            android:maxLines="1"
             android:text="@string/app_name"
             android:textColor="@color/white"
             android:textSize="17sp" />
@@ -107,8 +111,8 @@
                     android:layout_width="16dp"
                     android:layout_height="16dp"
                     android:layout_gravity="end"
-                    android:layout_marginEnd="4dp"
                     android:layout_marginTop="1dp"
+                    android:layout_marginEnd="4dp"
                     android:src="@drawable/vip" />
 
             </androidx.cardview.widget.CardView>
@@ -125,8 +129,8 @@
                 <ImageView
                     android:layout_width="25dp"
                     android:layout_height="25dp"
-                    android:layout_marginTop="2dp"
                     android:layout_gravity="center"
+                    android:layout_marginTop="2dp"
                     android:scaleType="centerCrop"
                     android:src="@drawable/gallery"
                     app:tint="@color/white" />
@@ -136,8 +140,8 @@
                     android:layout_width="16dp"
                     android:layout_height="16dp"
                     android:layout_gravity="end"
-                    android:layout_marginEnd="4dp"
                     android:layout_marginTop="1dp"
+                    android:layout_marginEnd="4dp"
                     android:src="@drawable/vip" />
 
             </androidx.cardview.widget.CardView>
@@ -164,8 +168,8 @@
                     android:layout_width="16dp"
                     android:layout_height="16dp"
                     android:layout_gravity="end"
-                    android:layout_marginEnd="4dp"
                     android:layout_marginTop="1dp"
+                    android:layout_marginEnd="4dp"
                     android:src="@drawable/vip" />
 
             </androidx.cardview.widget.CardView>

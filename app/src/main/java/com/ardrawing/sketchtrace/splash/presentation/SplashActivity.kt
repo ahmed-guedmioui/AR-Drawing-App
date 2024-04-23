@@ -8,7 +8,6 @@ import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import android.view.Gravity
 import android.view.View
 import android.view.Window
@@ -232,19 +231,25 @@ class SplashActivity : AppCompatActivity() {
 
         tryAgainButtonVisibility(false)
 
-        if (!splashState.isLanguageChosen) {
-            Intent(this@SplashActivity, LanguageActivity::class.java).also {
+        if (!splashState.isLanguageShown) {
+            Intent(
+                this@SplashActivity, LanguageActivity::class.java
+            ).also {
                 it.putExtra("from_splash", true)
                 startActivity(it)
             }
 
         } else if (!splashState.isOnboardingShown) {
-            Intent(this@SplashActivity, OnboardingActivity::class.java).also {
+            Intent(
+                this@SplashActivity, OnboardingActivity::class.java
+            ).also {
                 startActivity(it)
             }
 
         } else if (!splashState.isGetStartedShown) {
-            Intent(this@SplashActivity, GetStartedActivity::class.java).also {
+            Intent(
+                this@SplashActivity, GetStartedActivity::class.java
+            ).also {
                 startActivity(it)
             }
 

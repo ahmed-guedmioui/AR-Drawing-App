@@ -5,16 +5,18 @@ package com.ardrawing.sketchtrace.core.domain.repository
  */
 interface CoreRepository {
 
+    fun initPurchases()
     fun updateCanShowAdmobAds(canShowAdmobAds: Boolean)
+    fun setAppRated()
+    fun isAppRated(): Boolean
 
-    fun updateIsLanguageChosen()
-    fun updateIsOnboardingShown()
-    fun updateIsGetStartedShown()
+    fun setLanguageShown()
+    fun setOnboardingShown()
+    fun setGetStartedShown()
 
-    fun isLanguageChosen(): Boolean
+    fun isLanguageShown(): Boolean
     fun isOnboardingShown(): Boolean
     fun isGetStartedShown(): Boolean
 
 
-    fun initPurchases()
 }

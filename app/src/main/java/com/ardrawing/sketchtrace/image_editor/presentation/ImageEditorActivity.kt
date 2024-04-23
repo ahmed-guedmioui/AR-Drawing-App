@@ -34,9 +34,6 @@ import javax.inject.Inject
 @AndroidEntryPoint
 class ImageEditorActivity : AppCompatActivity(), SeekBar.OnSeekBarChangeListener {
 
-    @Inject
-    lateinit var prefs: SharedPreferences
-
     private val imageEditorViewModel: ImageEditorViewModel by viewModels()
     private var imageEditorState: ImageEditorState? = null
 

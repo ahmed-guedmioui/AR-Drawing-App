@@ -14,6 +14,7 @@ import com.ardrawing.sketchtrace.R
 import com.ardrawing.sketchtrace.core.domain.repository.AppDataRepository
 import com.ardrawing.sketchtrace.core.domain.repository.ads.RewardedRepository
 import com.ardrawing.sketchtrace.util.AdsConstants
+import com.ardrawing.sketchtrace.util.PrefsConstants
 import com.facebook.ads.Ad
 import com.facebook.ads.RewardedVideoAd
 import com.facebook.ads.RewardedVideoAdListener
@@ -116,7 +117,7 @@ class RewardedManagerImpl @Inject constructor(
 
     private fun loadAdmobRewarded(activity: Activity) {
 
-        if (!prefs.getBoolean(AdsConstants.CAN_SHOW_ADMOB_ADS, true)) {
+        if (!prefs.getBoolean(PrefsConstants.CAN_SHOW_ADMOB_ADS, true)) {
             return
         }
 
@@ -157,7 +158,7 @@ class RewardedManagerImpl @Inject constructor(
 
     private fun showAdmobRewarded(activity: Activity) {
 
-        if (!prefs.getBoolean(AdsConstants.CAN_SHOW_ADMOB_ADS, true)) {
+        if (!prefs.getBoolean(PrefsConstants.CAN_SHOW_ADMOB_ADS, true)) {
             return
         }
 

@@ -3,11 +3,9 @@ package com.ardrawing.sketchtrace.settings.presentation
 import android.annotation.SuppressLint
 import android.app.Dialog
 import android.content.Intent
-import android.content.SharedPreferences
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
-import android.util.Log
 import android.view.Gravity
 import android.view.View
 import android.view.Window
@@ -24,26 +22,24 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.ardrawing.sketchtrace.R
-import com.ardrawing.sketchtrace.core.domain.model.app_data.AppData
-import com.ardrawing.sketchtrace.databinding.ActivitySettingsBinding
-import com.ardrawing.sketchtrace.follow.presentation.FollowActivity
-import com.ardrawing.sketchtrace.language.presentation.LanguageActivity
-import com.ardrawing.sketchtrace.settings.presentation.adapter.RecommendedAppsAdapter
-import com.ardrawing.sketchtrace.onboarding.presentation.OnboardingActivity
-import com.ardrawing.sketchtrace.paywall.presentation.PaywallActivity
-import com.ardrawing.sketchtrace.util.AdsConstants
-import com.ardrawing.sketchtrace.util.Constants
-import com.ardrawing.sketchtrace.language.data.util.LanguageChanger
 import com.ardrawing.sketchtrace.core.data.util.openDeveloper
 import com.ardrawing.sketchtrace.core.data.util.rateApp
 import com.ardrawing.sketchtrace.core.data.util.shareApp
+import com.ardrawing.sketchtrace.core.domain.model.app_data.AppData
+import com.ardrawing.sketchtrace.databinding.ActivitySettingsBinding
+import com.ardrawing.sketchtrace.follow.presentation.FollowActivity
+import com.ardrawing.sketchtrace.language.data.util.LanguageChanger
+import com.ardrawing.sketchtrace.language.presentation.LanguageActivity
+import com.ardrawing.sketchtrace.onboarding.presentation.OnboardingActivity
+import com.ardrawing.sketchtrace.paywall.presentation.PaywallActivity
+import com.ardrawing.sketchtrace.settings.presentation.adapter.RecommendedAppsAdapter
+import com.ardrawing.sketchtrace.util.Constants
 import com.google.android.ump.ConsentDebugSettings
 import com.google.android.ump.ConsentInformation
 import com.google.android.ump.ConsentRequestParameters
 import com.google.android.ump.UserMessagingPlatform
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 @AndroidEntryPoint
 class SettingsActivity : AppCompatActivity() {
@@ -54,9 +50,6 @@ class SettingsActivity : AppCompatActivity() {
     private lateinit var binding: ActivitySettingsBinding
 
     private lateinit var consentInformation: ConsentInformation
-
-    @Inject
-    lateinit var prefs: SharedPreferences
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -183,6 +176,7 @@ class SettingsActivity : AppCompatActivity() {
 
         val params = ConsentRequestParameters
             .Builder()
+            .setConsentDebugSettings(debugSettings)
             .build()
 
         consentInformation.requestConsentInfoUpdate(
@@ -191,27 +185,16 @@ class SettingsActivity : AppCompatActivity() {
             {
                 UserMessagingPlatform.loadAndShowConsentFormIfRequired(
                     this@SettingsActivity
-                ) { loadAndShowError ->
-                    // Consent gathering failed.
-                    if (loadAndShowError != null) {
-                        Log.d("tag_admob", loadAndShowError.message)
-                    }
-                    // Consent has been gathered.
+                ) {
                     if (consentInformation.canRequestAds()) {
-                        Log.d("tag_admob", "canRequestAds 2")
-                        prefs.edit().putBoolean(AdsConstants.CAN_SHOW_ADMOB_ADS, true).apply()
-
+                        settingsViewModel.onEvent(SettingsUiEvent.OnAdmobConsent(true))
                     } else {
-                        Log.d("tag_admob", "navigate 1")
-                        prefs.edit().putBoolean(AdsConstants.CAN_SHOW_ADMOB_ADS, false).apply()
+                        settingsViewModel.onEvent(SettingsUiEvent.OnAdmobConsent(false))
                     }
                 }
             },
-            { requestConsentError ->
-                // Consent gathering failed.
-                Log.d("tag_admob", requestConsentError.message)
-                Log.d("tag_admob", "navigate 2")
-                prefs.edit().putBoolean(AdsConstants.CAN_SHOW_ADMOB_ADS, false).apply()
+            {
+                settingsViewModel.onEvent(SettingsUiEvent.OnAdmobConsent(false))
             }
         )
     }
@@ -224,13 +207,13 @@ class SettingsActivity : AppCompatActivity() {
         privacyDialog.setContentView(R.layout.dialog_privacy)
         val layoutParams = WindowManager.LayoutParams()
 
-        layoutParams.copyFrom(privacyDialog.window!!.attributes)
+        layoutParams.copyFrom(privacyDialog.window?.attributes)
         layoutParams.width = WindowManager.LayoutParams.MATCH_PARENT
         layoutParams.height = WindowManager.LayoutParams.WRAP_CONTENT
         layoutParams.gravity = Gravity.CENTER
 
-        privacyDialog.window!!.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
-        privacyDialog.window!!.attributes = layoutParams
+        privacyDialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+        privacyDialog.window?.attributes = layoutParams
 
         val webView = privacyDialog.findViewById<WebView>(R.id.web_view)
         webView.settings.javaScriptEnabled = true

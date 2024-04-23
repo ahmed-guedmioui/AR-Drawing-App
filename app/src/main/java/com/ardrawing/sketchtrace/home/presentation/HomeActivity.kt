@@ -2,12 +2,10 @@ package com.ardrawing.sketchtrace.home.presentation
 
 import android.app.Dialog
 import android.content.Intent
-import android.content.SharedPreferences
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.os.StrictMode
-import android.util.Log
 import android.view.Gravity
 import android.view.View
 import android.view.Window
@@ -25,18 +23,18 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.viewpager.widget.ViewPager
 import com.ardrawing.sketchtrace.BuildConfig
 import com.ardrawing.sketchtrace.R
-import com.ardrawing.sketchtrace.databinding.ActivityHomeBinding
-import com.ardrawing.sketchtrace.images.presentation.categories.CategoriesActivity
-import com.ardrawing.sketchtrace.home.presentation.adapter.HelperPagerAdapter
-import com.ardrawing.sketchtrace.settings.presentation.SettingsActivity
-import com.ardrawing.sketchtrace.my_creation.presentation.my_creation_list.MyCreationListActivity
-import com.ardrawing.sketchtrace.util.Constants
-import com.ardrawing.sketchtrace.language.data.util.LanguageChanger
-import com.ardrawing.sketchtrace.core.data.util.UrlOpener
 import com.ardrawing.sketchtrace.core.data.repository.ads.RewardedManagerImpl
+import com.ardrawing.sketchtrace.core.data.util.UrlOpener
 import com.ardrawing.sketchtrace.core.data.util.rateApp
 import com.ardrawing.sketchtrace.core.domain.repository.ads.InterRepository
 import com.ardrawing.sketchtrace.core.domain.repository.ads.NativeRepository
+import com.ardrawing.sketchtrace.databinding.ActivityHomeBinding
+import com.ardrawing.sketchtrace.home.presentation.adapter.HelperPagerAdapter
+import com.ardrawing.sketchtrace.images.presentation.categories.CategoriesActivity
+import com.ardrawing.sketchtrace.language.data.util.LanguageChanger
+import com.ardrawing.sketchtrace.my_creation.presentation.my_creation_list.MyCreationListActivity
+import com.ardrawing.sketchtrace.settings.presentation.SettingsActivity
+import com.ardrawing.sketchtrace.util.Constants
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -62,9 +60,6 @@ class HomeActivity : AppCompatActivity() {
     @Inject
     lateinit var nativeRepository: NativeRepository
 
-    @Inject
-    lateinit var prefs: SharedPreferences
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         LanguageChanger.changeAppLanguage(this)
@@ -72,15 +67,21 @@ class HomeActivity : AppCompatActivity() {
         val view: View = binding.root
         setContentView(view)
 
-        if (!prefs.getBoolean("is_rated", false)) {
-            rateDialog()
-        }
-
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 homeViewModel.homeState.collect {
                     homeState = it
                     helperDialog()
+                }
+            }
+        }
+
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                homeViewModel.showRateDialogChannel.collectLatest { showDialog ->
+                    if (showDialog) {
+                        rateDialog()
+                    }
                 }
             }
         }
@@ -267,8 +268,8 @@ class HomeActivity : AppCompatActivity() {
         }
 
         rateDialog.findViewById<RatingBar>(R.id.rating_bar).onRatingBarChangeListener =
-            RatingBar.OnRatingBarChangeListener { ratingBar, rating, fromUser ->
-                prefs.edit().putBoolean("is_rated", true).apply()
+            RatingBar.OnRatingBarChangeListener { _, _, _ ->
+                homeViewModel.onEvent(HomeUiEvent.OnAppRated)
                 UrlOpener.open(this, BuildConfig.APPLICATION_ID)
                 rateDialog.dismiss()
             }

@@ -32,9 +32,6 @@ import javax.inject.Inject
 @AndroidEntryPoint
 class MyCreationDetailsActivity : AppCompatActivity() {
 
-    @Inject
-    lateinit var prefs: SharedPreferences
-
     private var player: ExoPlayer? = null
 
     private val myCreationDetailsViewModel: MyCreationDetailsViewModel by viewModels()

@@ -77,7 +77,7 @@ class SplashViewModel @Inject constructor(
     private fun navigationValidator() {
         _splashState.update {
             it.copy(
-                isLanguageChosen = coreRepository.isLanguageChosen(),
+                isLanguageShown = coreRepository.isLanguageShown(),
                 isOnboardingShown = coreRepository.isOnboardingShown(),
                 isGetStartedShown = coreRepository.isGetStartedShown(),
             )

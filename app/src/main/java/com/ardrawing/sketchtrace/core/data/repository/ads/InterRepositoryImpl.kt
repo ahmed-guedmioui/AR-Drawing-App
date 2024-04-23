@@ -10,6 +10,7 @@ import com.ardrawing.sketchtrace.R
 import com.ardrawing.sketchtrace.core.domain.repository.AppDataRepository
 import com.ardrawing.sketchtrace.core.domain.repository.ads.InterRepository
 import com.ardrawing.sketchtrace.util.AdsConstants
+import com.ardrawing.sketchtrace.util.PrefsConstants
 import com.facebook.ads.Ad
 import com.facebook.ads.AdError
 import com.facebook.ads.InterstitialAdListener
@@ -132,7 +133,7 @@ class InterRepositoryImpl @Inject constructor(
 
     private fun loadAdmobInter(activity: Activity) {
 
-        if (!prefs.getBoolean(AdsConstants.CAN_SHOW_ADMOB_ADS, true)) {
+        if (!prefs.getBoolean(PrefsConstants.CAN_SHOW_ADMOB_ADS, true)) {
             return
         }
 
@@ -187,7 +188,7 @@ class InterRepositoryImpl @Inject constructor(
 
     private fun showAdmobInter(activity: Activity) {
 
-        if (!prefs.getBoolean(AdsConstants.CAN_SHOW_ADMOB_ADS, true)) {
+        if (!prefs.getBoolean(PrefsConstants.CAN_SHOW_ADMOB_ADS, true)) {
             return
         }
 

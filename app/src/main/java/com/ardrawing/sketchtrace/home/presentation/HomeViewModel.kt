@@ -3,6 +3,7 @@ package com.ardrawing.sketchtrace.home.presentation
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ardrawing.sketchtrace.core.domain.repository.AppDataRepository
+import com.ardrawing.sketchtrace.core.domain.repository.CoreRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
@@ -18,6 +19,7 @@ import javax.inject.Inject
  */
 @HiltViewModel
 class HomeViewModel @Inject constructor(
+    private val coreRepository: CoreRepository,
     private val appDataRepository: AppDataRepository
 ) : ViewModel() {
 
@@ -30,11 +32,20 @@ class HomeViewModel @Inject constructor(
     private val _closeChannel = Channel<Boolean>()
     val closeChannel = _closeChannel.receiveAsFlow()
 
+    private val _showRateDialogChannel = Channel<Boolean>()
+    val showRateDialogChannel = _showRateDialogChannel.receiveAsFlow()
+
     init {
         _homeState.update {
             it.copy(
                 appData = appDataRepository.getAppData()
             )
+        }
+
+        viewModelScope.launch {
+            if (!coreRepository.isAppRated()) {
+                _showRateDialogChannel.send(true)
+            }
         }
     }
 
@@ -65,6 +76,10 @@ class HomeViewModel @Inject constructor(
                 _homeState.update {
                     it.copy(showHelperDialog = !homeState.value.showHelperDialog)
                 }
+            }
+
+            HomeUiEvent.OnAppRated -> {
+                coreRepository.setAppRated()
             }
         }
     }

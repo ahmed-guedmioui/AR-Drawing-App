@@ -7,7 +7,7 @@ import com.ardrawing.sketchtrace.core.data.remote.respnod.app_data.AppDataDto
  */
 object TestAppDataApi {
 
-    suspend fun getAppData(): AppDataDto = AppDataDto(
+    suspend fun getAppData(): AppDataDto? = AppDataDto(
         "admob",
         "admob",
         "admob",

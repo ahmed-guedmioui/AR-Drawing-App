@@ -68,7 +68,9 @@ class AppDataRepositoryImpl @Inject constructor(
             }
 
             appDataDto?.let {
-                updateAppDataJsonString(it.toAppData())
+                AppDataInstance.appData = it.toAppData()
+
+//                updateAppDataJsonString(it.toAppData())
 
                 prefs.edit()
                     .putString("admobOpenApp", getAppData().admobOpenApp)
@@ -90,52 +92,66 @@ class AppDataRepositoryImpl @Inject constructor(
     }
 
     override fun getAppData(): AppData {
-        convertJsonStringToAppData()?.let { appData ->
-            return appData
-        }
 
-        return getDefaultAppData().toAppData()
+        return AppDataInstance.appData ?: getDefaultAppData().toAppData()
+
+//        convertJsonStringToAppData()?.let { appData ->
+//            return appData
+//        }
+//
+//        return getDefaultAppData().toAppData()
     }
 
     override fun updateIsSubscribed(
         isSubscribed: Boolean
     ) {
-        updateAppDataJsonString(
-            getAppData().copy(isSubscribed = isSubscribed)
-        )
+
+        getAppData().isSubscribed = isSubscribed
+
+//        updateAppDataJsonString(
+//            getAppData().copy(isSubscribed = isSubscribed)
+//        )
     }
 
-    override fun updateShowAdsForThisUser(showAdsForThisUser: Boolean) {
-        updateAppDataJsonString(
-            getAppData().copy(showAdsForThisUser = showAdsForThisUser)
-        )
+    override fun updateShowAdsForThisUser(
+        showAdsForThisUser: Boolean
+    ) {
+
+        getAppData().showAdsForThisUser = showAdsForThisUser
+
+//        updateAppDataJsonString(
+//            getAppData().copy(showAdsForThisUser = showAdsForThisUser)
+//        )
     }
 
     override fun updateSubscriptionExpireDate(
         subscriptionExpireDate: String
     ) {
-        updateAppDataJsonString(
-            getAppData().copy(subscriptionExpireDate = subscriptionExpireDate)
-        )
+
+        getAppData().subscriptionExpireDate = subscriptionExpireDate
+
+//        updateAppDataJsonString(
+//            getAppData().copy(subscriptionExpireDate = subscriptionExpireDate)
+//        )
     }
 
-    private fun updateAppDataJsonString(appData: AppData) {
-        val appDataJsonString = convertAppDataToJsonString(appData)
-        prefs.edit()
-            .putString("appDataJson", appDataJsonString)
-            .apply()
-    }
-
-    private fun convertAppDataToJsonString(appData: AppData): String {
-        return Gson().toJson(appData)
-    }
-
-    private fun convertJsonStringToAppData(): AppData? {
-        val appDataJsonString =
-            prefs.getString("appDataJson", null)
-
-        return Gson().fromJson(appDataJsonString, AppData::class.java)
-    }
+//    private fun updateAppDataJsonString(appData: AppData) {
+//        val appDataJsonString = convertAppDataToJsonString(appData)
+//        prefs.edit()
+//            .putString("appDataJson", appDataJsonString)
+//            .apply()
+//    }
+//
+//    private fun convertAppDataToJsonString(appData: AppData): String {
+//        return Gson().toJson(appData)
+//    }
+//
+//    private fun convertJsonStringToAppData(): AppData? {
+//        val appDataJsonString =
+//            prefs.getString("appDataJson", null)
+//
+//        return Gson().fromJson(appDataJsonString, AppData::class.java)
+//    }
 
 
     private fun subscription() {
@@ -229,6 +245,9 @@ class AppDataRepositoryImpl @Inject constructor(
     )
 }
 
+object AppDataInstance {
+    var appData: AppData? = null
+}
 
 
 

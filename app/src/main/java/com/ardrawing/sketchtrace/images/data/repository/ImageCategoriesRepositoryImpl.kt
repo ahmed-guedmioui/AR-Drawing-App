@@ -66,7 +66,7 @@ class ImageCategoriesRepositoryImpl @Inject constructor(
                 ImageCategoriesInstance.imageCategories =
                     imageCategoriesDto.toImageCategoryList().toMutableList()
 
-                updateImageCategoriesJsonString(imageCategoriesDto)
+//                updateImageCategoriesJsonString(imageCategoriesDto)
 
                 emit(Resource.Success())
                 emit(Resource.Loading(false))
@@ -82,41 +82,43 @@ class ImageCategoriesRepositoryImpl @Inject constructor(
 
     override fun getImageCategories(): MutableList<ImageCategory> {
 
-        ImageCategoriesInstance.imageCategories?.let { imageCategories ->
-            return imageCategories
-        }
+        return ImageCategoriesInstance.imageCategories?: mutableListOf()
 
-        // When we get, it means we lost the list for some reason.
-        // Now we reload it from cache
-        convertJsonStringToImageCategories()?.let { imageCategoriesDto ->
+//        ImageCategoriesInstance.imageCategories?.let { imageCategories ->
+//            return imageCategories
+//        }
+//
+//        // When we get, it means we lost the list for some reason.
+//        // Now we reload it from cache
+//        convertJsonStringToImageCategories()?.let { imageCategoriesDto ->
+//
+//            setUnlockedImages()
+//            setNativeItems()
+//            setGalleryAndCameraItems()
+//
+//            return imageCategoriesDto.toImageCategoryList().toMutableList()
+//        }
 
-            setUnlockedImages()
-            setNativeItems()
-            setGalleryAndCameraItems()
-
-            return imageCategoriesDto.toImageCategoryList().toMutableList()
-        }
-
-        return mutableListOf()
+//        return  mutableListOf()
     }
 
-    private fun updateImageCategoriesJsonString(
-        imageCategoriesDto: ImageCategoriesDto
-    ) {
-
-        val imageCategoriesJsonString =
-            convertImageCategoriesToJsonString(imageCategoriesDto)
-
-        prefs.edit()
-            .putString("ImageCategoriesJson", imageCategoriesJsonString)
-            .apply()
-    }
-
-    private fun convertImageCategoriesToJsonString(
-        imageCategoriesDto: ImageCategoriesDto
-    ): String {
-        return Gson().toJson(imageCategoriesDto)
-    }
+//    private fun updateImageCategoriesJsonString(
+//        imageCategoriesDto: ImageCategoriesDto
+//    ) {
+//
+//        val imageCategoriesJsonString =
+//            convertImageCategoriesToJsonString(imageCategoriesDto)
+//
+//        prefs.edit()
+//            .putString("ImageCategoriesJson", imageCategoriesJsonString)
+//            .apply()
+//    }
+//
+//    private fun convertImageCategoriesToJsonString(
+//        imageCategoriesDto: ImageCategoriesDto
+//    ): String {
+//        return Gson().toJson(imageCategoriesDto)
+//    }
 
     private fun convertJsonStringToImageCategories(): ImageCategoriesDto? {
         val imageCategoriesJsonString =

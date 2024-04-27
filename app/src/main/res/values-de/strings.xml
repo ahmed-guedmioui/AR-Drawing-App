@@ -182,5 +182,16 @@
     <string name="i_highly_recommend_this_app_for_those_who_want_to_learn_drawing">Ich empfehle diese App sehr für diejenigen, die das Zeichnen lernen möchten.</string>
     <string name="sketching_was_always_my_passion_and_this_app_really_boosted_my_drawing_skills">Skizzieren war schon immer meine Leidenschaft, und diese App hat meine Zeichenfähigkeiten wirklich verbessert!</string>
     <string name="user_reviews">Benutzerbewertungen</string>
+    <string name="get_access_to_details_4">Schalte Verbesserungen der erweiterten Stufe frei</string>
+    <string name="get_access_to_details_5">Laden Sie hochwertige Bilder hoch oder wählen Sie aus unserem Angebot an Vorlagen</string>
+    <string name="get_access_to_details_6">Alle Skizzen zum Zeichnen und Nachzeichnen bereit</string>
+    <string name="back">vorherige</string>
+    <string name="error_picking_image">Fehler beim Auswählen des Bildes</string>
+    <string name="error_loading_images">Fehler beim Laden der Bilder</string>
+    <string name="error_loading_data">Fehler beim Laden der Daten</string>
+    <string name="saving_image">Bild speichern…</string>
+    <string name="error_while_deleting_creation">Fehler beim Löschen der Erstellung</string>
+    <string name="ads_options">Anzeigenoptionen</string>
+    <string name="loading_ads">Anzeigen werden geladen…</string>
 
 </resources>

@@ -33,8 +33,8 @@
                     android:id="@+id/close"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:visibility="gone"
                     android:layout_margin="12dp"
+                    android:visibility="gone"
                     app:cardBackgroundColor="@color/primary"
                     app:cardCornerRadius="8dp">
 
@@ -162,6 +162,87 @@
                             android:layout_marginTop="8dp"
                             android:fontFamily="@font/font"
                             android:text="@string/get_access_to_details_3"
+                            android:textColor="@color/text"
+                            android:textSize="17sp" />
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginVertical="8dp"
+                            android:layout_marginStart="16dp"
+                            android:fontFamily="@font/font"
+                            android:text="✅"
+                            android:textColor="@color/text"
+                            android:textSize="17sp" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginHorizontal="12dp"
+                            android:layout_marginTop="8dp"
+                            android:fontFamily="@font/font"
+                            android:text="@string/get_access_to_details_4"
+                            android:textColor="@color/text"
+                            android:textSize="17sp" />
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginVertical="8dp"
+                            android:layout_marginStart="16dp"
+                            android:fontFamily="@font/font"
+                            android:text="✅"
+                            android:textColor="@color/text"
+                            android:textSize="17sp" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginHorizontal="12dp"
+                            android:layout_marginTop="8dp"
+                            android:fontFamily="@font/font"
+                            android:text="@string/get_access_to_details_5"
+                            android:textColor="@color/text"
+                            android:textSize="17sp" />
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginVertical="8dp"
+                            android:layout_marginStart="16dp"
+                            android:fontFamily="@font/font"
+                            android:text="✅"
+                            android:textColor="@color/text"
+                            android:textSize="17sp" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginHorizontal="12dp"
+                            android:layout_marginTop="8dp"
+                            android:fontFamily="@font/font"
+                            android:text="@string/get_access_to_details_6"
                             android:textColor="@color/text"
                             android:textSize="17sp" />
 
@@ -355,7 +436,7 @@
                         android:layout_marginTop="5dp"
                         android:layout_marginEnd="8dp"
                         android:fontFamily="@font/font"
-                        android:text="@string/a2"
+                        android:text="@string/a1"
                         android:textColor="@color/text"
                         android:textSize="17sp"
                         android:visibility="gone"
@@ -648,12 +729,3 @@
     </ScrollView>
 
 </RelativeLayout>
-
-
-
-
-
-
-
-
-

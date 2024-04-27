@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Ar Studio: Draw Sketch &amp; Trace</string>
+    <string name="app_name">Ar Draw Studio: Sketch &amp; Trace</string>
 
     <string name="tip_title_1">Unleash your creativity: draw your first picture today!</string>
     <string name="tip_desc_1">Unlock your inner artist effortlessly! With the magic of your smartphone camera and state-of-the-art AR technology, Unlock your inner artist effortlessly! With the magic of your smartphone camera and state-of-the-art AR technology, creating art has become more intuitive than ever. Elevate your drawing skills to professional levels in just 3 days – an exciting adventure for all skill levels awaits! 🌟🎨</string>
@@ -14,7 +14,7 @@
     <string name="tip_desc_4">Explore an array of creative possibilities with our various templates. Effortlessly elevate your designs with the flexibility and style that our templates offer.</string>
 
 
-    <string name="get_started_title">Welcome to AR Studio: Draw Sketch &amp; Trace</string>
+    <string name="get_started_title">Welcome to AR Draw Studio: Sketch &amp; Trace</string>
     <string name="get_started_desc">The magic trio: pencil, cup, and paper for your creative journey.</string>
 
 
@@ -122,7 +122,7 @@
     <string name="fast_video">Fast Video</string>
     <string name="speeding_up_and_saving_video">Speeding up and saving video…</string>
     <string name="share">Share</string>
-    <string name="rate_this_app_with_5_start_if_you_like_it">Rate this app with 5 start if you like it.</string>
+    <string name="rate_this_app_with_5_start_if_you_like_it">Please take a moment to rate us and help support to improve more new features.</string>
     <string name="update">Update</string>
     <string name="there_is_a_new_update">There is a new update 🤩</string>
     <string name="update_the_app_to_enjoy_the_latest_features">Update the app to enjoy the latest features.</string>
@@ -137,11 +137,14 @@
     <string name="japanese">日本語</string>
 
     <string name="you_need_to_watch_an_ad">You need to watch an ad</string>
-    <string name="draw_art_from_sketches_with_ar">Draw Art From Sketches With AR</string>
+    <string name="draw_art_from_sketches_with_ar">Unlock All Features In AR Draw Studio</string>
     <string name="get_access_to">GET ACCESS TO</string>
-    <string name="get_access_to_details_1">Easily trace pictures on paper</string>
-    <string name="get_access_to_details_2">Upload good quality images or choose from +1000 templates</string>
-    <string name="get_access_to_details_3">Quick draw and create an art</string>
+    <string name="get_access_to_details_1">Ad-Free Experience</string>
+    <string name="get_access_to_details_2">Unlimited Time Drawing</string>
+    <string name="get_access_to_details_3">Unlock the Video Recording Feature</string>
+    <string name="get_access_to_details_4">Unlock Advanced Level Enhancements</string>
+    <string name="get_access_to_details_5">Upload high-quality images or select from our range of templates</string>
+    <string name="get_access_to_details_6">All sketches ready for drawing and tracing</string>
     <string name="choose_a_plan">CHOOSE A PLAN</string>
     <string name="faq">FAQ</string>
     <string name="trusted_by_over">Trusted by over</string>
@@ -189,8 +192,8 @@
     <string name="error_picking_image">Error picking image</string>
     <string name="error_loading_images">Error loading images</string>
     <string name="error_loading_data">Error loading data</string>
-    <string name="saving_image">Saving Image...</string>
+    <string name="saving_image">Saving Image…</string>
     <string name="error_while_deleting_creation">Error while deleting creation</string>
     <string name="ads_options">Ads Options</string>
-    <string name="loading_ads">Loading Ads...</string>
+    <string name="loading_ads">Loading Ads…</string>
 </resources>

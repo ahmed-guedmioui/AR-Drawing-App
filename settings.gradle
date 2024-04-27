@@ -19,4 +19,4 @@ dependencyResolutionManagement {
     }
 }
 rootProject.name = "Med Drawing With Purchase"
-include ':app', ':library', ':spectrum'
+include ':app', ':spectrum'

@@ -184,6 +184,17 @@
     <string name="i_highly_recommend_this_app_for_those_who_want_to_learn_drawing">Recomiendo encarecidamente esta aplicación para aquellos que quieran aprender a dibujar.</string>
     <string name="sketching_was_always_my_passion_and_this_app_really_boosted_my_drawing_skills">Dibujar siempre fue mi pasión, ¡y esta aplicación realmente impulsó mis habilidades de dibujo!</string>
     <string name="user_reviews">Opiniones de los usuarios</string>
+    <string name="get_access_to_details_4">Desbloquear mejoras de nivel avanzado</string>
+    <string name="get_access_to_details_5">Cargue imágenes de alta calidad o seleccione entre nuestra gama de plantillas</string>
+    <string name="get_access_to_details_6">Todos los bocetos listos para dibujar y calcar.</string>
+    <string name="back">Previa</string>
+    <string name="error_picking_image">Error al seleccionar la imagen</string>
+    <string name="error_loading_images">Error al cargar imágenes</string>
+    <string name="error_loading_data">Error al cargar datos</string>
+    <string name="saving_image">Guardando imagen…</string>
+    <string name="error_while_deleting_creation">Error al eliminar la creación</string>
+    <string name="ads_options">Opciones de anuncios</string>
+    <string name="loading_ads">Cargando anuncios…</string>
 
 
 </resources>

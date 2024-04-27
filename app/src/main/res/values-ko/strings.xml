@@ -182,5 +182,16 @@
     <string name="i_highly_recommend_this_app_for_those_who_want_to_learn_drawing">그림을 배우고 싶은 사람들에게 이 앱을 강력 추천합니다.</string>
     <string name="sketching_was_always_my_passion_and_this_app_really_boosted_my_drawing_skills">스케치는 항상 제 열정이었고, 이 앱은 제 그림 실력을 실제로 향상시켰습니다!</string>
     <string name="user_reviews">사용자 리뷰</string>
+    <string name="get_access_to_details_4">고급 레벨 강화 잠금 해제</string>
+    <string name="get_access_to_details_5">고품질 이미지를 업로드하거나 다양한 템플릿 중에서 선택하세요</string>
+    <string name="get_access_to_details_6">그리기 및 추적 준비가 완료된 모든 스케치</string>
+    <string name="back">이전의</string>
+    <string name="error_picking_image">이미지를 선택하는 중에 오류가 발생했습니다.</string>
+    <string name="error_loading_images">이미지를 로드하는 중에 오류가 발생했습니다.</string>
+    <string name="error_loading_data">데이터를 로드하는 중에 오류가 발생했습니다.</string>
+    <string name="saving_image">이미지 저장 중…</string>
+    <string name="error_while_deleting_creation">생성된 항목을 삭제하는 중 오류가 발생했습니다.</string>
+    <string name="ads_options">광고 옵션</string>
+    <string name="loading_ads">광고 로드 중…</string>
 
 </resources>

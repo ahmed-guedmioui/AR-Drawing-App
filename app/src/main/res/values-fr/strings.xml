@@ -183,6 +183,17 @@
     <string name="i_highly_recommend_this_app_for_those_who_want_to_learn_drawing">Je recommande vivement cette application à ceux qui veulent apprendre à dessiner.</string>
     <string name="sketching_was_always_my_passion_and_this_app_really_boosted_my_drawing_skills">Le dessin a toujours été ma passion, et cette application a vraiment stimulé mes compétences en dessin !</string>
     <string name="user_reviews">Avis des utilisateurs</string>
+    <string name="get_access_to_details_4">Débloquez des améliorations de niveau avancé</string>
+    <string name="get_access_to_details_5">Téléchargez des images de haute qualité ou sélectionnez parmi notre gamme de modèles</string>
+    <string name="get_access_to_details_6">Tous les croquis prêts à être dessinés et tracés</string>
+    <string name="back">Précédent</string>
+    <string name="error_picking_image">Erreur lors de la sélection de l\'image</string>
+    <string name="error_loading_images">Erreur de chargement des images</string>
+    <string name="error_loading_data">Erreur de chargement des données</string>
+    <string name="saving_image">Enregistrement de l\'image...</string>
+    <string name="error_while_deleting_creation">Erreur lors de la suppression de la création</string>
+    <string name="ads_options">Options d\'annonces</string>
+    <string name="loading_ads">Chargement des annonces...</string>
 
 
 </resources>

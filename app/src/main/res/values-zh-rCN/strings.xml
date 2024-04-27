@@ -183,5 +183,16 @@
     <string name="sketching_was_always_my_passion_and_this_app_really_boosted_my_drawing_skills">素描一直是我的热情所在，这款应用真的提升了我的绘画技能！</string>
     <string name="user_reviews">用户评价</string>
     <string name="trusted_by_over">受到信赖</string>
+    <string name="get_access_to_details_4">解锁高级增强功能</string>
+    <string name="get_access_to_details_5">上传高质量图像或从我们的一系列模板中进行选择</string>
+    <string name="get_access_to_details_6">所有草图均已准备好进行绘制和描摹</string>
+    <string name="back">以前的</string>
+    <string name="error_picking_image">选取图像时出错</string>
+    <string name="error_loading_images">加载图像时出错</string>
+    <string name="error_loading_data">加载数据时出错</string>
+    <string name="saving_image">正在保存图像…</string>
+    <string name="error_while_deleting_creation">删除创建时出错</string>
+    <string name="ads_options">广告选项</string>
+    <string name="loading_ads">正在加载广告…</string>
 
 </resources>

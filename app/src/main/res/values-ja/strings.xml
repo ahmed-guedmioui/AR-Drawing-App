@@ -183,6 +183,17 @@
     <string name="i_highly_recommend_this_app_for_those_who_want_to_learn_drawing">絵を学びたい人には、このアプリを強くお勧めします。</string>
     <string name="sketching_was_always_my_passion_and_this_app_really_boosted_my_drawing_skills">スケッチはいつも私の情熱でしたが、このアプリは本当に私の絵のスキルを向上させました！</string>
     <string name="user_reviews">ユーザーレビュー</string>
+    <string name="get_access_to_details_4">上級レベルの強化のロックを解除する</string>
+    <string name="get_access_to_details_5">高品質の画像をアップロードするか、さまざまなテンプレートから選択してください</string>
+    <string name="get_access_to_details_6">すべてのスケッチは描画とトレースの準備ができています</string>
+    <string name="back">前の</string>
+    <string name="error_picking_image">画像選択エラー</string>
+    <string name="error_loading_images">画像の読み込みエラー</string>
+    <string name="error_loading_data">データのロード中にエラーが発生しました</string>
+    <string name="saving_image">画像を保存中…</string>
+    <string name="error_while_deleting_creation">作成の削除中にエラーが発生しました</string>
+    <string name="ads_options">広告オプション</string>
+    <string name="loading_ads">広告を読み込んでいます…</string>
 
 
 </resources>

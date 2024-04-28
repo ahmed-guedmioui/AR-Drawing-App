@@ -24,12 +24,12 @@ class App : Application() {
 
     companion object {
 
-        const val DEVELOPER_NAME = "AhmedGuedmioui"
+        const val DEVELOPER_NAME = "AR Draw Studio"
 
-        const val tiktok = "realmadrid"
-        const val facebook = "RealMadrid"
-        const val instagram = "realmadrid"
-        const val x = "realmadrid"
+        const val tiktok = "ardrawstudio.sketchtrace"
+        const val facebook = "ardrawstudio.sketchtrace"
+        const val instagram = "ardrawstudio.sketchtrace"
+        const val x = "ArDrawStudio"
     }
 
     override fun onCreate() {

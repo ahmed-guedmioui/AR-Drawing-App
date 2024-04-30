@@ -43,8 +43,8 @@ class AppDataRepositoryImpl @Inject constructor(
             emit(Resource.Loading(true))
 
             val appDataDto = try {
-//               appDataApi.getAppData()
-                TestAppDataApi.getAppData()
+               appDataApi.getAppData()
+//                TestAppDataApi.getAppData()
             } catch (e: IOException) {
                 e.printStackTrace()
                 emit(

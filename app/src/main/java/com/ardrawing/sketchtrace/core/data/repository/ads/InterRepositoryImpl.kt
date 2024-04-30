@@ -7,6 +7,7 @@ import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import com.ardrawing.sketchtrace.R
+import com.ardrawing.sketchtrace.core.domain.model.app_data.AppData
 import com.ardrawing.sketchtrace.core.domain.repository.AppDataRepository
 import com.ardrawing.sketchtrace.core.domain.repository.ads.InterRepository
 import com.ardrawing.sketchtrace.util.AdsConstants
@@ -22,11 +23,9 @@ import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback
 import javax.inject.Inject
 
 class InterRepositoryImpl @Inject constructor(
-    private val appDataRepository: AppDataRepository,
+    appDataRepository: AppDataRepository,
     private val prefs: SharedPreferences
 ) : InterRepository {
-
-    private var appData = appDataRepository.getAppData()
 
     private lateinit var admobInterstitialAd: InterstitialAd
     private lateinit var facebookInterstitialAd: com.facebook.ads.InterstitialAd
@@ -36,6 +35,12 @@ class InterRepositoryImpl @Inject constructor(
 
     private lateinit var onAdClosedListener: InterRepository.OnAdClosedListener
     private var counter = 1
+
+    private var appData = appDataRepository.getAppData()
+
+    override fun setAppDataRepository(appData: AppData) {
+        this.appData = appData
+    }
 
     override fun loadInterstitial(activity: Activity) {
 

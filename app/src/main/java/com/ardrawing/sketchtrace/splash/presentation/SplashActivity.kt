@@ -182,18 +182,10 @@ class SplashActivity : AppCompatActivity() {
                     this, arrayOf(Manifest.permission.POST_NOTIFICATIONS), 101
                 )
             } else {
-                if (canShowAds.get()) {
-                    loadAds()
-                } else {
-                    navigate()
-                }
+                loadAds()
             }
         } else {
-            if (canShowAds.get()) {
-                loadAds()
-            } else {
-                navigate()
-            }
+            loadAds()
         }
     }
 
@@ -201,11 +193,7 @@ class SplashActivity : AppCompatActivity() {
         requestCode: Int, permissions: Array<out String>, grantResults: IntArray
     ) {
         if (requestCode == 101) {
-            if (canShowAds.get()) {
-                loadAds()
-            } else {
-                navigate()
-            }
+            loadAds()
         }
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
     }
@@ -218,13 +206,16 @@ class SplashActivity : AppCompatActivity() {
 
         MobileAds.initialize(this)
 
-        interRepository.loadInterstitial(
-            activity = this@SplashActivity,
-        )
+        splashState.appData?.let { appData ->
+            interRepository.setAppDataRepository(appData)
+            interRepository.loadInterstitial(activity = this)
 
-        admobAppOpenRepository.showSplashAd(activity = this) {
-            navigate()
+            admobAppOpenRepository.setAppDataRepository(appData)
+            admobAppOpenRepository.showSplashAd(activity = this) {
+                navigate()
+            }
         }
+
     }
 
     private fun navigate() {

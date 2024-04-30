@@ -28,6 +28,7 @@ import com.ardrawing.sketchtrace.databinding.ActivityTraceBinding
 import com.ardrawing.sketchtrace.paywall.presentation.PaywallActivity
 import com.ardrawing.sketchtrace.language.data.util.LanguageChanger
 import com.ardrawing.sketchtrace.core.domain.repository.ads.RewardedRepository
+import com.ardrawing.sketchtrace.util.other_util.MultiTouch
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.transition.Transition
@@ -97,6 +98,11 @@ class TraceActivity : AppCompatActivity() {
     }
 
     private fun loadImage(path: String) {
+
+        binding.objImage.setOnTouchListener(
+            MultiTouch(binding.objImage)
+        )
+
         Glide.with(this)
             .asBitmap()
             .load(path)
@@ -217,17 +223,13 @@ class TraceActivity : AppCompatActivity() {
     }
 
     private fun setImageEnabled() {
-        traceState?.let {
-            binding.apply {
-                if (it.isEnabled) {
-                    objImage.isEnabled = true
-                    icLock.setImageResource(R.drawable.lock)
-                    Log.d("tag_trace", "Enabled = true")
-                } else {
-                    objImage.isEnabled = false
-                    icLock.setImageResource(R.drawable.unlock)
-                    Log.d("tag_trace", "Enabled = false")
-                }
+        traceState?.let {traceState ->
+            if (traceState.isEnabled) {
+                binding.objImage.isEnabled = true
+                binding.icLock.setImageResource(R.drawable.lock)
+            } else {
+                binding.objImage.isEnabled = false
+                binding.icLock.setImageResource(R.drawable.unlock)
             }
         }
     }

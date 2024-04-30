@@ -14,6 +14,7 @@ import com.ardrawing.sketchtrace.core.domain.repository.AppDataRepository
 import com.ardrawing.sketchtrace.core.domain.usecase.UpdateSubscriptionExpireDate
 import com.ardrawing.sketchtrace.core.data.util.CountryChecker
 import com.ardrawing.sketchtrace.core.data.util.Resource
+import com.ardrawing.sketchtrace.util.PrefsConstants
 import com.google.gson.Gson
 import com.revenuecat.purchases.CustomerInfo
 import com.revenuecat.purchases.Purchases
@@ -42,8 +43,8 @@ class AppDataRepositoryImpl @Inject constructor(
             emit(Resource.Loading(true))
 
             val appDataDto = try {
-               appDataApi.getAppData()
-//                TestAppDataApi.getAppData()
+//               appDataApi.getAppData()
+                TestAppDataApi.getAppData()
             } catch (e: IOException) {
                 e.printStackTrace()
                 emit(
@@ -70,10 +71,8 @@ class AppDataRepositoryImpl @Inject constructor(
             appDataDto?.let {
                 AppDataInstance.appData = it.toAppData()
 
-//                updateAppDataJsonString(it.toAppData())
-
                 prefs.edit()
-                    .putString("admobOpenApp", getAppData().admobOpenApp)
+                    .putString(PrefsConstants.ADMOB_OPEN_APP_AD_ID, getAppData().admobOpenApp)
                     .apply()
 
                 subscription()
@@ -92,67 +91,20 @@ class AppDataRepositoryImpl @Inject constructor(
     }
 
     override fun getAppData(): AppData {
-
         return AppDataInstance.appData ?: getDefaultAppData().toAppData()
-
-//        convertJsonStringToAppData()?.let { appData ->
-//            return appData
-//        }
-//
-//        return getDefaultAppData().toAppData()
     }
 
-    override fun updateIsSubscribed(
-        isSubscribed: Boolean
-    ) {
-
+    override fun updateIsSubscribed(isSubscribed: Boolean) {
         getAppData().isSubscribed = isSubscribed
-
-//        updateAppDataJsonString(
-//            getAppData().copy(isSubscribed = isSubscribed)
-//        )
     }
 
-    override fun updateShowAdsForThisUser(
-        showAdsForThisUser: Boolean
-    ) {
-
+    override fun updateShowAdsForThisUser(showAdsForThisUser: Boolean) {
         getAppData().showAdsForThisUser = showAdsForThisUser
-
-//        updateAppDataJsonString(
-//            getAppData().copy(showAdsForThisUser = showAdsForThisUser)
-//        )
     }
 
-    override fun updateSubscriptionExpireDate(
-        subscriptionExpireDate: String
-    ) {
-
+    override fun updateSubscriptionExpireDate(subscriptionExpireDate: String) {
         getAppData().subscriptionExpireDate = subscriptionExpireDate
-
-//        updateAppDataJsonString(
-//            getAppData().copy(subscriptionExpireDate = subscriptionExpireDate)
-//        )
     }
-
-//    private fun updateAppDataJsonString(appData: AppData) {
-//        val appDataJsonString = convertAppDataToJsonString(appData)
-//        prefs.edit()
-//            .putString("appDataJson", appDataJsonString)
-//            .apply()
-//    }
-//
-//    private fun convertAppDataToJsonString(appData: AppData): String {
-//        return Gson().toJson(appData)
-//    }
-//
-//    private fun convertJsonStringToAppData(): AppData? {
-//        val appDataJsonString =
-//            prefs.getString("appDataJson", null)
-//
-//        return Gson().fromJson(appDataJsonString, AppData::class.java)
-//    }
-
 
     private fun subscription() {
         Purchases.sharedInstance.getCustomerInfo(

@@ -8,6 +8,7 @@ import android.os.Bundle
 import android.util.Log
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.ProcessLifecycleOwner
+import com.ardrawing.sketchtrace.core.domain.model.app_data.AppData
 import com.ardrawing.sketchtrace.core.domain.repository.ads.AdmobAppOpenRepository
 import com.ardrawing.sketchtrace.core.domain.repository.AppDataRepository
 import com.ardrawing.sketchtrace.util.PrefsConstants
@@ -21,7 +22,7 @@ import java.util.Date
 import javax.inject.Inject
 
 class AdmobAppOpenRepositoryImpl @Inject constructor(
-   private val appDataRepository: AppDataRepository,
+    appDataRepository: AppDataRepository,
     private val prefs: SharedPreferences,
     private val app: Application,
 ) : AdmobAppOpenRepository, LifecycleObserver, ActivityLifecycleCallbacks {
@@ -30,6 +31,12 @@ class AdmobAppOpenRepositoryImpl @Inject constructor(
     private var loadTime: Long = 0
     private var currentActivity: Activity? = null
     private lateinit var loadCallback: AppOpenAdLoadCallback
+
+    private var appData = appDataRepository.getAppData()
+
+    override fun setAppDataRepository(appData: AppData) {
+        this.appData = appData
+    }
 
     /**
      * Utility method to check if ad was loaded more than n hours ago.
@@ -59,9 +66,13 @@ class AdmobAppOpenRepositoryImpl @Inject constructor(
         }
 
 
-        val id = prefs.getString("admobOpenApp", "") ?: ""
+        val id = prefs.getString(
+            PrefsConstants.ADMOB_OPEN_APP_AD_ID,
+            appData?.admobOpenApp
+        ) ?: ""
 
         Log.d(LOG_TAG, "id = $id")
+
         loadCallback = object : AppOpenAdLoadCallback() {
             /**
              * Called when an app open ad has loaded.
@@ -72,7 +83,6 @@ class AdmobAppOpenRepositoryImpl @Inject constructor(
                 appOpenAd = ad
                 loadTime = Date().time
                 Log.d(LOG_TAG, "onAdLoaded")
-                Log.d(LOG_TAG, "\n\n")
 
                 if (isSplash) {
                     showAdIfAvailable(activity) {
@@ -190,7 +200,7 @@ class AdmobAppOpenRepositoryImpl @Inject constructor(
     ) {
 
         if (
-            !appDataRepository.getAppData().showAdsForThisUser ||
+            appData?.showAdsForThisUser != true ||
             !prefs.getBoolean(PrefsConstants.CAN_SHOW_ADMOB_ADS, true)
         ) {
             onAdClosed()

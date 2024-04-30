@@ -49,6 +49,7 @@ import com.ardrawing.sketchtrace.language.data.util.LanguageChanger
 import com.ardrawing.sketchtrace.core.data.util.PermissionUtils
 import com.ardrawing.sketchtrace.core.domain.repository.ads.NativeRepository
 import com.ardrawing.sketchtrace.core.domain.repository.ads.RewardedRepository
+import com.ardrawing.sketchtrace.util.other_util.MultiTouch
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.transition.Transition
@@ -81,9 +82,6 @@ class SketchActivity : AppCompatActivity() {
 
     @Inject
     lateinit var appDataRepository: AppDataRepository
-
-    @Inject
-    lateinit var imageCategoriesRepository: ImageCategoriesRepository
 
     @Inject
     lateinit var rewardedRepository: RewardedRepository
@@ -151,6 +149,10 @@ class SketchActivity : AppCompatActivity() {
             takePhotoDialog()
         }
 
+        binding.objImage.setOnTouchListener(
+            MultiTouch(binding.objImage)
+        )
+
         val imagePath = intent?.extras?.getString("imagePath")
         if (imagePath != null) {
             Glide.with(this).asBitmap().load(imagePath).into(object : CustomTarget<Bitmap>() {
@@ -160,7 +162,6 @@ class SketchActivity : AppCompatActivity() {
                     Constants.bitmap = resource
                     binding.objImage.apply {
                         setImageBitmap(Constants.bitmap)
-
                         isEditSketch = false
                         binding.imgOutline.setImageResource(R.drawable.outline)
                         alpha = 0.6f

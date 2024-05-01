@@ -7,6 +7,7 @@ import com.ardrawing.sketchtrace.core.domain.repository.AppDataRepository
 import com.ardrawing.sketchtrace.core.domain.repository.CoreRepository
 import com.ardrawing.sketchtrace.splash.presentation.util.ShouldShowUpdateDialog
 import com.ardrawing.sketchtrace.core.data.util.Resource
+import com.ardrawing.sketchtrace.paywall.domain.repository.PaywallRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -24,6 +25,7 @@ class SplashViewModel @Inject constructor(
     private val coreRepository: CoreRepository,
     private val appDataRepository: AppDataRepository,
     private val imageCategoriesRepository: ImageCategoriesRepository,
+    private val paywallRepository: PaywallRepository
 ) : ViewModel() {
 
     private val _splashState = MutableStateFlow(SplashState())
@@ -96,6 +98,8 @@ class SplashViewModel @Inject constructor(
                     is Resource.Loading -> Unit
 
                     is Resource.Success -> {
+
+                        paywallRepository.subscription()
 
                         _splashState.update {
                             it.copy(

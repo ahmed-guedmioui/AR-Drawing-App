@@ -14,6 +14,7 @@ import com.ardrawing.sketchtrace.core.domain.repository.AppDataRepository
 import com.ardrawing.sketchtrace.core.domain.usecase.UpdateSubscriptionExpireDate
 import com.ardrawing.sketchtrace.core.data.util.CountryChecker
 import com.ardrawing.sketchtrace.core.data.util.Resource
+import com.ardrawing.sketchtrace.paywall.domain.repository.PaywallRepository
 import com.ardrawing.sketchtrace.util.PrefsConstants
 import com.google.gson.Gson
 import com.revenuecat.purchases.CustomerInfo
@@ -34,7 +35,7 @@ import javax.inject.Inject
 class AppDataRepositoryImpl @Inject constructor(
     private val application: Application,
     private val appDataApi: AppDataApi,
-    private val prefs: SharedPreferences
+    private val prefs: SharedPreferences,
 ) : AppDataRepository {
 
     override suspend fun loadAppData(): Flow<Resource<Unit>> {
@@ -43,8 +44,8 @@ class AppDataRepositoryImpl @Inject constructor(
             emit(Resource.Loading(true))
 
             val appDataDto = try {
-//               appDataApi.getAppData()
-                TestAppDataApi.getAppData()
+               appDataApi.getAppData()
+//                TestAppDataApi.getAppData()
             } catch (e: IOException) {
                 e.printStackTrace()
                 emit(
@@ -75,8 +76,6 @@ class AppDataRepositoryImpl @Inject constructor(
                     .putString(PrefsConstants.ADMOB_OPEN_APP_AD_ID, getAppData().admobOpenApp)
                     .apply()
 
-                subscription()
-
                 emit(Resource.Success())
                 emit(Resource.Loading(false))
                 return@flow
@@ -106,30 +105,30 @@ class AppDataRepositoryImpl @Inject constructor(
         getAppData().subscriptionExpireDate = subscriptionExpireDate
     }
 
-    private fun subscription() {
-        Purchases.sharedInstance.getCustomerInfo(
-            object : ReceiveCustomerInfoCallback {
-                override fun onError(error: PurchasesError) {
-                    updateIsSubscribed(false)
-                }
-
-                override fun onReceived(customerInfo: CustomerInfo) {
-                    val date = customerInfo.getExpirationDateForEntitlement(
-                        BuildConfig.ENTITLEMENT
-                    )
-                    date?.let {
-                        if (it.after(Date())) {
-                            updateIsSubscribed(true)
-                        }
-                    }
-                    UpdateSubscriptionExpireDate(
-                        date, this@AppDataRepositoryImpl
-                    ).invoke()
-                    updateShowAdsForThisUser()
-                }
-            }
-        )
-    }
+//    private fun subscription() {
+//        Purchases.sharedInstance.getCustomerInfo(
+//            object : ReceiveCustomerInfoCallback {
+//                override fun onError(error: PurchasesError) {
+//                    updateIsSubscribed(false)
+//                }
+//
+//                override fun onReceived(customerInfo: CustomerInfo) {
+//                    val date = customerInfo.getExpirationDateForEntitlement(
+//                        BuildConfig.ENTITLEMENT
+//                    )
+//                    date?.let {
+//                        if (it.after(Date())) {
+//                            updateIsSubscribed(true)
+//                        }
+//                    }
+//                    UpdateSubscriptionExpireDate(
+//                        date, this@AppDataRepositoryImpl
+//                    ).invoke()
+//                    updateShowAdsForThisUser()
+//                }
+//            }
+//        )
+//    }
 
     override fun updateShowAdsForThisUser() {
         if (getAppData().isSubscribed) {

@@ -255,7 +255,10 @@ class SplashActivity : AppCompatActivity() {
     private fun checkSubscriptionBeforeGoingHome() {
         if (splashState.appData?.isSubscribed == true) {
             splashViewModel.onEvent(SplashUiEvent.AlreadySubscribed)
-            goToHome()
+            Intent(
+                this, HomeActivity::class.java
+            ).also(::startActivity)
+
         } else {
             Intent(this, PaywallActivity::class.java).also {
                 it.putExtra("toHome", true)
@@ -263,13 +266,6 @@ class SplashActivity : AppCompatActivity() {
             }
         }
     }
-
-    private fun goToHome() {
-        Intent(this, HomeActivity::class.java).also {
-            startActivity(it)
-        }
-    }
-
 
     private fun updateDialog(state: Int) {
 

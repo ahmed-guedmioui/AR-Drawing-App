@@ -43,8 +43,8 @@ class AppDataRepositoryImpl @Inject constructor(
             emit(Resource.Loading(true))
 
             val appDataDto = try {
-               appDataApi.getAppData()
-//                TestAppDataApi.getAppData()
+//               appDataApi.getAppData()
+                TestAppDataApi.getAppData()
             } catch (e: IOException) {
                 e.printStackTrace()
                 emit(
@@ -111,13 +111,12 @@ class AppDataRepositoryImpl @Inject constructor(
             object : ReceiveCustomerInfoCallback {
                 override fun onError(error: PurchasesError) {
                     updateIsSubscribed(false)
-                    UpdateSubscriptionExpireDate(
-                        null, this@AppDataRepositoryImpl
-                    ).invoke()
                 }
 
                 override fun onReceived(customerInfo: CustomerInfo) {
-                    val date = customerInfo.getExpirationDateForEntitlement(BuildConfig.ENTITLEMENT)
+                    val date = customerInfo.getExpirationDateForEntitlement(
+                        BuildConfig.ENTITLEMENT
+                    )
                     date?.let {
                         if (it.after(Date())) {
                             updateIsSubscribed(true)

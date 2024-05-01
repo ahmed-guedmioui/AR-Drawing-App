@@ -24,6 +24,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.viewinterop.AndroidView
@@ -50,6 +51,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import kotlin.properties.Delegates
 
+@OptIn(ExperimentalPreviewRevenueCatUIPurchasesAPI::class)
 @AndroidEntryPoint
 class PaywallActivity : AppCompatActivity() {
 
@@ -76,6 +78,20 @@ class PaywallActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         LanguageChanger.changeAppLanguage(this)
 
+        reviews = listOf(
+            this.getString(R.string.i_was_able_to_sketch_a_picture_of_my_friend_so_easily),
+            this.getString(R.string.everyone_was_amazed_with_my_drawing_and_i_m_so_proud),
+            this.getString(R.string.i_highly_recommend_this_app_for_those_who_want_to_learn_drawing),
+            this.getString(R.string.sketching_was_always_my_passion_and_this_app_really_boosted_my_drawing_skills),
+        )
+        images = listOf(
+            AppCompatResources.getDrawable(this, R.drawable.step_by_step_1),
+            AppCompatResources.getDrawable(this, R.drawable.step_by_step_2),
+            AppCompatResources.getDrawable(this, R.drawable.step_by_step_3),
+            AppCompatResources.getDrawable(this, R.drawable.step_by_step_4),
+            AppCompatResources.getDrawable(this, R.drawable.step_by_step_5),
+        )
+
         toHome = intent?.extras?.getBoolean("toHome") ?: false
 
         lifecycleScope.launch {
@@ -87,19 +103,28 @@ class PaywallActivity : AppCompatActivity() {
             }
         }
 
-        images = listOf(
-            AppCompatResources.getDrawable(this, R.drawable.step_by_step_1),
-            AppCompatResources.getDrawable(this, R.drawable.step_by_step_2),
-            AppCompatResources.getDrawable(this, R.drawable.step_by_step_3),
-            AppCompatResources.getDrawable(this, R.drawable.step_by_step_4),
-            AppCompatResources.getDrawable(this, R.drawable.step_by_step_5),
-        )
-        reviews = listOf(
-            this.getString(R.string.i_was_able_to_sketch_a_picture_of_my_friend_so_easily),
-            this.getString(R.string.everyone_was_amazed_with_my_drawing_and_i_m_so_proud),
-            this.getString(R.string.i_highly_recommend_this_app_for_those_who_want_to_learn_drawing),
-            this.getString(R.string.sketching_was_always_my_passion_and_this_app_really_boosted_my_drawing_skills),
-        )
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                paywallViewModel.purchasesErrorChannel.collect { error ->
+                    if (error) {
+                        finish()
+                    }
+                }
+            }
+        }
+
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                paywallViewModel.dismissRequestChannel.collect { dismiss ->
+                    if (dismiss && toHome) {
+                        Intent(
+                            this@PaywallActivity, HomeActivity::class.java
+                        ).also(::startActivity)
+                        finish()
+                    }
+                }
+            }
+        }
 
         setContent {
             ArDrawingTheme {
@@ -108,88 +133,18 @@ class PaywallActivity : AppCompatActivity() {
                         .background(MaterialTheme.colorScheme.background)
                 ) {
 
-                    LaunchedEffect(true) {
-                        paywallViewModel.finishActivityChannel.collect { finish ->
-                            if (finish) {
-                                finish()
-                            }
+                    val options = paywallViewModel.optionsState.collectAsState().value
+
+                    options?.let {
+                        PaywallFooter(
+                            condensed = true,
+                            options = it
+                        ) { padding ->
+                            PaywallScreen(padding)
                         }
                     }
-
-                    paywallState.offering?.let {
-                        PaywallDialogScreen2(it) {
-                            if (toHome) {
-                                Intent(this, HomeActivity::class.java).also {
-                                    startActivity(it)
-                                }
-                            }
-                            finish()
-                        }
-                    }
-
                 }
             }
-        }
-    }
-
-    @OptIn(ExperimentalPreviewRevenueCatUIPurchasesAPI::class)
-    @Composable
-    private fun PaywallDialogScreen2(
-        offering: Offering,
-        dismissRequest: () -> Unit
-    ) {
-
-        PaywallFooter(
-            condensed = true,
-            options = PaywallOptions.Builder(dismissRequest).setOffering(offering)
-                .setListener(object : PaywallListener {
-                    override fun onPurchaseCompleted(
-                        customerInfo: CustomerInfo, storeTransaction: StoreTransaction
-                    ) {
-                        val date =
-                            customerInfo.getExpirationDateForEntitlement(BuildConfig.ENTITLEMENT)
-
-                        paywallViewModel.onEvent(
-                            PaywallUiEvent.Subscribe(isSubscribed = true, date = date)
-                        )
-
-                        Log.d("REVENUE_CUT", "onPurchaseCompleted")
-                    }
-
-                    override fun onRestoreCompleted(customerInfo: CustomerInfo) {
-                        val date =
-                            customerInfo.getExpirationDateForEntitlement(BuildConfig.ENTITLEMENT)
-
-                        paywallViewModel.onEvent(
-                            PaywallUiEvent.Subscribe(isSubscribed = true, date = date)
-                        )
-
-                        Log.d("REVENUE_CUT", "onRestoreCompleted")
-                    }
-
-                    override fun onPurchaseCancelled() {
-                        Log.d("REVENUE_CUT", "onPurchaseCancelled")
-                        paywallViewModel.onEvent(
-                            PaywallUiEvent.Subscribe(isSubscribed = false)
-                        )
-                    }
-
-                    override fun onPurchaseError(error: PurchasesError) {
-                        Log.d("REVENUE_CUT", "onPurchaseError")
-                        paywallViewModel.onEvent(
-                            PaywallUiEvent.Subscribe(isSubscribed = false)
-                        )
-                    }
-
-                    override fun onRestoreError(error: PurchasesError) {
-                        Log.d("REVENUE_CUT", "onRestoreError")
-                        paywallViewModel.onEvent(
-                            PaywallUiEvent.Subscribe(isSubscribed = false)
-                        )
-                    }
-                }).build()
-        ) { padding ->
-            PaywallScreen(padding)
         }
     }
 

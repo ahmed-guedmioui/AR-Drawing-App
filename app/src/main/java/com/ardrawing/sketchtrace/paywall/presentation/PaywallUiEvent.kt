@@ -8,10 +8,10 @@ import java.util.Date
  */
 sealed interface PaywallUiEvent {
 
-    data class Subscribe(
-        val isSubscribed: Boolean,
-        val date: Date? = null
-    ) : PaywallUiEvent
+//    data class Subscribe(
+//        val isSubscribed: Boolean,
+//        val date: Date? = null
+//    ) : PaywallUiEvent
 
     data class ShowHideFaq(
         val faqNumber: Int

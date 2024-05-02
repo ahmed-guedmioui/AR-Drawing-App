@@ -6,7 +6,7 @@ import com.ardrawing.sketchtrace.core.domain.model.app_data.AppData
 /**
  * @author Ahmed Guedmioui
  */
-interface InterRepository {
+interface InterstitialManger {
 
     fun setAppDataRepository(
         appData: AppData

@@ -9,7 +9,7 @@ import android.util.Log
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.ProcessLifecycleOwner
 import com.ardrawing.sketchtrace.core.domain.model.app_data.AppData
-import com.ardrawing.sketchtrace.core.domain.repository.ads.AdmobAppOpenRepository
+import com.ardrawing.sketchtrace.core.domain.repository.ads.AppOpenManager
 import com.ardrawing.sketchtrace.core.domain.repository.AppDataRepository
 import com.ardrawing.sketchtrace.util.PrefsConstants
 import com.google.android.gms.ads.AdError
@@ -21,11 +21,11 @@ import com.google.android.gms.ads.appopen.AppOpenAd.AppOpenAdLoadCallback
 import java.util.Date
 import javax.inject.Inject
 
-class AdmobAppOpenRepositoryImpl @Inject constructor(
+class AdmobAppOpenManagerImpl @Inject constructor(
     appDataRepository: AppDataRepository,
     private val prefs: SharedPreferences,
     private val app: Application,
-) : AdmobAppOpenRepository, LifecycleObserver, ActivityLifecycleCallbacks {
+) : AppOpenManager, LifecycleObserver, ActivityLifecycleCallbacks {
 
     private var appOpenAd: AppOpenAd? = null
     private var loadTime: Long = 0

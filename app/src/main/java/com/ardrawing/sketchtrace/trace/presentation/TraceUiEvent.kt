@@ -4,21 +4,22 @@ package com.ardrawing.sketchtrace.trace.presentation
  * @author Ahmed Guedmioui
  */
 sealed interface TraceUiEvent {
-    data class UpdateTransparency(
+    data class UpdateImageTransparency(
         val transparency: Float
     ) : TraceUiEvent
 
-    data class UpdateBrightness(
+    data class UpdateScreenBrightness(
         val brightness: Float
     ) : TraceUiEvent
 
-    data class UpdateBackgroundColor(
+    data class UpdateScreenBackgroundColor(
         val backgroundColor: Int
     ) : TraceUiEvent
 
-    object UpdateIsEnabled : TraceUiEvent
-    object InitializedActivity : TraceUiEvent
-    object UpdateIsFlipped : TraceUiEvent
-    object ShowHideColorDialog : TraceUiEvent
+
+    data object ShowStartAnimation : TraceUiEvent
+    data object ShowHideColorDialog : TraceUiEvent
+    data object UpdateIsImageEnabled : TraceUiEvent
+    data object UpdateIsImageFlipped : TraceUiEvent
 
 }

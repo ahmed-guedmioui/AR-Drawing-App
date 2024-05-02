@@ -1,4 +1,4 @@
-package com.ardrawing.sketchtrace.my_creation.presentation.my_creation_list
+package com.ardrawing.sketchtrace.creation.presentation.creation_list
 
 import android.content.Intent
 import android.os.Bundle
@@ -10,9 +10,9 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.GridLayoutManager
 import com.ardrawing.sketchtrace.databinding.ActivityMyCreationLsitBinding
-import com.ardrawing.sketchtrace.my_creation.presentation.my_creation_details.MyCreationDetailsActivity
-import com.ardrawing.sketchtrace.my_creation.presentation.my_creation_list.adapter.MyCreationListAdapter
-import com.ardrawing.sketchtrace.core.domain.repository.ads.InterRepository
+import com.ardrawing.sketchtrace.creation.presentation.creation_details.CreationDetailsActivity
+import com.ardrawing.sketchtrace.creation.presentation.creation_list.adapter.CreationListAdapter
+import com.ardrawing.sketchtrace.core.domain.repository.ads.InterstitialManger
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import com.ardrawing.sketchtrace.language.data.util.LanguageChanger
@@ -22,13 +22,13 @@ import javax.inject.Inject
  * @author Ahmed Guedmioui
  */
 @AndroidEntryPoint
-class MyCreationListActivity : AppCompatActivity() {
+class CreationListActivity : AppCompatActivity() {
 
     @Inject
-    lateinit var interRepository: InterRepository
+    lateinit var interstitialManger: InterstitialManger
 
-    private val myCreationListViewModel: MyCreationListViewModel by viewModels()
-    private lateinit var myCreationListState: MyCreationListState
+    private val creationListViewModel: CreationListViewModel by viewModels()
+    private lateinit var creationListState: CreationListState
 
     private lateinit var binding: ActivityMyCreationLsitBinding
 
@@ -45,8 +45,8 @@ class MyCreationListActivity : AppCompatActivity() {
 
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
-                myCreationListViewModel.myCreationState.collect {
-                    myCreationListState = it
+                creationListViewModel.myCreationState.collect {
+                    creationListState = it
                     initCreationListRec()
                 }
             }
@@ -55,23 +55,23 @@ class MyCreationListActivity : AppCompatActivity() {
     }
 
     private fun initCreationListRec() {
-       val myCreationListAdapter = MyCreationListAdapter(
-            this, myCreationListState.creationList
+       val creationListAdapter = CreationListAdapter(
+            this, creationListState.creationList
         )
 
         binding.recyclerView.layoutManager = GridLayoutManager(this, 2)
-        binding.recyclerView.adapter = myCreationListAdapter
+        binding.recyclerView.adapter = creationListAdapter
 
-        myCreationListAdapter.setClickListener(object :
-            MyCreationListAdapter.ClickListener {
+        creationListAdapter.setClickListener(object :
+            CreationListAdapter.ClickListener {
             override fun oClick(uri: String, isVideo: Boolean) {
-                interRepository.showInterstitial(
-                    this@MyCreationListActivity,
-                    object : InterRepository.OnAdClosedListener {
+                interstitialManger.showInterstitial(
+                    this@CreationListActivity,
+                    object : InterstitialManger.OnAdClosedListener {
                         override fun onAdClosed() {
                             Intent(
-                                this@MyCreationListActivity,
-                                MyCreationDetailsActivity::class.java
+                                this@CreationListActivity,
+                                CreationDetailsActivity::class.java
                             ).also { intent ->
                                 intent.putExtra("uri", uri)
                                 intent.putExtra("isVideo", isVideo)

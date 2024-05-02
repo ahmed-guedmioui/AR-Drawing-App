@@ -15,8 +15,8 @@ import com.ardrawing.sketchtrace.get_started.presentation.GetStartedActivity
 import com.ardrawing.sketchtrace.databinding.ActivityTipsBinding
 import com.ardrawing.sketchtrace.core.presentation.util.Animations
 import com.ardrawing.sketchtrace.language.data.util.LanguageChanger
-import com.ardrawing.sketchtrace.core.domain.repository.ads.InterRepository
-import com.ardrawing.sketchtrace.core.domain.repository.ads.NativeRepository
+import com.ardrawing.sketchtrace.core.domain.repository.ads.InterstitialManger
+import com.ardrawing.sketchtrace.core.domain.repository.ads.NativeManager
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -35,10 +35,10 @@ class OnboardingActivity : AppCompatActivity() {
     private var isFromSplash = true
 
     @Inject
-    lateinit var interRepository: InterRepository
+    lateinit var interstitialManger: InterstitialManger
 
     @Inject
-    lateinit var nativeRepository: NativeRepository
+    lateinit var nativeManager: NativeManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -57,8 +57,8 @@ class OnboardingActivity : AppCompatActivity() {
             }
         }
 
-        nativeRepository.setActivity(this)
-        nativeRepository.loadNative(
+        nativeManager.setActivity(this)
+        nativeManager.loadNative(
             findViewById(R.id.native_frame),
             findViewById(R.id.native_temp),
             isButtonTop = false
@@ -133,9 +133,9 @@ class OnboardingActivity : AppCompatActivity() {
             }
 
             5 -> {
-                interRepository.showInterstitial(
+                interstitialManger.showInterstitial(
                     this,
-                    object : InterRepository.OnAdClosedListener {
+                    object : InterstitialManger.OnAdClosedListener {
                     override fun onAdClosed() {
                         if (isFromSplash) {
                             onboardingViewModel.onEvent(OnboardingUiEvent.Navigate)

@@ -9,7 +9,7 @@ import android.util.Log
 import com.ardrawing.sketchtrace.R
 import com.ardrawing.sketchtrace.core.domain.model.app_data.AppData
 import com.ardrawing.sketchtrace.core.domain.repository.AppDataRepository
-import com.ardrawing.sketchtrace.core.domain.repository.ads.InterRepository
+import com.ardrawing.sketchtrace.core.domain.repository.ads.InterstitialManger
 import com.ardrawing.sketchtrace.util.AdsConstants
 import com.ardrawing.sketchtrace.util.PrefsConstants
 import com.facebook.ads.Ad
@@ -22,10 +22,10 @@ import com.google.android.gms.ads.interstitial.InterstitialAd
 import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback
 import javax.inject.Inject
 
-class InterRepositoryImpl @Inject constructor(
+class InterstitialMangerImpl @Inject constructor(
     appDataRepository: AppDataRepository,
     private val prefs: SharedPreferences
-) : InterRepository {
+) : InterstitialManger {
 
     private lateinit var admobInterstitialAd: InterstitialAd
     private lateinit var facebookInterstitialAd: com.facebook.ads.InterstitialAd
@@ -33,7 +33,7 @@ class InterRepositoryImpl @Inject constructor(
     private var isFacebookInterLoaded = false
     private var isAdmobInterLoaded = false
 
-    private lateinit var onAdClosedListener: InterRepository.OnAdClosedListener
+    private lateinit var onAdClosedListener: InterstitialManger.OnAdClosedListener
     private var counter = 1
 
     private var appData = appDataRepository.getAppData()
@@ -56,7 +56,7 @@ class InterRepositoryImpl @Inject constructor(
 
     override fun showInterstitial(
         activity: Activity,
-        adClosedListener: InterRepository.OnAdClosedListener
+        adClosedListener: InterstitialManger.OnAdClosedListener
     ) {
 
         onAdClosedListener = adClosedListener

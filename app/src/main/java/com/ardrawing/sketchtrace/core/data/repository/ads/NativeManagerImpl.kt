@@ -11,7 +11,7 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import com.ardrawing.sketchtrace.R
 import com.ardrawing.sketchtrace.core.domain.repository.AppDataRepository
-import com.ardrawing.sketchtrace.core.domain.repository.ads.NativeRepository
+import com.ardrawing.sketchtrace.core.domain.repository.ads.NativeManager
 import com.ardrawing.sketchtrace.util.AdsConstants
 import com.ardrawing.sketchtrace.util.PrefsConstants
 import com.facebook.ads.Ad
@@ -29,10 +29,10 @@ import com.google.android.gms.ads.nativead.NativeAd
 import com.google.android.gms.ads.nativead.NativeAdView
 import javax.inject.Inject
 
-class NativeRepositoryImpl @Inject constructor(
+class NativeManagerImpl @Inject constructor(
     appDataRepository: AppDataRepository,
     private val prefs: SharedPreferences
-) : NativeRepository {
+) : NativeManager {
 
     private var appData = appDataRepository.getAppData()
 

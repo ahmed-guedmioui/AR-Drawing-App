@@ -9,7 +9,7 @@ import androidx.cardview.widget.CardView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.ardrawing.sketchtrace.R
-import com.ardrawing.sketchtrace.core.domain.repository.ads.NativeRepository
+import com.ardrawing.sketchtrace.core.domain.repository.ads.NativeManager
 import com.ardrawing.sketchtrace.images.domain.model.images.ImageCategory
 import com.ardrawing.sketchtrace.images.presentation.category.CategoryAdapter
 
@@ -19,7 +19,7 @@ import com.ardrawing.sketchtrace.images.presentation.category.CategoryAdapter
 class CategoriesAdapter(
     private val activity: Activity,
     var imageCategoryList: List<ImageCategory> = emptyList(),
-    private val nativeRepository: NativeRepository
+    private val nativeManager: NativeManager
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     override fun getItemViewType(i: Int): Int {
@@ -40,7 +40,7 @@ class CategoriesAdapter(
             return NativeViewHolder(
                 itemView = view,
                 activity = activity,
-                nativeRepository = nativeRepository
+                nativeManager = nativeManager
             )
         }
 
@@ -140,13 +140,13 @@ class CategoriesAdapter(
     private class NativeViewHolder(
         itemView: View,
         activity: Activity,
-        nativeRepository: NativeRepository
+        nativeManager: NativeManager
     ) :
         RecyclerView.ViewHolder(itemView) {
         init {
 
-            nativeRepository.setActivity(activity)
-            nativeRepository.loadNative(
+            nativeManager.setActivity(activity)
+            nativeManager.loadNative(
                 itemView.findViewById(R.id.native_frame),
                 itemView.findViewById(R.id.native_temp),
                 isButtonTop = false

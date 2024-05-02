@@ -5,14 +5,14 @@ import android.app.Activity
 /**
  * @author Ahmed Guedmioui
  */
-interface RewardedRepository {
+interface RewardedManger {
 
     fun loadRewarded(activity: Activity)
 
     fun showRewarded(
         activity: Activity,
         adClosedListener: OnAdClosedListener,
-        isImages: Boolean = true,
+        isUnlockImages: Boolean = true,
         onOpenPaywall: () -> Unit,
     )
 

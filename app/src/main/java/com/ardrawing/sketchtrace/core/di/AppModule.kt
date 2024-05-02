@@ -4,9 +4,9 @@ import android.app.Application
 import android.content.Context
 import android.content.SharedPreferences
 import com.ardrawing.sketchtrace.core.data.remote.AppDataApi
-import com.ardrawing.sketchtrace.core.data.repository.ads.AdmobAppOpenRepositoryImpl
-import com.ardrawing.sketchtrace.core.data.repository.ads.InterRepositoryImpl
-import com.ardrawing.sketchtrace.core.data.repository.ads.NativeRepositoryImpl
+import com.ardrawing.sketchtrace.core.data.repository.ads.AdmobAppOpenManagerImpl
+import com.ardrawing.sketchtrace.core.data.repository.ads.InterstitialMangerImpl
+import com.ardrawing.sketchtrace.core.data.repository.ads.NativeManagerImpl
 import com.ardrawing.sketchtrace.core.data.repository.ads.RewardedManagerImpl
 import com.ardrawing.sketchtrace.core.domain.repository.AppDataRepository
 import dagger.Module
@@ -59,8 +59,8 @@ object AppModule {
         appDataRepository: AppDataRepository,
         prefs: SharedPreferences,
         app: Application
-    ): AdmobAppOpenRepositoryImpl {
-        return AdmobAppOpenRepositoryImpl(appDataRepository, prefs, app)
+    ): AdmobAppOpenManagerImpl {
+        return AdmobAppOpenManagerImpl(appDataRepository, prefs, app)
     }
 
     @Provides
@@ -77,8 +77,8 @@ object AppModule {
     fun providesInterManager(
         appDataRepository: AppDataRepository,
         prefs: SharedPreferences
-    ): InterRepositoryImpl {
-        return InterRepositoryImpl(appDataRepository, prefs)
+    ): InterstitialMangerImpl {
+        return InterstitialMangerImpl(appDataRepository, prefs)
     }
 
     @Provides
@@ -86,8 +86,8 @@ object AppModule {
     fun providesNativeManager(
         appDataRepository: AppDataRepository,
         prefs: SharedPreferences
-    ): NativeRepositoryImpl {
-        return NativeRepositoryImpl(appDataRepository, prefs)
+    ): NativeManagerImpl {
+        return NativeManagerImpl(appDataRepository, prefs)
     }
 
 }

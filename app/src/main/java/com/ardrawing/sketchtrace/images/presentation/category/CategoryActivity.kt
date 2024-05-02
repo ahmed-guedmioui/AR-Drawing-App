@@ -17,9 +17,9 @@ import com.ardrawing.sketchtrace.paywall.presentation.PaywallActivity
 import com.ardrawing.sketchtrace.sketch.presentation.SketchActivity
 import com.ardrawing.sketchtrace.trace.presentation.TraceActivity
 import com.ardrawing.sketchtrace.language.data.util.LanguageChanger
-import com.ardrawing.sketchtrace.core.domain.repository.ads.InterRepository
-import com.ardrawing.sketchtrace.core.domain.repository.ads.NativeRepository
-import com.ardrawing.sketchtrace.core.domain.repository.ads.RewardedRepository
+import com.ardrawing.sketchtrace.core.domain.repository.ads.InterstitialManger
+import com.ardrawing.sketchtrace.core.domain.repository.ads.NativeManager
+import com.ardrawing.sketchtrace.core.domain.repository.ads.RewardedManger
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -36,13 +36,13 @@ class CategoryActivity : AppCompatActivity() {
     private var categoryState: CategoryState? = null
 
     @Inject
-    lateinit var rewardedRepository: RewardedRepository
+    lateinit var rewardedManger: RewardedManger
 
     @Inject
-    lateinit var interRepository: InterRepository
+    lateinit var interstitialManger: InterstitialManger
 
     @Inject
-    lateinit var nativeRepository: NativeRepository
+    lateinit var nativeManager: NativeManager
 
 
     private lateinit var binding: ActivityCategoryBinding
@@ -120,8 +120,8 @@ class CategoryActivity : AppCompatActivity() {
             }
         }
 
-        nativeRepository.setActivity(this)
-        nativeRepository.loadNative(
+        nativeManager.setActivity(this)
+        nativeManager.loadNative(
             findViewById(R.id.native_frame),
             findViewById(R.id.native_temp),
             isButtonTop = false
@@ -162,9 +162,9 @@ class CategoryActivity : AppCompatActivity() {
     private fun rewarded(
         onRewComplete: () -> Unit
     ) {
-        rewardedRepository.showRewarded(
+        rewardedManger.showRewarded(
             activity = this,
-            adClosedListener = object : RewardedRepository.OnAdClosedListener {
+            adClosedListener = object : RewardedManger.OnAdClosedListener {
                 override fun onRewClosed() {}
 
                 override fun onRewFailedToShow() {
@@ -189,9 +189,9 @@ class CategoryActivity : AppCompatActivity() {
     }
 
     private fun traceDrawingScreen(imagePath: String) {
-        interRepository.showInterstitial(
+        interstitialManger.showInterstitial(
             this,
-            object : InterRepository.OnAdClosedListener {
+            object : InterstitialManger.OnAdClosedListener {
                 override fun onAdClosed() {
                     val intent = Intent(this@CategoryActivity, TraceActivity::class.java)
                     intent.putExtra("imagePath", imagePath)
@@ -202,9 +202,9 @@ class CategoryActivity : AppCompatActivity() {
     }
 
     private fun sketchDrawingScreen(imagePath: String) {
-        interRepository.showInterstitial(
+        interstitialManger.showInterstitial(
             this,
-            object : InterRepository.OnAdClosedListener {
+            object : InterstitialManger.OnAdClosedListener {
                 override fun onAdClosed() {
                     val intent = Intent(this@CategoryActivity, SketchActivity::class.java)
                     intent.putExtra("imagePath", imagePath)

@@ -34,21 +34,23 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.content.res.AppCompatResources
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import com.ardrawing.sketchtrace.R
-import com.ardrawing.sketchtrace.image_editor.presentation.ImageEditorActivity
-import com.ardrawing.sketchtrace.databinding.ActivitySketchBinding
-import com.ardrawing.sketchtrace.images.domain.repository.ImageCategoriesRepository
-import com.ardrawing.sketchtrace.my_creation.domian.repository.CreationRepository
-import com.ardrawing.sketchtrace.paywall.presentation.PaywallActivity
-import com.ardrawing.sketchtrace.core.domain.repository.AppDataRepository
-import com.ardrawing.sketchtrace.util.Constants
-import com.ardrawing.sketchtrace.language.data.util.LanguageChanger
 import com.ardrawing.sketchtrace.core.data.util.PermissionUtils
-import com.ardrawing.sketchtrace.core.domain.repository.ads.NativeRepository
-import com.ardrawing.sketchtrace.core.domain.repository.ads.RewardedRepository
+import com.ardrawing.sketchtrace.core.domain.repository.AppDataRepository
+import com.ardrawing.sketchtrace.core.domain.repository.ads.NativeManager
+import com.ardrawing.sketchtrace.core.domain.repository.ads.RewardedManger
+import com.ardrawing.sketchtrace.creation.domian.repository.CreationRepository
+import com.ardrawing.sketchtrace.databinding.ActivitySketchBinding
+import com.ardrawing.sketchtrace.image_editor.presentation.ImageEditorActivity
+import com.ardrawing.sketchtrace.language.data.util.LanguageChanger
+import com.ardrawing.sketchtrace.paywall.presentation.PaywallActivity
+import com.ardrawing.sketchtrace.util.Constants
 import com.ardrawing.sketchtrace.util.other_util.MultiTouch
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.target.CustomTarget
@@ -84,12 +86,15 @@ class SketchActivity : AppCompatActivity() {
     lateinit var appDataRepository: AppDataRepository
 
     @Inject
-    lateinit var rewardedRepository: RewardedRepository
+    lateinit var rewardedManger: RewardedManger
 
     @Inject
-    lateinit var nativeRepository: NativeRepository
+    lateinit var nativeManager: NativeManager
 
     private lateinit var binding: ActivitySketchBinding
+    private val sketchViewModel: SketchViewModel by viewModels()
+    private var sketchState: SketchState? = null
+
 
     private lateinit var pushanim: Animation
     private var ringProgressDialog: ProgressDialog? = null
@@ -103,7 +108,6 @@ class SketchActivity : AppCompatActivity() {
     private var isRecording = false
     private var isSavedVideoCalled = true
     private var handler: Handler? = null
-    private lateinit var timestamp: String
 
     private var countDownTimer: CountDownTimer? = null
 
@@ -118,7 +122,16 @@ class SketchActivity : AppCompatActivity() {
         binding = ActivitySketchBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        updateMainTimerText("05:00", 500000)
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                sketchViewModel.sketchState.collect {
+                    sketchState = it
+                }
+            }
+        }
+
+        // 5 * 60 * 1000 = 5 minutes
+        updateMainTimerText("05:00", 5 * 60 * 1000)
 
         if (appDataRepository.getAppData()?.isSubscribed == false) {
             countDown()
@@ -136,8 +149,8 @@ class SketchActivity : AppCompatActivity() {
             binding.nativeParent.visibility = View.GONE
         }
 
-        nativeRepository.setActivity(this)
-        nativeRepository.loadNative(
+        nativeManager.setActivity(this)
+        nativeManager.loadNative(
             findViewById(R.id.native_frame),
             findViewById(R.id.native_temp),
             isButtonTop = true
@@ -482,7 +495,7 @@ class SketchActivity : AppCompatActivity() {
 
         try {
 
-            timestamp = SimpleDateFormat(
+            val timestamp = SimpleDateFormat(
                 "yyyyMMdd_HHmmss", Locale.getDefault()
             ).format(Date())
             val videoFile = File(filesDir, "VIDEO_$timestamp.mp4")
@@ -496,7 +509,6 @@ class SketchActivity : AppCompatActivity() {
                     this, R.drawable.rec_stop
                 )
             )
-
 
             binding.temp.visibility = View.VISIBLE
             binding.fastVideoCheck.visibility = View.VISIBLE
@@ -575,11 +587,14 @@ class SketchActivity : AppCompatActivity() {
         countDownTimer?.start()
     }
 
-    private fun updateMainTimerText(timerText: String, millisUntilFinished: Long) {
+    private fun updateMainTimerText(
+        timerText: String, millisUntilFinished: Long
+    ) {
         // Update your TextView with the timerText
         binding.mainTemp.text = timerText
 
-        if (millisUntilFinished <= 120000) {
+        val twoMinutes = 2 * 60 * 1000
+        if (millisUntilFinished <= twoMinutes) {
             binding.theDrawingIsReadyBtn.visibility = View.VISIBLE
         }
     }
@@ -610,9 +625,9 @@ class SketchActivity : AppCompatActivity() {
     }
 
     private fun rewarded(onRewDone: () -> Unit) {
-        rewardedRepository.showRewarded(
+        rewardedManger.showRewarded(
             activity = this,
-            adClosedListener = object : RewardedRepository.OnAdClosedListener {
+            adClosedListener = object : RewardedManger.OnAdClosedListener {
                 override fun onRewClosed() {
                     onRewDone()
                 }
@@ -625,14 +640,13 @@ class SketchActivity : AppCompatActivity() {
                     ).show()
                 }
 
-                override fun onRewComplete() {
-                }
+                override fun onRewComplete() {}
             },
-            isImages = false,
+            isUnlockImages = false,
             onOpenPaywall = {
-                Intent(this, PaywallActivity::class.java).also {
-                    startActivity(it)
-                }
+                Intent(
+                    this, PaywallActivity::class.java
+                ).also(::startActivity)
             }
         )
     }

@@ -1,7 +1,6 @@
-package com.ardrawing.sketchtrace.my_creation.presentation.my_creation_details
+package com.ardrawing.sketchtrace.creation.presentation.creation_details
 
 import android.content.Intent
-import android.content.SharedPreferences
 import android.net.Uri
 import android.os.Bundle
 import android.view.View
@@ -21,16 +20,15 @@ import com.bumptech.glide.Glide
 import com.ardrawing.sketchtrace.language.data.util.LanguageChanger
 import com.ardrawing.sketchtrace.R
 import com.ardrawing.sketchtrace.databinding.ActivityMyCreationDetailsBinding
-import com.ardrawing.sketchtrace.my_creation.domian.model.Creation
-import com.ardrawing.sketchtrace.my_creation.presentation.my_creation_list.MyCreationListActivity
+import com.ardrawing.sketchtrace.creation.domian.model.Creation
+import com.ardrawing.sketchtrace.creation.presentation.creation_list.CreationListActivity
 import dagger.hilt.android.AndroidEntryPoint
-import javax.inject.Inject
 
 /**
  * @author Ahmed Guedmioui
  */
 @AndroidEntryPoint
-class MyCreationDetailsActivity : AppCompatActivity() {
+class CreationDetailsActivity : AppCompatActivity() {
 
     private var player: ExoPlayer? = null
 
@@ -47,7 +45,7 @@ class MyCreationDetailsActivity : AppCompatActivity() {
         setContentView(view)
 
         binding.back.setOnClickListener {
-            Intent(this, MyCreationListActivity::class.java).also {
+            Intent(this, CreationListActivity::class.java).also {
                 startActivity(it)
                 finish()
             }
@@ -108,10 +106,10 @@ class MyCreationDetailsActivity : AppCompatActivity() {
 
     private fun deleteCreation(creationUri: String) {
         myCreationDetailsViewModel.onEvent(
-            MyCreationDetailsUiEvent.DeleteCreation(creationUri)
+            CreationDetailsUiEvent.DeleteCreation(creationUri)
         )
 
-        Intent(this, MyCreationListActivity::class.java).also {
+        Intent(this, CreationListActivity::class.java).also {
             startActivity(it)
             finish()
         }
@@ -119,7 +117,7 @@ class MyCreationDetailsActivity : AppCompatActivity() {
     }
 
     override fun onBackPressed() {
-        Intent(this, MyCreationListActivity::class.java).also {
+        Intent(this, CreationListActivity::class.java).also {
             startActivity(it)
             finish()
         }

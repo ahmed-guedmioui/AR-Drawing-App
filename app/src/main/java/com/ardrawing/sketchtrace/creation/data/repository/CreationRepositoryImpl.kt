@@ -1,4 +1,4 @@
-package com.ardrawing.sketchtrace.my_creation.data.repository
+package com.ardrawing.sketchtrace.creation.data.repository
 
 import android.app.Application
 import android.content.Intent
@@ -9,9 +9,8 @@ import android.os.Environment
 import android.provider.MediaStore
 import android.util.Log
 import androidx.core.net.toUri
-import com.ardrawing.sketchtrace.R
-import com.ardrawing.sketchtrace.my_creation.domian.model.Creation
-import com.ardrawing.sketchtrace.my_creation.domian.repository.CreationRepository
+import com.ardrawing.sketchtrace.creation.domian.model.Creation
+import com.ardrawing.sketchtrace.creation.domian.repository.CreationRepository
 import com.otaliastudios.transcoder.Transcoder
 import com.otaliastudios.transcoder.TranscoderListener
 import com.otaliastudios.transcoder.common.TrackStatus
@@ -21,10 +20,8 @@ import com.otaliastudios.transcoder.strategy.DefaultVideoStrategy
 import com.otaliastudios.transcoder.validator.DefaultValidator
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.ByteArrayOutputStream
 import java.io.File
@@ -38,7 +35,7 @@ import javax.inject.Inject
 /**
  * @author Ahmed Guedmioui
  */
-class MyCreationRepositoryImpl @Inject constructor(
+class CreationRepositoryImpl @Inject constructor(
     private val application: Application
 ) : CreationRepository {
 

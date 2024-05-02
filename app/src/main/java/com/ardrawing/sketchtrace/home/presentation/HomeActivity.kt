@@ -26,13 +26,13 @@ import com.ardrawing.sketchtrace.R
 import com.ardrawing.sketchtrace.core.data.repository.ads.RewardedManagerImpl
 import com.ardrawing.sketchtrace.core.data.util.UrlOpener
 import com.ardrawing.sketchtrace.core.data.util.rateApp
-import com.ardrawing.sketchtrace.core.domain.repository.ads.InterRepository
-import com.ardrawing.sketchtrace.core.domain.repository.ads.NativeRepository
+import com.ardrawing.sketchtrace.core.domain.repository.ads.InterstitialManger
+import com.ardrawing.sketchtrace.core.domain.repository.ads.NativeManager
 import com.ardrawing.sketchtrace.databinding.ActivityHomeBinding
 import com.ardrawing.sketchtrace.home.presentation.adapter.HelperPagerAdapter
 import com.ardrawing.sketchtrace.images.presentation.categories.CategoriesActivity
 import com.ardrawing.sketchtrace.language.data.util.LanguageChanger
-import com.ardrawing.sketchtrace.my_creation.presentation.my_creation_list.MyCreationListActivity
+import com.ardrawing.sketchtrace.creation.presentation.creation_list.CreationListActivity
 import com.ardrawing.sketchtrace.settings.presentation.SettingsActivity
 import com.ardrawing.sketchtrace.util.Constants
 import dagger.hilt.android.AndroidEntryPoint
@@ -55,10 +55,10 @@ class HomeActivity : AppCompatActivity() {
     lateinit var rewardedManagerImpl: RewardedManagerImpl
 
     @Inject
-    lateinit var interRepository: InterRepository
+    lateinit var interstitialManger: InterstitialManger
 
     @Inject
-    lateinit var nativeRepository: NativeRepository
+    lateinit var nativeManager: NativeManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -102,8 +102,8 @@ class HomeActivity : AppCompatActivity() {
 
         rewardedManagerImpl.loadRewarded(this)
 
-        nativeRepository.setActivity(this)
-        nativeRepository.loadNative(
+        nativeManager.setActivity(this)
+        nativeManager.loadNative(
             findViewById(R.id.native_frame),
             findViewById(R.id.native_temp),
             isButtonTop = false
@@ -135,7 +135,7 @@ class HomeActivity : AppCompatActivity() {
 
         binding.creation.setOnClickListener {
             it.startAnimation(pushAnimation)
-            startActivity(Intent(this, MyCreationListActivity::class.java))
+            startActivity(Intent(this, CreationListActivity::class.java))
         }
 
         binding.rate.setOnClickListener {
@@ -215,9 +215,9 @@ class HomeActivity : AppCompatActivity() {
     }
 
     private fun drawingListScreen(isTrace: Boolean) {
-        interRepository.showInterstitial(
+        interstitialManger.showInterstitial(
             this,
-            object : InterRepository.OnAdClosedListener {
+            object : InterstitialManger.OnAdClosedListener {
                 override fun onAdClosed() {
                     val intent = Intent(this@HomeActivity, CategoriesActivity::class.java)
                     intent.putExtra("isTrace", isTrace)

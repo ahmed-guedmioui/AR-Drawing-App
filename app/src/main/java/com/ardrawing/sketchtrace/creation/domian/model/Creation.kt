@@ -1,4 +1,4 @@
-package com.ardrawing.sketchtrace.my_creation.domian.model
+package com.ardrawing.sketchtrace.creation.domian.model
 
 import android.net.Uri
 

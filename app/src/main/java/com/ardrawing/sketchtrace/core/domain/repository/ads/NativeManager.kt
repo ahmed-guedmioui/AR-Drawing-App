@@ -7,7 +7,7 @@ import android.widget.TextView
 /**
  * @author Ahmed Guedmioui
  */
-interface NativeRepository {
+interface NativeManager {
 
     fun setActivity(activity: Activity)
 

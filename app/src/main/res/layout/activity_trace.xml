@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:background="@drawable/background">
 
-    <LinearLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/top_layer"
         android:layout_width="match_parent"
         android:layout_height="@dimen/_45sdp"
@@ -16,27 +16,14 @@
         android:weightSum="4">
 
         <RelativeLayout
-            android:id="@+id/rel_lock"
-            android:layout_width="0dp"
-            android:visibility="gone"
-            android:layout_height="match_parent"
-            android:layout_weight="1">
-
-            <ImageView
-                android:id="@+id/ic_lock"
-                app:tint="@color/primary"
-                android:layout_width="@dimen/_45sdp"
-                android:layout_height="@dimen/_45sdp"
-                android:layout_centerInParent="true"
-                android:padding="@dimen/_8sdp"
-                app:srcCompat="@drawable/lock" />
-        </RelativeLayout>
-
-        <RelativeLayout
             android:id="@+id/rel_edit_round"
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_weight="1">
+            android:layout_weight="1"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/rel_flip"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
 
             <ImageView
                 android:id="@+id/img_bg"
@@ -52,7 +39,11 @@
             android:id="@+id/rel_flip"
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_weight="1">
+            android:layout_weight="1"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/rel_lock"
+            app:layout_constraintStart_toEndOf="@+id/rel_edit_round"
+            app:layout_constraintTop_toTopOf="parent">
 
             <ImageView
                 android:layout_width="@dimen/_35sdp"
@@ -63,64 +54,86 @@
                 app:tint="@color/primary" />
         </RelativeLayout>
 
-        <LinearLayout
+        <RelativeLayout
+            android:id="@+id/rel_lock"
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_weight="2">
+            android:layout_weight="1"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/rel_camera"
+            app:layout_constraintStart_toEndOf="@+id/rel_flip"
+            app:layout_constraintTop_toTopOf="parent">
 
-            <RelativeLayout
-                android:id="@+id/rel_camera"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                tools:ignore="NestedWeights">
+            <ImageView
+                android:id="@+id/ic_lock"
+                android:layout_width="@dimen/_47sdp"
+                android:layout_height="@dimen/_47sdp"
+                android:layout_centerInParent="true"
+                android:padding="@dimen/_8sdp"
+                app:srcCompat="@drawable/lock"
+                app:tint="@color/primary" />
+        </RelativeLayout>
 
-                <ImageView
-                    android:layout_width="@dimen/_35sdp"
-                    android:layout_height="@dimen/_35sdp"
-                    android:layout_centerInParent="true"
-                    android:padding="@dimen/_3sdp"
-                    android:src="@drawable/camera"
-                    app:tint="@color/primary" />
+        <RelativeLayout
+            android:id="@+id/rel_camera"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/rel_gallery"
+            app:layout_constraintStart_toEndOf="@+id/rel_lock"
+            app:layout_constraintTop_toTopOf="parent">
 
-                <ImageView
-                    android:id="@+id/vip_photo"
-                    android:layout_width="16dp"
-                    android:layout_height="16dp"
-                    android:layout_alignParentEnd="true"
-                    android:layout_marginEnd="8dp"
-                    android:layout_marginTop="14dp"
-                    android:layout_marginBottom="14dp"
-                    android:src="@drawable/vip" />
-            </RelativeLayout>
+            <ImageView
+                android:layout_width="@dimen/_35sdp"
+                android:layout_height="@dimen/_35sdp"
+                android:layout_centerInParent="true"
+                android:padding="@dimen/_3sdp"
+                android:src="@drawable/camera"
+                app:tint="@color/primary" />
 
-            <RelativeLayout
-                android:id="@+id/rel_gallery"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1">
+            <ImageView
+                android:id="@+id/vip_photo"
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:layout_alignParentEnd="true"
+                android:layout_marginTop="14dp"
+                android:layout_marginEnd="8dp"
+                android:layout_marginBottom="14dp"
+                android:src="@drawable/vip" />
+        </RelativeLayout>
 
-                <ImageView
-                    android:layout_width="@dimen/_35sdp"
-                    android:layout_height="@dimen/_35sdp"
-                    android:layout_centerInParent="true"
-                    android:padding="@dimen/_3sdp"
-                    android:src="@drawable/gallery"
-                    app:tint="@color/primary" />
+        <RelativeLayout
+            android:id="@+id/rel_gallery"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/rel_camera"
+            app:layout_constraintTop_toTopOf="parent">
 
-                <ImageView
-                    android:id="@+id/vip_video"
-                    android:layout_width="16dp"
-                    android:layout_height="16dp"
-                    android:layout_alignParentEnd="true"
-                    android:layout_marginTop="14dp"
-                    android:layout_marginEnd="8dp"
-                    android:layout_marginBottom="14dp"
-                    android:src="@drawable/vip" />
+            <ImageView
+                android:layout_width="@dimen/_35sdp"
+                android:layout_height="@dimen/_35sdp"
+                android:layout_centerInParent="true"
+                android:padding="@dimen/_3sdp"
+                android:src="@drawable/gallery"
+                app:tint="@color/primary" />
 
-            </RelativeLayout>
-        </LinearLayout>
-    </LinearLayout>
+            <ImageView
+                android:id="@+id/vip_video"
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:layout_alignParentEnd="true"
+                android:layout_marginTop="14dp"
+                android:layout_marginEnd="8dp"
+                android:layout_marginBottom="14dp"
+                android:src="@drawable/vip" />
+
+        </RelativeLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
     <LinearLayout
         android:id="@+id/bottom_layer"
@@ -183,9 +196,9 @@
                 android:layout_marginEnd="@dimen/_5sdp"
                 android:layout_toEndOf="@+id/ic_brightness"
                 android:max="100"
-                android:progress="50"
                 android:maxHeight="@dimen/_12sdp"
                 android:minHeight="@dimen/_12sdp"
+                android:progress="50"
                 android:progressDrawable="@drawable/progress_drawable"
                 android:thumb="@drawable/thumb"
                 android:thumbOffset="-5dp" />
@@ -213,9 +226,9 @@
             android:id="@+id/animation_view"
             android:layout_width="@dimen/_250sdp"
             android:layout_height="@dimen/_250sdp"
-            android:visibility="gone"
             android:layout_centerInParent="true"
             android:layout_gravity="center"
+            android:visibility="gone"
             app:lottie_autoPlay="true"
             app:lottie_fileName="LottieHandStrech.lottie"
             app:lottie_loop="true" />

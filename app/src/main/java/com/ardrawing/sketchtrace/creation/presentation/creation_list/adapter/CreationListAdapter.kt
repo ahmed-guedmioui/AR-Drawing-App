@@ -1,4 +1,4 @@
-package com.ardrawing.sketchtrace.my_creation.presentation.my_creation_list.adapter
+package com.ardrawing.sketchtrace.creation.presentation.creation_list.adapter
 
 import android.app.Activity
 import android.media.MediaMetadataRetriever
@@ -9,12 +9,12 @@ import android.widget.ImageView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.ardrawing.sketchtrace.R
-import com.ardrawing.sketchtrace.my_creation.domian.model.Creation
+import com.ardrawing.sketchtrace.creation.domian.model.Creation
 
 /**
  * @author Ahmed Guedmioui
  */
-class MyCreationListAdapter(
+class CreationListAdapter(
     val activity: Activity,
     private val creationList: List<Creation>,
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
@@ -57,6 +57,7 @@ class MyCreationListAdapter(
                 holder.image.setImageBitmap(bitmap)
 
             } catch (e: Exception) {
+                e.printStackTrace()
             }
 
             holder.image.setOnClickListener {
@@ -65,7 +66,7 @@ class MyCreationListAdapter(
             return
         }
 
-        Glide.with(activity)
+        Glide.with(activity.application)
             .load(uri)
             .thumbnail(0.25f)
             .into(holder.image)

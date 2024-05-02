@@ -14,8 +14,8 @@ import com.ardrawing.sketchtrace.databinding.ActivityLanguageBinding
 import com.ardrawing.sketchtrace.onboarding.presentation.OnboardingActivity
 import com.ardrawing.sketchtrace.util.Constants
 import com.ardrawing.sketchtrace.language.data.util.LanguageChanger
-import com.ardrawing.sketchtrace.core.domain.repository.ads.InterRepository
-import com.ardrawing.sketchtrace.core.domain.repository.ads.NativeRepository
+import com.ardrawing.sketchtrace.core.domain.repository.ads.InterstitialManger
+import com.ardrawing.sketchtrace.core.domain.repository.ads.NativeManager
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -40,10 +40,10 @@ class LanguageActivity : AppCompatActivity() {
     private lateinit var binding: ActivityLanguageBinding
 
     @Inject
-    lateinit var interRepository: InterRepository
+    lateinit var interstitialManger: InterstitialManger
 
     @Inject
-    lateinit var nativeRepository: NativeRepository
+    lateinit var nativeManager: NativeManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -61,8 +61,8 @@ class LanguageActivity : AppCompatActivity() {
             }
         }
 
-        nativeRepository.setActivity(this)
-        nativeRepository.loadNative(
+        nativeManager.setActivity(this)
+        nativeManager.loadNative(
             findViewById(R.id.native_frame),
             findViewById(R.id.native_temp),
             isButtonTop = false
@@ -78,9 +78,9 @@ class LanguageActivity : AppCompatActivity() {
         }
 
         binding.apply.setOnClickListener {
-            interRepository.showInterstitial(
+            interstitialManger.showInterstitial(
                 this,
-                object : InterRepository.OnAdClosedListener {
+                object : InterstitialManger.OnAdClosedListener {
                     override fun onAdClosed() {
                         languageViewModel.onEvent(LanguageUiEvent.Navigate)
 

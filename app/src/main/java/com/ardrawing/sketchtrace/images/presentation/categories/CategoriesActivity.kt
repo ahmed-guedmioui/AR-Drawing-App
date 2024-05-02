@@ -19,9 +19,9 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.ardrawing.sketchtrace.R
-import com.ardrawing.sketchtrace.core.domain.repository.ads.InterRepository
-import com.ardrawing.sketchtrace.core.domain.repository.ads.NativeRepository
-import com.ardrawing.sketchtrace.core.domain.repository.ads.RewardedRepository
+import com.ardrawing.sketchtrace.core.domain.repository.ads.InterstitialManger
+import com.ardrawing.sketchtrace.core.domain.repository.ads.NativeManager
+import com.ardrawing.sketchtrace.core.domain.repository.ads.RewardedManger
 import com.ardrawing.sketchtrace.databinding.ActivityCategoriesBinding
 import com.ardrawing.sketchtrace.images.presentation.category.CategoryActivity
 import com.ardrawing.sketchtrace.language.data.util.LanguageChanger
@@ -53,13 +53,13 @@ class CategoriesActivity : AppCompatActivity() {
     private lateinit var binding: ActivityCategoriesBinding
 
     @Inject
-    lateinit var rewardedRepository: RewardedRepository
+    lateinit var rewardedManger: RewardedManger
 
     @Inject
-    lateinit var interRepository: InterRepository
+    lateinit var interstitialManger: InterstitialManger
 
     @Inject
-    lateinit var nativeRepository: NativeRepository
+    lateinit var nativeManager: NativeManager
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -132,7 +132,7 @@ class CategoriesActivity : AppCompatActivity() {
 
         categoriesAdapter = CategoriesAdapter(
             activity = this,
-            nativeRepository = nativeRepository
+            nativeManager = nativeManager
         )
 
         initAdapterClicks()
@@ -203,9 +203,9 @@ class CategoriesActivity : AppCompatActivity() {
         categoriesAdapter?.setViewMoreClickListener(object :
             CategoriesAdapter.ViewMoreClickListener {
             override fun oClick(categoryPosition: Int) {
-                interRepository.showInterstitial(
+                interstitialManger.showInterstitial(
                     this@CategoriesActivity,
-                    object : InterRepository.OnAdClosedListener {
+                    object : InterstitialManger.OnAdClosedListener {
                         override fun onAdClosed() {
                             val intent = Intent(
                                 this@CategoriesActivity, CategoryActivity::class.java
@@ -224,9 +224,9 @@ class CategoriesActivity : AppCompatActivity() {
         onRewComplete: () -> Unit
     ) {
 
-        rewardedRepository.showRewarded(
+        rewardedManger.showRewarded(
             activity = this,
-            adClosedListener = object : RewardedRepository.OnAdClosedListener {
+            adClosedListener = object : RewardedManger.OnAdClosedListener {
                 override fun onRewClosed() {}
 
                 override fun onRewFailedToShow() {
@@ -364,9 +364,9 @@ class CategoriesActivity : AppCompatActivity() {
         }
 
     private fun traceDrawingScreen(imagePath: String) {
-        interRepository.showInterstitial(
+        interstitialManger.showInterstitial(
             this,
-            object : InterRepository.OnAdClosedListener {
+            object : InterstitialManger.OnAdClosedListener {
                 override fun onAdClosed() {
                     Intent(
                         this@CategoriesActivity, TraceActivity::class.java
@@ -380,9 +380,9 @@ class CategoriesActivity : AppCompatActivity() {
     }
 
     private fun sketchDrawingScreen(imagePath: String) {
-        interRepository.showInterstitial(
+        interstitialManger.showInterstitial(
             this,
-            object : InterRepository.OnAdClosedListener {
+            object : InterstitialManger.OnAdClosedListener {
                 override fun onAdClosed() {
                     Log.d("tag_anr", "CategoriesActivity onAdClosed")
 

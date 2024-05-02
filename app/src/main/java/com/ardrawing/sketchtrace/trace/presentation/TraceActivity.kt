@@ -11,7 +11,6 @@ import android.os.Bundle
 import android.os.Environment
 import android.os.Handler
 import android.os.Looper
-import android.util.Log
 import android.view.View
 import android.view.animation.AnimationUtils
 import android.widget.SeekBar
@@ -27,7 +26,7 @@ import com.ardrawing.sketchtrace.R
 import com.ardrawing.sketchtrace.databinding.ActivityTraceBinding
 import com.ardrawing.sketchtrace.paywall.presentation.PaywallActivity
 import com.ardrawing.sketchtrace.language.data.util.LanguageChanger
-import com.ardrawing.sketchtrace.core.domain.repository.ads.RewardedRepository
+import com.ardrawing.sketchtrace.core.domain.repository.ads.RewardedManger
 import com.ardrawing.sketchtrace.util.other_util.MultiTouch
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.target.CustomTarget
@@ -50,7 +49,7 @@ class TraceActivity : AppCompatActivity() {
     private var bmOriginal: Bitmap? = null
 
     @Inject
-    lateinit var rewardedRepository: RewardedRepository
+    lateinit var rewardedManger: RewardedManger
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -63,21 +62,22 @@ class TraceActivity : AppCompatActivity() {
                 traceViewModel.traceState.collect {
                     traceState = it
 
-                    if (traceState?.isSubscribed == true) {
+                    if (traceState?.appData?.isSubscribed == true) {
                         binding.vipPhoto.visibility = View.GONE
                         binding.vipVideo.visibility = View.GONE
                     }
 
-                    if (traceState?.isActivityInitialized == false) {
-                        traceViewModel.onEvent(TraceUiEvent.InitializedActivity)
+                    if (traceState?.isStartAnimationShown == false) {
+                        traceViewModel.onEvent(TraceUiEvent.ShowStartAnimation)
                         showStartAnimation()
                     }
 
                     binding.mainLayout.setBackgroundColor(
-                        traceState?.backgroundColor ?: Color.TRANSPARENT
+                        traceState?.screenBackgroundColor ?: Color.TRANSPARENT
                     )
 
-//                    setImageEnabled()
+                    setImageEnabled()
+                    binding.objImage.alpha = traceState?.imageTransparency ?: 50f
                 }
             }
         }
@@ -113,7 +113,7 @@ class TraceActivity : AppCompatActivity() {
                     ) {
                         bmOriginal = resource
                         bmOriginal?.let {
-                            if (traceState?.isFlipped == true) {
+                            if (traceState?.isImageFlipped == true) {
                                 flip(it)
                             }
                             binding.objImage.setImageBitmap(it)
@@ -147,7 +147,7 @@ class TraceActivity : AppCompatActivity() {
                 flip.startAnimation(pushAnim)
                 bmOriginal?.let {
                     bmOriginal = flip(it)
-                    traceViewModel.onEvent(TraceUiEvent.UpdateIsFlipped)
+                    traceViewModel.onEvent(TraceUiEvent.UpdateIsImageFlipped)
                 }
 
                 bmOriginal?.let {
@@ -158,8 +158,10 @@ class TraceActivity : AppCompatActivity() {
             relCamera.setOnClickListener {
                 it.startAnimation(pushAnim)
                 rewarded {
-                    getExternalFilesDir(Environment.DIRECTORY_DCIM)?.let { it1 ->
-                        ImagePicker.with(this@TraceActivity).cameraOnly().saveDir(it1)
+                    getExternalFilesDir(Environment.DIRECTORY_DCIM)?.let { file ->
+                        ImagePicker.with(this@TraceActivity)
+                            .cameraOnly()
+                            .saveDir(file)
                             .createIntent { intent ->
                                 startForGetPhotoResult.launch(intent)
                             }
@@ -171,32 +173,36 @@ class TraceActivity : AppCompatActivity() {
             relGallery.setOnClickListener {
                 it.startAnimation(pushAnim)
                 rewarded {
-                    ImagePicker.with(this@TraceActivity).galleryOnly().createIntent { intent ->
-                        startForGetPhotoResult.launch(intent)
-                    }
+                    ImagePicker.with(this@TraceActivity)
+                        .galleryOnly()
+                        .createIntent { intent ->
+                            startForGetPhotoResult.launch(intent)
+                        }
                 }
             }
 
             relLock.setOnClickListener {
                 it.startAnimation(pushAnim)
-                traceViewModel.onEvent(TraceUiEvent.UpdateIsEnabled)
+                traceViewModel.onEvent(TraceUiEvent.UpdateIsImageEnabled)
             }
 
-            alphaSeek.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
-                override fun onProgressChanged(
-                    seekBar: SeekBar?, progress: Int, fromUser: Boolean
-                ) {
-                    val transparency = (alphaSeek.max - progress) / 10f
-                    traceViewModel.onEvent(
-                        TraceUiEvent.UpdateTransparency(transparency)
-                    )
-                    objImage.alpha = transparency
+            alphaSeek.setOnSeekBarChangeListener(
+                object : SeekBar.OnSeekBarChangeListener {
+                    override fun onProgressChanged(
+                        seekBar: SeekBar?, progress: Int, fromUser: Boolean
+                    ) {
+                        val transparency = (alphaSeek.max - progress) / 10f
+                        traceViewModel.onEvent(
+                            TraceUiEvent.UpdateImageTransparency(transparency)
+                        )
+                        objImage.alpha = transparency
+                    }
+
+                    override fun onStartTrackingTouch(seekBar: SeekBar?) {}
+
+                    override fun onStopTrackingTouch(seekBar: SeekBar?) {}
                 }
-
-                override fun onStartTrackingTouch(seekBar: SeekBar?) {}
-
-                override fun onStopTrackingTouch(seekBar: SeekBar?) {}
-            })
+            )
 
             binding.brightnessSeek.keyProgressIncrement = 1
             brightnessSeek.setOnSeekBarChangeListener(
@@ -207,7 +213,7 @@ class TraceActivity : AppCompatActivity() {
                         val brightness = progress / 100f
 
                         traceViewModel.onEvent(
-                            TraceUiEvent.UpdateBrightness(brightness)
+                            TraceUiEvent.UpdateScreenBrightness(brightness)
                         )
 
                         val attributes = window.attributes
@@ -223,8 +229,8 @@ class TraceActivity : AppCompatActivity() {
     }
 
     private fun setImageEnabled() {
-        traceState?.let {traceState ->
-            if (traceState.isEnabled) {
+        traceState?.let { traceState ->
+            if (traceState.isImageEnabled) {
                 binding.objImage.isEnabled = true
                 binding.icLock.setImageResource(R.drawable.lock)
             } else {
@@ -235,9 +241,9 @@ class TraceActivity : AppCompatActivity() {
     }
 
     private fun rewarded(onRewDone: () -> Unit) {
-        rewardedRepository.showRewarded(
+        rewardedManger.showRewarded(
             activity = this,
-            adClosedListener = object : RewardedRepository.OnAdClosedListener {
+            adClosedListener = object : RewardedManger.OnAdClosedListener {
                 override fun onRewClosed() {
                     onRewDone()
                 }
@@ -253,7 +259,7 @@ class TraceActivity : AppCompatActivity() {
                 override fun onRewComplete() {
                 }
             },
-            isImages = false,
+            isUnlockImages = false,
             onOpenPaywall = {
                 Intent(this, PaywallActivity::class.java).also {
                     startActivity(it)
@@ -262,7 +268,7 @@ class TraceActivity : AppCompatActivity() {
     }
 
     private fun colorDialog() {
-        val colorDialog = SpectrumDialog.Builder(this)
+        SpectrumDialog.Builder(this)
             .setColors(R.array.demo_colors)
             .setSelectedColorRes(R.color.transparent)
             .setDismissOnColorSelected(true)
@@ -270,7 +276,7 @@ class TraceActivity : AppCompatActivity() {
             .setFixedColumnCount(4)
             .setOnColorSelectedListener { _, color ->
                 traceViewModel.onEvent(
-                    TraceUiEvent.UpdateBackgroundColor(color)
+                    TraceUiEvent.UpdateScreenBackgroundColor(color)
                 )
                 binding.mainLayout.setBackgroundColor(color)
             }
@@ -291,7 +297,9 @@ class TraceActivity : AppCompatActivity() {
     }
 
     private val startForGetPhotoResult =
-        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result: ActivityResult ->
+        registerForActivityResult(
+            ActivityResultContracts.StartActivityForResult()
+        ) { result: ActivityResult ->
             val resultCode = result.resultCode
 
             if (resultCode == Activity.RESULT_OK) {
@@ -300,7 +308,9 @@ class TraceActivity : AppCompatActivity() {
                 loadImage(uri.toString())
             } else {
                 Toast.makeText(
-                    this, getString(R.string.error_importing_photo), Toast.LENGTH_SHORT
+                    this,
+                    getString(R.string.error_importing_photo),
+                    Toast.LENGTH_SHORT
                 ).show()
             }
         }
@@ -309,7 +319,12 @@ class TraceActivity : AppCompatActivity() {
         requestCode: Int, permissions: Array<String>, grantResults: IntArray
     ) {
         if (requestCode == PERMISSION_CODE_CAMERA && (grantResults.isEmpty() || grantResults[0] != 0)) {
-            Toast.makeText(this, "Permission not granted", Toast.LENGTH_SHORT).show()
+            Toast.makeText(
+                this,
+                getString(R.string.permission_not_granted),
+                Toast.LENGTH_SHORT
+            ).show()
+
             finish()
         }
         if (requestCode != PERMISSION_CODE_CAMERA) {
@@ -320,7 +335,7 @@ class TraceActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
 
-        if (traceState?.isSubscribed == true) {
+        if (traceState?.appData?.isSubscribed == true) {
             binding.vipPhoto.visibility = View.GONE
             binding.vipVideo.visibility = View.GONE
         }

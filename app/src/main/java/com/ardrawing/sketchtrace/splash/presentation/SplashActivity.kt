@@ -34,8 +34,8 @@ import com.ardrawing.sketchtrace.paywall.presentation.PaywallActivity
 import com.ardrawing.sketchtrace.core.presentation.util.Animations
 import com.ardrawing.sketchtrace.language.data.util.LanguageChanger
 import com.ardrawing.sketchtrace.core.data.util.UrlOpener
-import com.ardrawing.sketchtrace.core.domain.repository.ads.AdmobAppOpenRepository
-import com.ardrawing.sketchtrace.core.domain.repository.ads.InterRepository
+import com.ardrawing.sketchtrace.core.domain.repository.ads.AppOpenManager
+import com.ardrawing.sketchtrace.core.domain.repository.ads.InterstitialManger
 import com.google.android.gms.ads.MobileAds
 import com.google.android.ump.ConsentDebugSettings
 import com.google.android.ump.ConsentInformation
@@ -56,10 +56,10 @@ class SplashActivity : AppCompatActivity() {
     private lateinit var binding: ActivitySplashBinding
 
     @Inject
-    lateinit var admobAppOpenRepository: AdmobAppOpenRepository
+    lateinit var appOpenManager: AppOpenManager
 
     @Inject
-    lateinit var interRepository: InterRepository
+    lateinit var interstitialManger: InterstitialManger
 
     private var isNotificationDialogCalled = AtomicBoolean(false)
     private var canShowAds = AtomicBoolean(false)
@@ -207,11 +207,11 @@ class SplashActivity : AppCompatActivity() {
         MobileAds.initialize(this)
 
         splashState.appData?.let { appData ->
-            interRepository.setAppDataRepository(appData)
-            interRepository.loadInterstitial(activity = this)
+            interstitialManger.setAppDataRepository(appData)
+            interstitialManger.loadInterstitial(activity = this)
 
-            admobAppOpenRepository.setAppDataRepository(appData)
-            admobAppOpenRepository.showSplashAd(activity = this) {
+            appOpenManager.setAppDataRepository(appData)
+            appOpenManager.showSplashAd(activity = this) {
                 navigate()
             }
         }

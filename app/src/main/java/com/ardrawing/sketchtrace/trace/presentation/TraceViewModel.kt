@@ -21,15 +21,11 @@ class TraceViewModel @Inject constructor(
     private val _traceState = MutableStateFlow(TraceState())
     val traceState = _traceState.asStateFlow()
 
-    
-
     init {
-        
         viewModelScope.launch {
             _traceState.update {
                 it.copy(
                     appData = appDataRepository.getAppData(),
-                    isSubscribed = appDataRepository.getAppData().isSubscribed
                 )
             }
         }
@@ -45,50 +41,50 @@ class TraceViewModel @Inject constructor(
                 }
             }
 
-            is TraceUiEvent.UpdateBackgroundColor -> {
+            is TraceUiEvent.UpdateScreenBackgroundColor -> {
                 _traceState.update {
                     it.copy(
-                        backgroundColor = event.backgroundColor
+                        screenBackgroundColor = event.backgroundColor
                     )
                 }
             }
 
-            is TraceUiEvent.UpdateBrightness -> {
+            is TraceUiEvent.UpdateScreenBrightness -> {
                 _traceState.update {
                     it.copy(
-                        brightness = event.brightness
+                        screenBrightness = event.brightness
                     )
                 }
             }
 
-            TraceUiEvent.UpdateIsEnabled -> {
+            TraceUiEvent.UpdateIsImageEnabled -> {
                 _traceState.update {
                     it.copy(
-                        isEnabled = !it.isEnabled
+                        isImageEnabled = !it.isImageEnabled
                     )
                 }
             }
 
-            is TraceUiEvent.UpdateTransparency -> {
+            is TraceUiEvent.UpdateImageTransparency -> {
                 _traceState.update {
                     it.copy(
-                        transparency = event.transparency
+                        imageTransparency = event.transparency
                     )
                 }
             }
 
-            TraceUiEvent.UpdateIsFlipped -> {
+            TraceUiEvent.UpdateIsImageFlipped -> {
                 _traceState.update {
                     it.copy(
-                        isFlipped = !it.isFlipped
+                        isImageFlipped = !it.isImageFlipped
                     )
                 }
             }
 
-            TraceUiEvent.InitializedActivity -> {
+            TraceUiEvent.ShowStartAnimation -> {
                 _traceState.update {
                     it.copy(
-                        isActivityInitialized = true
+                        isStartAnimationShown = true
                     )
                 }
             }

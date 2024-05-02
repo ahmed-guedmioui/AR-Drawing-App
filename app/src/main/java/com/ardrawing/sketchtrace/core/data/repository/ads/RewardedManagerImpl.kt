@@ -12,7 +12,7 @@ import android.widget.ImageView
 import androidx.cardview.widget.CardView
 import com.ardrawing.sketchtrace.R
 import com.ardrawing.sketchtrace.core.domain.repository.AppDataRepository
-import com.ardrawing.sketchtrace.core.domain.repository.ads.RewardedRepository
+import com.ardrawing.sketchtrace.core.domain.repository.ads.RewardedManger
 import com.ardrawing.sketchtrace.util.AdsConstants
 import com.ardrawing.sketchtrace.util.PrefsConstants
 import com.facebook.ads.Ad
@@ -27,11 +27,11 @@ import javax.inject.Inject
 class RewardedManagerImpl @Inject constructor(
     appDataRepository: AppDataRepository,
     private val prefs: SharedPreferences
-) : RewardedRepository {
+) : RewardedManger {
 
     private var appData = appDataRepository.getAppData()
 
-    private lateinit var onAdClosedListener: RewardedRepository.OnAdClosedListener
+    private lateinit var onAdClosedListener: RewardedManger.OnAdClosedListener
 
     private var isFacebookRewardedLoaded = false
     private var isAdmobRewardedLoaded = false
@@ -54,8 +54,8 @@ class RewardedManagerImpl @Inject constructor(
 
     override fun showRewarded(
         activity: Activity,
-        adClosedListener: RewardedRepository.OnAdClosedListener,
-        isImages: Boolean,
+        adClosedListener: RewardedManger.OnAdClosedListener,
+        isUnlockImages: Boolean,
         onOpenPaywall: () -> Unit,
     ) {
         onAdClosedListener = adClosedListener
@@ -66,7 +66,7 @@ class RewardedManagerImpl @Inject constructor(
             return
         }
 
-        dialog(activity, isImages) {
+        dialog(activity, isUnlockImages) {
             onOpenPaywall()
         }
     }

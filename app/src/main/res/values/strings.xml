@@ -92,7 +92,7 @@
     <string name="advanced">Advanced</string>
     <string name="the_drawing_is_ready">The Drawing is ready</string>
     <string name="time_is_up">Time is up</string>
-    <string name="you_need_to_watch_an_add_to_continue_drawing">You need to watch an add to reset the timer and continue drawing.</string>
+    <string name="you_need_to_watch_an_add_to_continue_drawing">You need to watch an ad to reset the timer and continue drawing.</string>
     <string name="watch">Watch</string>
     <string name="take_a_photo_of_the_finished_drawing_to_move_to_the_next_level">Take a photo of the finished drawing to move to the next level.</string>
     <string name="it_s_not_finished_yet">It\'s not finished yet</string>

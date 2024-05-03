@@ -11,10 +11,8 @@ sealed interface SketchUiEvent {
         val timerTime: String
     ) : SketchUiEvent
 
-    data object ShowStartAnimation : SketchUiEvent
     data object UpdateIsFlashEnabled : SketchUiEvent
-    data object UpdateIsImageEnabled : SketchUiEvent
+    data object UpdateIsImageLocked : SketchUiEvent
     data object UpdateIsImageBordered : SketchUiEvent
-    data object UpdateIsImageFlipped : SketchUiEvent
 
 }

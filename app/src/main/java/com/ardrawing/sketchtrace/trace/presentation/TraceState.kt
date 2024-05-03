@@ -11,7 +11,7 @@ data class TraceState(
     val isImageFlipped: Boolean = false,
     val screenBrightness: Float = 0f,
 
-    val isImageEnabled: Boolean = true,
+    val isImageLocked: Boolean = true,
     val imageTransparency: Float = 50f,
 
     val screenBackgroundColor: Int = 0,

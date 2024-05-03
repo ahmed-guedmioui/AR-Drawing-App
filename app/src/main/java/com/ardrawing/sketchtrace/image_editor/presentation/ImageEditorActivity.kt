@@ -1,7 +1,6 @@
 package com.ardrawing.sketchtrace.image_editor.presentation
 
 import android.content.Intent
-import android.content.SharedPreferences
 import android.os.Bundle
 import android.view.View
 import android.widget.SeekBar
@@ -14,9 +13,11 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.ardrawing.sketchtrace.R
 import com.ardrawing.sketchtrace.databinding.ActivityAdvancedBinding
+import com.ardrawing.sketchtrace.image_editor.presentation.util.EditedBitmap
 import com.ardrawing.sketchtrace.paywall.presentation.PaywallActivity
 import com.ardrawing.sketchtrace.util.Constants
 import com.ardrawing.sketchtrace.language.data.util.LanguageChanger
+import com.ardrawing.sketchtrace.sketch.presentation.util.SketchBitmap
 import dagger.hilt.android.AndroidEntryPoint
 import jp.co.cyberagent.android.gpuimage.GPUImage
 import jp.co.cyberagent.android.gpuimage.filter.GPUImageContrastFilter
@@ -25,7 +26,6 @@ import jp.co.cyberagent.android.gpuimage.filter.GPUImageSharpenFilter
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 
 /**
@@ -64,7 +64,7 @@ class ImageEditorActivity : AppCompatActivity(), SeekBar.OnSeekBarChangeListener
             }
         }
 
-        binding.objImage.setImageBitmap(Constants.bitmap)
+        binding.objImage.setImageBitmap(SketchBitmap.bitmap)
 
         binding.edge.setOnClickListener {
             imageEditorViewModel.onEvent(ImageEditorUiEvent.Select(1))
@@ -89,8 +89,8 @@ class ImageEditorActivity : AppCompatActivity(), SeekBar.OnSeekBarChangeListener
 
         binding.apply.setOnClickListener {
             if (imageEditorState?.appData?.isSubscribed == true) {
-                Constants.bitmap = Constants.convertedBitmap
-                Constants.convertedBitmap = null
+                SketchBitmap.bitmap = EditedBitmap.editedBitmap
+                EditedBitmap.editedBitmap = null
 
                 finish()
                 Toast.makeText(
@@ -112,8 +112,8 @@ class ImageEditorActivity : AppCompatActivity(), SeekBar.OnSeekBarChangeListener
             )
             .setPositiveButton(getString(R.string.yes)) { _, _ ->
                 if (imageEditorState?.appData?.isSubscribed == true) {
-                    Constants.bitmap = Constants.convertedBitmap
-                    Constants.convertedBitmap = null
+                    SketchBitmap.bitmap = EditedBitmap.editedBitmap
+                    EditedBitmap.editedBitmap = null
 
                     finish()
                     Toast.makeText(
@@ -178,16 +178,14 @@ class ImageEditorActivity : AppCompatActivity(), SeekBar.OnSeekBarChangeListener
     }
 
     override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
-        Constants.convertedBitmap = Constants.bitmap
+        EditedBitmap.editedBitmap = SketchBitmap.bitmap
         setPreviousEdited()
         sendSelected(progress)
     }
 
-    override fun onStartTrackingTouch(seekBar: SeekBar?) {
-    }
+    override fun onStartTrackingTouch(seekBar: SeekBar?) {}
 
-    override fun onStopTrackingTouch(seekBar: SeekBar?) {
-    }
+    override fun onStopTrackingTouch(seekBar: SeekBar?) {}
 
     private fun setPreviousEdited() {
         imageEditorState?.let {
@@ -291,7 +289,7 @@ class ImageEditorActivity : AppCompatActivity(), SeekBar.OnSeekBarChangeListener
 
             try {
                 val gPUImage = GPUImage(this@ImageEditorActivity)
-                gPUImage.setImage(Constants.convertedBitmap)
+                gPUImage.setImage(EditedBitmap.editedBitmap)
 
                 gPUImage.setFilter(
                     GPUImageSharpenFilter(
@@ -303,8 +301,8 @@ class ImageEditorActivity : AppCompatActivity(), SeekBar.OnSeekBarChangeListener
                 )
 
                 if (gPUImage.bitmapWithFilterApplied != null) {
-                    Constants.convertedBitmap = gPUImage.bitmapWithFilterApplied
-                    binding.objImage.setImageBitmap(Constants.convertedBitmap)
+                    EditedBitmap.editedBitmap = gPUImage.bitmapWithFilterApplied
+                    binding.objImage.setImageBitmap(EditedBitmap.editedBitmap)
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
@@ -319,7 +317,7 @@ class ImageEditorActivity : AppCompatActivity(), SeekBar.OnSeekBarChangeListener
 
             try {
                 val gPUImage = GPUImage(this@ImageEditorActivity)
-                gPUImage.setImage(Constants.convertedBitmap)
+                gPUImage.setImage(EditedBitmap.editedBitmap)
 
                 gPUImage.setFilter(
                     GPUImageContrastFilter(
@@ -331,8 +329,8 @@ class ImageEditorActivity : AppCompatActivity(), SeekBar.OnSeekBarChangeListener
                 )
 
                 if (gPUImage.bitmapWithFilterApplied != null) {
-                    Constants.convertedBitmap = gPUImage.bitmapWithFilterApplied
-                    binding.objImage.setImageBitmap(Constants.convertedBitmap)
+                    EditedBitmap.editedBitmap = gPUImage.bitmapWithFilterApplied
+                    binding.objImage.setImageBitmap(EditedBitmap.editedBitmap)
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
@@ -347,7 +345,7 @@ class ImageEditorActivity : AppCompatActivity(), SeekBar.OnSeekBarChangeListener
 
             try {
                 val gPUImage = GPUImage(this@ImageEditorActivity)
-                gPUImage.setImage(Constants.convertedBitmap)
+                gPUImage.setImage(EditedBitmap.editedBitmap)
 
                 val filter = GPUImageGaussianBlurFilter()
                 filter.setBlurSize(
@@ -360,8 +358,8 @@ class ImageEditorActivity : AppCompatActivity(), SeekBar.OnSeekBarChangeListener
                 gPUImage.setFilter(filter)
 
                 if (gPUImage.bitmapWithFilterApplied != null) {
-                    Constants.convertedBitmap = gPUImage.bitmapWithFilterApplied
-                    binding.objImage.setImageBitmap(Constants.convertedBitmap)
+                    EditedBitmap.editedBitmap = gPUImage.bitmapWithFilterApplied
+                    binding.objImage.setImageBitmap(EditedBitmap.editedBitmap)
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
@@ -377,7 +375,7 @@ class ImageEditorActivity : AppCompatActivity(), SeekBar.OnSeekBarChangeListener
 
             try {
                 val gPUImage = GPUImage(this@ImageEditorActivity)
-                gPUImage.setImage(Constants.convertedBitmap)
+                gPUImage.setImage(EditedBitmap.editedBitmap)
 
                 gPUImage.setFilter(
                     GPUImageSharpenFilter(
@@ -389,8 +387,8 @@ class ImageEditorActivity : AppCompatActivity(), SeekBar.OnSeekBarChangeListener
                 )
 
                 if (gPUImage.bitmapWithFilterApplied != null) {
-                    Constants.convertedBitmap = gPUImage.bitmapWithFilterApplied
-                    binding.objImage.setImageBitmap(Constants.convertedBitmap)
+                    EditedBitmap.editedBitmap = gPUImage.bitmapWithFilterApplied
+                    binding.objImage.setImageBitmap(EditedBitmap.editedBitmap)
                 }
             } catch (e: Exception) {
                 e.printStackTrace()

@@ -19,7 +19,7 @@ sealed interface TraceUiEvent {
 
     data object ShowStartAnimation : TraceUiEvent
     data object ShowHideColorDialog : TraceUiEvent
-    data object UpdateIsImageEnabled : TraceUiEvent
+    data object UpdateIsImageLocked : TraceUiEvent
     data object UpdateIsImageFlipped : TraceUiEvent
 
 }

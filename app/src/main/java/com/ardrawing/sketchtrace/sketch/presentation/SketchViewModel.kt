@@ -2,6 +2,7 @@ package com.ardrawing.sketchtrace.sketch.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.ardrawing.sketchtrace.core.domain.model.app_data.AppData
 import com.ardrawing.sketchtrace.core.domain.repository.AppDataRepository
 import com.ardrawing.sketchtrace.creation.domian.repository.CreationRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -23,12 +24,19 @@ class SketchViewModel @Inject constructor(
     private val _sketchState = MutableStateFlow(SketchState())
     val sketchState = _sketchState.asStateFlow()
 
+    private val _appDataState = MutableStateFlow<AppData?>(null)
+    val appData = _appDataState.asStateFlow()
+
+    private val _imageBorderState = MutableStateFlow(false)
+    val imageBorderState = _imageBorderState.asStateFlow()
+
+    private val _flashState = MutableStateFlow(false)
+    val flashState = _flashState.asStateFlow()
+
     init {
         viewModelScope.launch {
-            _sketchState.update {
-                it.copy(
-                    appData = appDataRepository.getAppData(),
-                )
+            viewModelScope.launch {
+                _appDataState.update { appDataRepository.getAppData() }
             }
         }
     }
@@ -51,44 +59,20 @@ class SketchViewModel @Inject constructor(
                 }
             }
 
-            SketchUiEvent.UpdateIsImageEnabled -> {
+            SketchUiEvent.UpdateIsImageLocked -> {
                 _sketchState.update {
                     it.copy(
-                        isImageEnabled = !it.isImageEnabled
-                    )
-                }
-            }
-
-            SketchUiEvent.UpdateIsImageFlipped -> {
-                _sketchState.update {
-                    it.copy(
-                        isImageFlipped = !it.isImageFlipped
-                    )
-                }
-            }
-
-            SketchUiEvent.UpdateIsImageBordered -> {
-                _sketchState.update {
-                    it.copy(
-                        isImageBordered = !it.isImageBordered
-                    )
-                }
-            }
-
-            SketchUiEvent.ShowStartAnimation -> {
-                _sketchState.update {
-                    it.copy(
-                        isStartAnimationShown = true
+                        isImageLocked = !it.isImageLocked
                     )
                 }
             }
 
             SketchUiEvent.UpdateIsFlashEnabled -> {
-                _sketchState.update {
-                    it.copy(
-                        isFlashEnabled = !it.isFlashEnabled
-                    )
-                }
+                _flashState.update { !it }
+            }
+
+            SketchUiEvent.UpdateIsImageBordered -> {
+                _imageBorderState.update { !it }
             }
 
         }

@@ -57,10 +57,10 @@ class TraceViewModel @Inject constructor(
                 }
             }
 
-            TraceUiEvent.UpdateIsImageEnabled -> {
+            TraceUiEvent.UpdateIsImageLocked -> {
                 _traceState.update {
                     it.copy(
-                        isImageEnabled = !it.isImageEnabled
+                        isImageLocked = !it.isImageLocked
                     )
                 }
             }

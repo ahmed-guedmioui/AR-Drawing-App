@@ -46,7 +46,7 @@ class TraceActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityTraceBinding
 
-    private var bmOriginal: Bitmap? = null
+    private var imageBitmap: Bitmap? = null
 
     @Inject
     lateinit var rewardedManger: RewardedManger
@@ -76,7 +76,7 @@ class TraceActivity : AppCompatActivity() {
                         traceState?.screenBackgroundColor ?: Color.TRANSPARENT
                     )
 
-                    setImageEnabled()
+                    setImageLock()
                     binding.objImage.alpha = traceState?.imageTransparency ?: 50f
                 }
             }
@@ -111,8 +111,8 @@ class TraceActivity : AppCompatActivity() {
                     override fun onResourceReady(
                         resource: Bitmap, transition: Transition<in Bitmap>?
                     ) {
-                        bmOriginal = resource
-                        bmOriginal?.let {
+                        imageBitmap = resource
+                        imageBitmap?.let {
                             if (traceState?.isImageFlipped == true) {
                                 flip(it)
                             }
@@ -145,13 +145,10 @@ class TraceActivity : AppCompatActivity() {
 
             relFlip.setOnClickListener { flip ->
                 flip.startAnimation(pushAnim)
-                bmOriginal?.let {
-                    bmOriginal = flip(it)
-                    traceViewModel.onEvent(TraceUiEvent.UpdateIsImageFlipped)
-                }
-
-                bmOriginal?.let {
+                imageBitmap?.let {
+                    imageBitmap = flip(it)
                     objImage.setImageBitmap(it)
+                    traceViewModel.onEvent(TraceUiEvent.UpdateIsImageFlipped)
                 }
             }
 
@@ -183,7 +180,7 @@ class TraceActivity : AppCompatActivity() {
 
             relLock.setOnClickListener {
                 it.startAnimation(pushAnim)
-                traceViewModel.onEvent(TraceUiEvent.UpdateIsImageEnabled)
+                traceViewModel.onEvent(TraceUiEvent.UpdateIsImageLocked)
             }
 
             alphaSeek.setOnSeekBarChangeListener(
@@ -228,16 +225,15 @@ class TraceActivity : AppCompatActivity() {
         }
     }
 
-    private fun setImageEnabled() {
-        traceState?.let { traceState ->
-            if (traceState.isImageEnabled) {
-                binding.objImage.isEnabled = true
-                binding.icLock.setImageResource(R.drawable.lock)
-            } else {
-                binding.objImage.isEnabled = false
-                binding.icLock.setImageResource(R.drawable.unlock)
-            }
+    private fun setImageLock() {
+        if (traceState?.isImageLocked == true) {
+            binding.objImage.isEnabled = true
+            binding.icLock.setImageResource(R.drawable.lock)
+        } else {
+            binding.objImage.isEnabled = false
+            binding.icLock.setImageResource(R.drawable.unlock)
         }
+
     }
 
     private fun rewarded(onRewDone: () -> Unit) {

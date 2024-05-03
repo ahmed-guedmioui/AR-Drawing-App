@@ -25,7 +25,6 @@ import android.view.Gravity
 import android.view.View
 import android.view.Window
 import android.view.WindowManager
-import android.view.animation.Animation
 import android.view.animation.AnimationUtils
 import android.widget.Button
 import android.widget.ImageView
@@ -38,11 +37,12 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.ardrawing.sketchtrace.R
 import com.ardrawing.sketchtrace.core.data.util.PermissionUtils
-import com.ardrawing.sketchtrace.core.domain.repository.AppDataRepository
+import com.ardrawing.sketchtrace.core.domain.model.app_data.AppData
 import com.ardrawing.sketchtrace.core.domain.repository.ads.NativeManager
 import com.ardrawing.sketchtrace.core.domain.repository.ads.RewardedManger
 import com.ardrawing.sketchtrace.creation.domian.repository.CreationRepository
@@ -50,7 +50,7 @@ import com.ardrawing.sketchtrace.databinding.ActivitySketchBinding
 import com.ardrawing.sketchtrace.image_editor.presentation.ImageEditorActivity
 import com.ardrawing.sketchtrace.language.data.util.LanguageChanger
 import com.ardrawing.sketchtrace.paywall.presentation.PaywallActivity
-import com.ardrawing.sketchtrace.util.Constants
+import com.ardrawing.sketchtrace.sketch.presentation.util.SketchBitmap
 import com.ardrawing.sketchtrace.util.other_util.MultiTouch
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.target.CustomTarget
@@ -64,8 +64,11 @@ import com.otaliastudios.cameraview.controls.Mode
 import dagger.hilt.android.AndroidEntryPoint
 import jp.co.cyberagent.android.gpuimage.GPUImage
 import jp.co.cyberagent.android.gpuimage.filter.GPUImageThresholdEdgeDetectionFilter
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.IOException
 import java.text.SimpleDateFormat
@@ -83,26 +86,17 @@ class SketchActivity : AppCompatActivity() {
     lateinit var creationRepository: CreationRepository
 
     @Inject
-    lateinit var appDataRepository: AppDataRepository
-
-    @Inject
     lateinit var rewardedManger: RewardedManger
 
     @Inject
     lateinit var nativeManager: NativeManager
 
     private lateinit var binding: ActivitySketchBinding
+
     private val sketchViewModel: SketchViewModel by viewModels()
     private var sketchState: SketchState? = null
-
-
-    private lateinit var pushanim: Animation
-    private var ringProgressDialog: ProgressDialog? = null
-    private var isFlashSupported = false
-    private var isTorchOn = false
-    private var isLock = false
-    private var isEditSketch = false
-    private var convertedBitmap: Bitmap? = null
+    private var appDataState: AppData? = null
+    private var isImageBorderState: Boolean = false
 
     private var elapsedTimeMillis: Long = 0
     private var isRecording = false
@@ -115,38 +109,41 @@ class SketchActivity : AppCompatActivity() {
     private var isTimeIsUp = false
     private var isTimeIsUpDialogShowing = false
 
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         LanguageChanger.changeAppLanguage(this)
         binding = ActivitySketchBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
-                sketchViewModel.sketchState.collect {
-                    sketchState = it
-                }
-            }
+        val imagePath = intent?.extras?.getString("imagePath")
+
+        collectState(sketchViewModel.appData) {
+            appDataState = it
+            initializeActivity(imagePath)
         }
 
-        // 5 * 60 * 1000 = 5 minutes
-        updateMainTimerText("05:00", 5 * 60 * 1000)
-
-        if (appDataRepository.getAppData()?.isSubscribed == false) {
-            countDown()
-        } else {
-            binding.theDrawingIsReadyBtn.visibility = View.VISIBLE
-            binding.mainTempContainer.visibility = View.GONE
-            binding.vipPhoto.visibility = View.GONE
-            binding.vipVideo.visibility = View.GONE
-            binding.vipRecord.visibility = View.GONE
+        collectState(sketchViewModel.sketchState) {
+            sketchState = it
+            setImageLock()
+            binding.objImage.alpha = sketchState?.imageTransparency ?: 50f
         }
+
+        collectState(sketchViewModel.imageBorderState) {
+            isImageBorderState = it
+            setImageBorder(isImageBorderState)
+        }
+
+        collectState(sketchViewModel.flashState, ::switchFlash)
 
         handler = Handler(Looper.getMainLooper())
-        pushanim = AnimationUtils.loadAnimation(this, R.anim.view_push)
-        binding.close.setOnClickListener {
-            binding.nativeParent.visibility = View.GONE
+        val pushAnime = AnimationUtils.loadAnimation(this, R.anim.view_push)
+
+        val cameraManager = getSystemService(Context.CAMERA_SERVICE) as CameraManager
+        val isFlashSupported = cameraManager.getCameraCharacteristics("0")
+            .get(CameraCharacteristics.FLASH_INFO_AVAILABLE) == true
+
+        if (!isFlashSupported) {
+            binding.relFlash.visibility = View.GONE
         }
 
         nativeManager.setActivity(this)
@@ -156,166 +153,246 @@ class SketchActivity : AppCompatActivity() {
             isButtonTop = true
         )
 
-        setupFlashButton()
-
-        binding.theDrawingIsReadyBtn.setOnClickListener {
-            takePhotoDialog()
-        }
-
         binding.objImage.setOnTouchListener(
             MultiTouch(binding.objImage)
         )
 
-        val imagePath = intent?.extras?.getString("imagePath")
-        if (imagePath != null) {
-            Glide.with(this).asBitmap().load(imagePath).into(object : CustomTarget<Bitmap>() {
-                override fun onResourceReady(
-                    resource: Bitmap, transition: Transition<in Bitmap>?
-                ) {
-                    Constants.bitmap = resource
-                    binding.objImage.apply {
-                        setImageBitmap(Constants.bitmap)
-                        isEditSketch = false
-                        binding.imgOutline.setImageResource(R.drawable.outline)
-                        alpha = 0.6f
-                        binding.alphaSeek.progress = 4
-                    }
-                }
+        binding.apply {
 
-                override fun onLoadCleared(placeholder: Drawable?) {}
-            })
-        }
+            close.setOnClickListener {
+                binding.nativeParent.visibility = View.GONE
+            }
 
-        binding.animationView.visibility = View.VISIBLE
-        Handler(Looper.getMainLooper()).postDelayed({
-            binding.animationView.visibility = View.GONE
-        }, 7000)
+            theDrawingIsReadyBtn.setOnClickListener {
+                takePhotoDialog()
+            }
 
-        binding.relCamera.setOnClickListener {
-            it.startAnimation(pushanim)
-            rewarded {
-                getExternalFilesDir(Environment.DIRECTORY_DCIM)?.let { it1 ->
-                    ImagePicker.with(this).cameraOnly().saveDir(it1).createIntent { intent ->
-                        startForGetPhotoResult.launch(intent)
+            relCamera.setOnClickListener {
+                it.startAnimation(pushAnime)
+                rewarded {
+                    getExternalFilesDir(Environment.DIRECTORY_DCIM)?.let { it1 ->
+                        ImagePicker.with(this@SketchActivity)
+                            .cameraOnly()
+                            .saveDir(it1)
+                            .createIntent { intent ->
+                                startForGetPhotoResult.launch(intent)
+                            }
                     }
                 }
             }
-        }
 
-        binding.relGallery.setOnClickListener {
-            it.startAnimation(pushanim)
-            rewarded {
-                ImagePicker.with(this).galleryOnly().createIntent { intent ->
-                    startForGetPhotoResult.launch(intent)
+            relGallery.setOnClickListener {
+                it.startAnimation(pushAnime)
+                rewarded {
+                    ImagePicker.with(this@SketchActivity)
+                        .galleryOnly()
+                        .createIntent { intent ->
+                            startForGetPhotoResult.launch(intent)
+                        }
                 }
             }
-        }
 
-        binding.relFlip.setOnClickListener {
-            it.startAnimation(pushanim)
-            Constants.bitmap = flip(Constants.bitmap, FLIP_HORIZONTAL) ?: return@setOnClickListener
-            binding.objImage.setImageBitmap(Constants.bitmap)
-        }
+            relFlip.setOnClickListener {
+                it.startAnimation(pushAnime)
+                flipImage()
+            }
 
-        binding.relEditRound.setOnClickListener {
-            convertBorderBitmap()
-        }
+            relEditRound.setOnClickListener {
+                sketchViewModel.onEvent(
+                    SketchUiEvent.UpdateIsImageBordered
+                )
+            }
 
-        binding.advanced.setOnClickListener {
-            startActivity(
-                Intent(this, ImageEditorActivity::class.java)
+            binding.advanced.setOnClickListener {
+                Intent(
+                    this@SketchActivity, ImageEditorActivity::class.java
+                ).also(::startActivity)
+            }
+
+            alphaSeek.setOnSeekBarChangeListener(
+                object : SeekBar.OnSeekBarChangeListener {
+                    override fun onStartTrackingTouch(seekBar: SeekBar) {}
+
+                    override fun onStopTrackingTouch(seekBar: SeekBar) {}
+
+                    override fun onProgressChanged(
+                        seekBar: SeekBar, progress: Int, fromUser: Boolean
+                    ) {
+                        val transparency = (alphaSeek.max - progress) / 10f
+                        sketchViewModel.onEvent(
+                            SketchUiEvent.UpdateImageTransparency(transparency)
+                        )
+                        objImage.alpha = transparency
+
+                        objImage.alpha = (alphaSeek.max - progress) / 10.0f
+                    }
+                }
             )
-        }
 
-        binding.relLock.setOnClickListener {
-            if (!isLock) {
-                binding.objImage.isEnabled = false
-                isLock = true
-                binding.icLock.setImageResource(R.drawable.unlock)
-            } else {
-                binding.objImage.isEnabled = true
-                isLock = false
-                binding.icLock.setImageResource(R.drawable.lock)
+            relFlash.setOnClickListener {
+                sketchViewModel.onEvent(SketchUiEvent.UpdateIsFlashEnabled)
             }
-        }
 
-        binding.alphaSeek.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
-            override fun onStartTrackingTouch(seekBar: SeekBar) {}
-
-            override fun onStopTrackingTouch(seekBar: SeekBar) {}
-
-            override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
-                binding.objImage.alpha = (binding.alphaSeek.max - progress) / 10.0f
+            relLock.setOnClickListener {
+                sketchViewModel.onEvent(SketchUiEvent.UpdateIsImageLocked)
             }
-        })
-
-        binding.relFlash.setOnClickListener {
-            switchFlash()
         }
     }
 
-    private fun convertBorderBitmap() {
-        val gPUImage = GPUImage(this)
-        val show = ProgressDialog.show(this, "", getString(R.string.convert_bitmap), true)
-        ringProgressDialog = show
-        show.setCancelable(false)
-        Thread {
+    private fun <T> LifecycleOwner.collectState(
+        stateFlow: StateFlow<T>,
+        collect: suspend (T) -> Unit
+    ) {
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                stateFlow.collect { value ->
+                    collect(value)
+                }
+            }
+        }
+    }
+
+    private fun loadImage(imagePath: String) {
+        Glide.with(this)
+            .asBitmap()
+            .load(imagePath)
+            .into(
+                object : CustomTarget<Bitmap>() {
+                    override fun onResourceReady(
+                        resource: Bitmap, transition: Transition<in Bitmap>?
+                    ) {
+                        SketchBitmap.bitmap = resource
+                        binding.objImage.apply {
+                            setImageBitmap(SketchBitmap.bitmap)
+                            binding.imgOutline.setImageResource(R.drawable.outline)
+                            alpha = 0.6f
+                            binding.alphaSeek.progress = 4
+                        }
+                    }
+
+                    override fun onLoadCleared(placeholder: Drawable?) {}
+                }
+            )
+    }
+
+    private fun initializeActivity(imagePath: String?) {
+        if (appDataState?.isSubscribed == true) {
+            binding.theDrawingIsReadyBtn.visibility = View.VISIBLE
+            binding.mainTempContainer.visibility = View.GONE
+            binding.vipPhoto.visibility = View.GONE
+            binding.vipVideo.visibility = View.GONE
+            binding.vipRecord.visibility = View.GONE
+        }
+
+        imagePath?.let(::loadImage)
+
+        showStartAnimation()
+        updateMainTimerText(
+            "05:00", 5 * 60 * 1000
+        )
+
+        Log.d(
+            "tag_counter", "initializeActivity: ${appDataState == null}"
+        )
+        if (appDataState?.isSubscribed == false) {
+            countDown()
+        }
+    }
+
+    private fun showStartAnimation() {
+        binding.animationView.visibility = View.VISIBLE
+        Handler(Looper.getMainLooper()).postDelayed({
+            binding.animationView.visibility = View.GONE
+        }, 3000)
+    }
+
+    private fun flipImage() {
+        SketchBitmap.bitmap = flip(SketchBitmap.bitmap)
+        SketchBitmap.borderedBitmap = flip(SketchBitmap.borderedBitmap)
+
+        binding.objImage.setImageBitmap(
+            if (!isImageBorderState) SketchBitmap.bitmap
+            else SketchBitmap.borderedBitmap
+        )
+    }
+
+    private fun setImageLock() {
+        if (sketchState?.isImageLocked == true) {
+            binding.objImage.isEnabled = false
+            binding.icLock.setImageResource(R.drawable.unlock)
+        } else {
+            binding.objImage.isEnabled = true
+            binding.icLock.setImageResource(R.drawable.lock)
+        }
+    }
+
+    private fun setImageBorder(isImageBordered: Boolean) {
+
+        if (isImageBordered) {
+            Log.d("tag_border", "isImageBordered")
+
+            val progressDialog = ProgressDialog(this@SketchActivity)
+            progressDialog.setCancelable(false)
+            progressDialog.setMessage(getString(R.string.convert_bitmap))
+            progressDialog.show()
+
             try {
-                if (!isEditSketch) {
-                    gPUImage.setImage(Constants.bitmap)
+                lifecycleScope.launch(Dispatchers.IO) {
+                    val gPUImage = GPUImage(this@SketchActivity)
+                    gPUImage.setImage(SketchBitmap.bitmap)
                     gPUImage.setFilter(GPUImageThresholdEdgeDetectionFilter())
                     val bitmapWithFilterApplied = gPUImage.bitmapWithFilterApplied
+
                     if (bitmapWithFilterApplied != null) {
-                        convertedBitmap = getBitmapWithTransparentBG(bitmapWithFilterApplied, -1)
+                        SketchBitmap.borderedBitmap = getBitmapWithTransparentBG(
+                            bitmapWithFilterApplied, -1
+                        )
+                    }
+
+                    if (SketchBitmap.borderedBitmap != null) {
+                        withContext(Dispatchers.Main) {
+                            binding.objImage.setImageBitmap(SketchBitmap.borderedBitmap)
+                            binding.imgOutline.setImageResource(R.drawable.normal)
+                            progressDialog.dismiss()
+                        }
                     } else {
-                        Toast.makeText(
-                            this@SketchActivity,
-                            getString(R.string.can_t_convert_this_image_try_with_another),
-                            Toast.LENGTH_SHORT
-                        ).show()
+                        withContext(Dispatchers.Main) {
+                            Toast.makeText(
+                                this@SketchActivity,
+                                getString(R.string.can_t_convert_this_image_try_with_another),
+                                Toast.LENGTH_SHORT
+                            ).show()
+                            progressDialog.dismiss()
+                        }
                     }
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
+                progressDialog.dismiss()
+                Toast.makeText(
+                    this@SketchActivity,
+                    getString(R.string.can_t_convert_this_image_try_with_another),
+                    Toast.LENGTH_SHORT
+                ).show()
+                progressDialog.dismiss()
             }
-            ringProgressDialog?.dismiss()
-        }.start()
-        ringProgressDialog?.setOnDismissListener {
-            if (!isEditSketch) {
-                if (convertedBitmap != null) {
-                    isEditSketch = true
-                    binding.objImage.setImageBitmap(convertedBitmap)
-                    binding.imgOutline.setImageResource(R.drawable.normal)
-                } else {
-                    Toast.makeText(
-                        this,
-                        getString(R.string.can_t_convert_this_image_try_with_another),
-                        Toast.LENGTH_SHORT
-                    ).show()
-                }
-            } else {
-                isEditSketch = false
-                binding.objImage.setImageBitmap(Constants.bitmap)
-                binding.imgOutline.setImageResource(R.drawable.outline)
-            }
+
+        } else {
+            Log.d("tag_border", "!isImageBordered")
+            binding.objImage.setImageBitmap(SketchBitmap.bitmap)
+            binding.imgOutline.setImageResource(R.drawable.outline)
         }
+
     }
 
-    private fun switchFlash() {
+    private fun switchFlash(isFlashEnabled: Boolean) {
         try {
-            isFlashSupported =
-                (getSystemService(Context.CAMERA_SERVICE) as CameraManager).getCameraCharacteristics(
-                    "0"
-                ).get(CameraCharacteristics.FLASH_INFO_AVAILABLE) == true
-
-            if (isTorchOn) {
-                isTorchOn = false
-                binding.icFlash.setImageResource(R.drawable.ic_flash_off)
-                binding.cameraView.flash = Flash.OFF
-            } else {
-                isTorchOn = true
+            if (isFlashEnabled) {
                 binding.icFlash.setImageResource(R.drawable.ic_flash_on)
                 binding.cameraView.flash = Flash.TORCH
+            } else {
+                binding.icFlash.setImageResource(R.drawable.ic_flash_off)
+                binding.cameraView.flash = Flash.OFF
             }
         } catch (e: CameraAccessException) {
             e.printStackTrace()
@@ -335,10 +412,9 @@ class SketchActivity : AppCompatActivity() {
                         override fun onResourceReady(
                             resource: Bitmap, transition: Transition<in Bitmap>?
                         ) {
-                            Constants.bitmap = resource
+                            SketchBitmap.bitmap = resource
                             binding.objImage.apply {
-                                setImageBitmap(Constants.bitmap)
-                                isEditSketch = false
+                                setImageBitmap(SketchBitmap.bitmap)
                                 binding.imgOutline.setImageResource(R.drawable.outline)
                                 alpha = 0.6f
                                 binding.alphaSeek.progress = 4
@@ -378,27 +454,6 @@ class SketchActivity : AppCompatActivity() {
                 ).show()
             }
         }
-
-    private fun setupFlashButton() {
-        try {
-            isFlashSupported =
-                (getSystemService(Context.CAMERA_SERVICE) as CameraManager).getCameraCharacteristics(
-                    "0"
-                ).get(CameraCharacteristics.FLASH_INFO_AVAILABLE) == true
-
-            if (isFlashSupported) {
-                binding.relFlash.visibility = View.VISIBLE
-                binding.icFlash.setImageResource(
-                    if (!isTorchOn) R.drawable.ic_flash_off
-                    else R.drawable.ic_flash_on
-                )
-            } else {
-                binding.relFlash.visibility = View.GONE
-            }
-        } catch (e: CameraAccessException) {
-            e.printStackTrace()
-        }
-    }
 
     private fun setupCameraCallbacks() {
         binding.cameraView.mode = Mode.VIDEO
@@ -462,7 +517,7 @@ class SketchActivity : AppCompatActivity() {
 
 
     private fun subscribe() {
-        if (appDataRepository.getAppData()?.isSubscribed == true) {
+        if (appDataState?.isSubscribed == true) {
             handler?.removeCallbacks(timerRunnable)
             countDownTimer?.cancel()
 
@@ -556,13 +611,16 @@ class SketchActivity : AppCompatActivity() {
     }
 
     private fun countDown() {
+
         isTimeIsUp = false
         binding.theDrawingIsReadyBtn.visibility = View.GONE
 
         val countdownDurationMillis: Long = 5 * 60 * 1000
         val countdownIntervalMillis: Long = 1000
 
-        countDownTimer = object : CountDownTimer(countdownDurationMillis, countdownIntervalMillis) {
+        countDownTimer = object : CountDownTimer(
+            countdownDurationMillis, countdownIntervalMillis
+        ) {
             override fun onTick(millisUntilFinished: Long) {
                 val minutes = (millisUntilFinished / 1000) / 60
                 val seconds = (millisUntilFinished / 1000) % 60
@@ -574,9 +632,10 @@ class SketchActivity : AppCompatActivity() {
             override fun onFinish() {
                 isTimeIsUp = true
                 updateMainTimerText("00:00", 0)
-                if (!isDialogShowing
-                    && !isTimeIsUpDialogShowing
-                    && appDataRepository.getAppData()?.isSubscribed == false
+                if (
+                    !isDialogShowing &&
+                    !isTimeIsUpDialogShowing &&
+                    appDataState?.isSubscribed == false
                 ) {
                     timeDialog()
                 }
@@ -590,7 +649,6 @@ class SketchActivity : AppCompatActivity() {
     private fun updateMainTimerText(
         timerText: String, millisUntilFinished: Long
     ) {
-        // Update your TextView with the timerText
         binding.mainTemp.text = timerText
 
         val twoMinutes = 2 * 60 * 1000
@@ -811,8 +869,8 @@ class SketchActivity : AppCompatActivity() {
             )
         }
 
-        if (Constants.bitmap != null) {
-            binding.objImage.setImageBitmap(Constants.bitmap)
+        if (SketchBitmap.bitmap != null) {
+            binding.objImage.setImageBitmap(SketchBitmap.bitmap)
         }
 
         subscribe()
@@ -836,11 +894,6 @@ class SketchActivity : AppCompatActivity() {
     override fun onPause() {
         super.onPause()
         binding.cameraView.close()
-        if (ringProgressDialog != null) {
-            if (ringProgressDialog?.isShowing == true) {
-                ringProgressDialog?.dismiss()
-            }
-        }
 
         if (isRecording) {
             stopVideo()
@@ -849,28 +902,24 @@ class SketchActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        if (appDataRepository.getAppData()?.isSubscribed == false) {
+        if (appDataState?.isSubscribed == false) {
             handler?.removeCallbacks(timerRunnable)
             countDownTimer?.cancel()
-            Constants.bitmap = null
-            Constants.convertedBitmap = null
+            SketchBitmap.bitmap = null
+            SketchBitmap.borderedBitmap = null
         }
     }
 
     companion object {
-        const val FLIP_HORIZONTAL = 2
-        private const val FLIP_VERTICAL = 1
         const val PERMISSIONS_CODE = 3002
 
-        fun flip(bitmap: Bitmap?, type: Int): Bitmap? {
+        fun flip(bitmap: Bitmap?): Bitmap? {
             if (bitmap != null) {
                 val matrix = Matrix()
-                when (type) {
-                    FLIP_VERTICAL -> matrix.preScale(1.0f, -1.0f)
-                    FLIP_HORIZONTAL -> matrix.preScale(-1.0f, 1.0f)
-                    else -> return null
-                }
-                return Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true)
+                matrix.preScale(-1.0f, 1.0f)
+                return Bitmap.createBitmap(
+                    bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true
+                )
             }
             return null
         }

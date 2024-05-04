@@ -94,9 +94,13 @@ class SketchActivity : AppCompatActivity() {
     private lateinit var binding: ActivitySketchBinding
 
     private val sketchViewModel: SketchViewModel by viewModels()
+
     private var sketchState: SketchState? = null
     private var appDataState: AppData? = null
-    private var isImageBorderState: Boolean = false
+    private var imageBorderState: Boolean = false
+    private var isTakePhotoDialogShowingState = false
+    private var isTimeIsUpDialogShowingState = false
+    private var isTimeIsUpState = false
 
     private var elapsedTimeMillis: Long = 0
     private var isRecording = false
@@ -105,9 +109,6 @@ class SketchActivity : AppCompatActivity() {
 
     private var countDownTimer: CountDownTimer? = null
 
-    private var isDialogShowing = false
-    private var isTimeIsUp = false
-    private var isTimeIsUpDialogShowing = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -129,11 +130,25 @@ class SketchActivity : AppCompatActivity() {
         }
 
         collectState(sketchViewModel.imageBorderState) {
-            isImageBorderState = it
-            setImageBorder(isImageBorderState)
+            imageBorderState = it
+            setImageBorder(imageBorderState)
         }
 
         collectState(sketchViewModel.flashState, ::switchFlash)
+
+        collectState(sketchViewModel.isTimeIsUpDialogShowingState) {
+            isTimeIsUpDialogShowingState = it
+            timeUpDialog()
+        }
+
+        collectState(sketchViewModel.isTakePhotoDialogShowingState) {
+            isTakePhotoDialogShowingState = it
+            takePhotoDialog()
+        }
+
+        collectState(sketchViewModel.isTimeIsUpState) {
+            isTimeIsUpState = it
+        }
 
         handler = Handler(Looper.getMainLooper())
         val pushAnime = AnimationUtils.loadAnimation(this, R.anim.view_push)
@@ -311,7 +326,7 @@ class SketchActivity : AppCompatActivity() {
         SketchBitmap.borderedBitmap = flip(SketchBitmap.borderedBitmap)
 
         binding.objImage.setImageBitmap(
-            if (!isImageBorderState) SketchBitmap.bitmap
+            if (!imageBorderState) SketchBitmap.bitmap
             else SketchBitmap.borderedBitmap
         )
     }
@@ -612,7 +627,7 @@ class SketchActivity : AppCompatActivity() {
 
     private fun countDown() {
 
-        isTimeIsUp = false
+        isTimeIsUpState = false
         binding.theDrawingIsReadyBtn.visibility = View.GONE
 
         val countdownDurationMillis: Long = 5 * 60 * 1000
@@ -630,14 +645,14 @@ class SketchActivity : AppCompatActivity() {
             }
 
             override fun onFinish() {
-                isTimeIsUp = true
+                isTimeIsUpState = true
                 updateMainTimerText("00:00", 0)
                 if (
-                    !isDialogShowing &&
-                    !isTimeIsUpDialogShowing &&
+                    !isTakePhotoDialogShowingState &&
+                    !isTimeIsUpDialogShowingState &&
                     appDataState?.isSubscribed == false
                 ) {
-                    timeDialog()
+                    timeUpDialog()
                 }
             }
         }
@@ -657,8 +672,8 @@ class SketchActivity : AppCompatActivity() {
         }
     }
 
-    private fun timeDialog() {
-        isTimeIsUpDialogShowing = true
+    private fun timeUpDialog() {
+        isTimeIsUpDialogShowingState = true
         val timeDialog = Dialog(this)
         timeDialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
         timeDialog.setCancelable(false)
@@ -675,7 +690,7 @@ class SketchActivity : AppCompatActivity() {
 
         timeDialog.findViewById<Button>(R.id.watch).setOnClickListener {
             rewarded { countDown() }
-            isTimeIsUpDialogShowing = false
+            isTimeIsUpDialogShowingState = false
             timeDialog.dismiss()
         }
 
@@ -711,7 +726,7 @@ class SketchActivity : AppCompatActivity() {
 
 
     private fun takePhotoDialog() {
-        isDialogShowing = true
+        isTakePhotoDialogShowingState = true
 
         val takePhotoDialog = Dialog(this)
         takePhotoDialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
@@ -730,26 +745,23 @@ class SketchActivity : AppCompatActivity() {
         val itsNotFinished = takePhotoDialog.findViewById<TextView>(R.id.its_not_finished)
         itsNotFinished.paintFlags = itsNotFinished.paintFlags or Paint.UNDERLINE_TEXT_FLAG
 
-        takePhotoDialog.findViewById<ImageView>(R.id.close).setOnClickListener {
-            isDialogShowing = false
-            takePhotoDialog.dismiss()
-
-            if (isTimeIsUp && !isTimeIsUpDialogShowing) {
-                timeDialog()
+        takePhotoDialog.setOnDismissListener {
+            isTakePhotoDialogShowingState = false
+            if (isTimeIsUpState && !isTimeIsUpDialogShowingState) {
+                timeUpDialog()
             }
         }
 
         itsNotFinished.setOnClickListener {
-            isDialogShowing = false
             takePhotoDialog.dismiss()
+        }
 
-            if (isTimeIsUp && !isTimeIsUpDialogShowing) {
-                timeDialog()
-            }
+        takePhotoDialog.findViewById<ImageView>(R.id.close).setOnClickListener {
+            takePhotoDialog.dismiss()
         }
 
         takePhotoDialog.findViewById<Button>(R.id.take_photo).setOnClickListener {
-            isDialogShowing = false
+            isTakePhotoDialogShowingState = false
             takePhotoDialog.dismiss()
             takePhoto()
         }
@@ -758,7 +770,7 @@ class SketchActivity : AppCompatActivity() {
     }
 
     private fun savePhotoDialog(bitmap: Bitmap) {
-        isDialogShowing = true
+        isTakePhotoDialogShowingState = true
         val savePhotoDialog = Dialog(this)
         savePhotoDialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
         savePhotoDialog.setCancelable(true)
@@ -779,22 +791,22 @@ class SketchActivity : AppCompatActivity() {
         savePhotoDialog.findViewById<ImageView>(R.id.photo).setImageBitmap(bitmap)
 
         savePhotoDialog.findViewById<ImageView>(R.id.close).setOnClickListener {
-            isDialogShowing = false
+            isTakePhotoDialogShowingState = false
             savePhotoDialog.dismiss()
 
-            if (isTimeIsUp && !isTimeIsUpDialogShowing) {
-                timeDialog()
+            if (isTimeIsUpState && !isTimeIsUpDialogShowingState) {
+                timeUpDialog()
             }
         }
 
         takeAnotherPhoto.setOnClickListener {
-            isDialogShowing = false
+            isTakePhotoDialogShowingState = false
             savePhotoDialog.dismiss()
             takePhoto()
         }
 
         savePhotoDialog.findViewById<Button>(R.id.save_photo).setOnClickListener {
-            isDialogShowing = false
+            isTakePhotoDialogShowingState = false
             savePhotoDialog.dismiss()
             saveImage(bitmap)
         }
@@ -804,9 +816,12 @@ class SketchActivity : AppCompatActivity() {
 
     private fun takePhoto() {
         getExternalFilesDir(Environment.DIRECTORY_DCIM)?.let { it1 ->
-            ImagePicker.with(this).cameraOnly().saveDir(it1).createIntent { intent ->
-                startForTakeAndSaveDrawingPhotoResult.launch(intent)
-            }
+            ImagePicker.with(this)
+                .cameraOnly()
+                .saveDir(it1)
+                .createIntent { intent ->
+                    startForTakeAndSaveDrawingPhotoResult.launch(intent)
+                }
         }
     }
 

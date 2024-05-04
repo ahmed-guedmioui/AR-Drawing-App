@@ -33,6 +33,15 @@ class SketchViewModel @Inject constructor(
     private val _flashState = MutableStateFlow(false)
     val flashState = _flashState.asStateFlow()
 
+    private val _isTimeIsUpDialogShowingState = MutableStateFlow(false)
+    val isTimeIsUpDialogShowingState = _isTimeIsUpDialogShowingState.asStateFlow()
+
+    private val _isTakePhotoDialogShowingState = MutableStateFlow(false)
+    val isTakePhotoDialogShowingState = _isTakePhotoDialogShowingState.asStateFlow()
+
+    private val _isTimeIsUpState = MutableStateFlow(false)
+    val isTimeIsUpState = _isTimeIsUpState.asStateFlow()
+
     init {
         viewModelScope.launch {
             viewModelScope.launch {

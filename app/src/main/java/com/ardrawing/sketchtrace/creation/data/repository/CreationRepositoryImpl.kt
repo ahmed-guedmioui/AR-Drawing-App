@@ -71,7 +71,13 @@ class CreationRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun insertPhotoCreation(bitmap: Bitmap): Boolean {
+    override suspend fun insertPhotoCreation(
+        bitmap: Bitmap?
+    ): Boolean {
+        if (bitmap == null) {
+            return false
+        }
+
         val timestamp = SimpleDateFormat(
             "yyyyMMdd_HHmmss", Locale.getDefault()
         ).format(Date())

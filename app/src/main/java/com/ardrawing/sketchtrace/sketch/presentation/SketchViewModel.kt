@@ -27,6 +27,9 @@ class SketchViewModel @Inject constructor(
     private val _appDataState = MutableStateFlow<AppData?>(null)
     val appData = _appDataState.asStateFlow()
 
+    private val _isActivityInitializedState = MutableStateFlow(false)
+    val isActivityInitializedState = _isActivityInitializedState.asStateFlow()
+
     private val _imageBorderState = MutableStateFlow(false)
     val imageBorderState = _imageBorderState.asStateFlow()
 
@@ -42,8 +45,8 @@ class SketchViewModel @Inject constructor(
     private val _isSavePhotoDialogShowingState = MutableStateFlow(false)
     val isSavePhotoDialogShowingState = _isSavePhotoDialogShowingState.asStateFlow()
 
-    private val _isCountdownRunningState = MutableStateFlow(false)
-    val isCountdownRunningState = _isCountdownRunningState.asStateFlow()
+    private val _shouldStartCountdownState = MutableStateFlow(false)
+    val shouldStartCountdownState = _shouldStartCountdownState.asStateFlow()
 
     init {
         viewModelScope.launch {
@@ -55,28 +58,38 @@ class SketchViewModel @Inject constructor(
 
     fun onEvent(event: SketchUiEvent) {
         when (event) {
-            is SketchUiEvent.UpdateImageTransparency -> {
-                _sketchState.update {
-                    it.copy(
-                        imageTransparency = event.transparency
-                    )
-                }
+
+            is SketchUiEvent.InitializeActivity -> {
+                _isActivityInitializedState.update { event.shouldInit }
             }
 
-            is SketchUiEvent.UpdateTimerTime -> {
-                _sketchState.update {
-                    it.copy(
-                        timerTime = event.timerTime
-                    )
-                }
+            is SketchUiEvent.UpdateCountdownTime -> {
+                _sketchState.update { it.copy(countdownTime = event.time) }
             }
+
+            is SketchUiEvent.UpdateImageTransparency -> {
+                _sketchState.update { it.copy(imageTransparency = event.transparency) }
+            }
+
+            is SketchUiEvent.ShowAndHideSavePhotoDialog -> {
+                _isSavePhotoDialogShowingState.update { event.shouldShow }
+            }
+
+            is SketchUiEvent.ShowAndHideTakePhotoDialog -> {
+                _isTakePhotoDialogShowingState.update { event.shouldShow }
+            }
+
+            is SketchUiEvent.ShowAndHideTimeFinishedDialog -> {
+                _isTimeFinishedDialogShowingState.update { event.shouldShow }
+            }
+
+            is SketchUiEvent.StartAndStopCountdownTimer -> {
+                _shouldStartCountdownState.update { event.shouldStart }
+            }
+
 
             SketchUiEvent.UpdateIsImageLocked -> {
-                _sketchState.update {
-                    it.copy(
-                        isImageLocked = !it.isImageLocked
-                    )
-                }
+                _sketchState.update { it.copy(isImageLocked = !it.isImageLocked) }
             }
 
             SketchUiEvent.UpdateIsFlashEnabled -> {

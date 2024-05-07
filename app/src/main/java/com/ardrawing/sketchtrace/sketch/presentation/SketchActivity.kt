@@ -1,5 +1,6 @@
 package com.ardrawing.sketchtrace.sketch.presentation
 
+import android.Manifest
 import android.app.Activity
 import android.app.Dialog
 import android.app.ProgressDialog
@@ -98,9 +99,12 @@ class SketchActivity : AppCompatActivity() {
     private var sketchState: SketchState? = null
     private var appDataState: AppData? = null
     private var imageBorderState: Boolean = false
+
     private var isTakePhotoDialogShowingState = false
-    private var isTimeIsUpDialogShowingState = false
-    private var isTimeIsUpState = false
+    private var isSavePhotoDialogShowingState = false
+
+    private var isTimeFinishedDialogShowingState = false
+    private var isCountdownRunningState = false
 
     private var elapsedTimeMillis: Long = 0
     private var isRecording = false
@@ -108,6 +112,10 @@ class SketchActivity : AppCompatActivity() {
     private var handler: Handler? = null
 
     private var countDownTimer: CountDownTimer? = null
+
+    private val countdownPeriod: Long = 5 * 60 * 1000
+    private val countdownStartText = "05:00"
+    private val showDrawingIsReadyBtnAfter: Long = 60 * 1000
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -136,9 +144,9 @@ class SketchActivity : AppCompatActivity() {
 
         collectState(sketchViewModel.flashState, ::switchFlash)
 
-        collectState(sketchViewModel.isTimeIsUpDialogShowingState) {
-            isTimeIsUpDialogShowingState = it
-            timeUpDialog()
+        collectState(sketchViewModel.isTimeFinishedDialogShowingState) {
+            isTimeFinishedDialogShowingState = it
+            timeFinishedDialog()
         }
 
         collectState(sketchViewModel.isTakePhotoDialogShowingState) {
@@ -146,8 +154,17 @@ class SketchActivity : AppCompatActivity() {
             takePhotoDialog()
         }
 
-        collectState(sketchViewModel.isTimeIsUpState) {
-            isTimeIsUpState = it
+        collectState(sketchViewModel.isSavePhotoDialogShowingState) {
+            isSavePhotoDialogShowingState = it
+            savePhotoDialog()
+        }
+
+        collectState(sketchViewModel.isCountdownRunningState) {
+            isCountdownRunningState = it
+
+            if (isCountdownRunningState) {
+                startCountdown()
+            }
         }
 
         handler = Handler(Looper.getMainLooper())
@@ -179,7 +196,8 @@ class SketchActivity : AppCompatActivity() {
             }
 
             theDrawingIsReadyBtn.setOnClickListener {
-                takePhotoDialog()
+                // event
+                isTakePhotoDialogShowingState = true
             }
 
             relCamera.setOnClickListener {
@@ -267,6 +285,29 @@ class SketchActivity : AppCompatActivity() {
         }
     }
 
+    private fun initializeActivity(imagePath: String?) {
+
+        if (appDataState?.isSubscribed == true) {
+            binding.mainTempContainer.visibility = View.GONE
+            binding.vipPhoto.visibility = View.GONE
+            binding.vipVideo.visibility = View.GONE
+            binding.vipRecord.visibility = View.GONE
+        }
+
+        imagePath?.let(::loadImage)
+
+        showStartAnimation()
+        updateMainTimerText(
+            timerText = countdownStartText,
+            millisUntilFinished = countdownPeriod
+        )
+
+        if (appDataState?.isSubscribed == false) {
+            // event
+            isCountdownRunningState = true
+        }
+    }
+
     private fun loadImage(imagePath: String) {
         Glide.with(this)
             .asBitmap()
@@ -288,30 +329,6 @@ class SketchActivity : AppCompatActivity() {
                     override fun onLoadCleared(placeholder: Drawable?) {}
                 }
             )
-    }
-
-    private fun initializeActivity(imagePath: String?) {
-        if (appDataState?.isSubscribed == true) {
-            binding.theDrawingIsReadyBtn.visibility = View.VISIBLE
-            binding.mainTempContainer.visibility = View.GONE
-            binding.vipPhoto.visibility = View.GONE
-            binding.vipVideo.visibility = View.GONE
-            binding.vipRecord.visibility = View.GONE
-        }
-
-        imagePath?.let(::loadImage)
-
-        showStartAnimation()
-        updateMainTimerText(
-            "05:00", 5 * 60 * 1000
-        )
-
-        Log.d(
-            "tag_counter", "initializeActivity: ${appDataState == null}"
-        )
-        if (appDataState?.isSubscribed == false) {
-            countDown()
-        }
     }
 
     private fun showStartAnimation() {
@@ -344,7 +361,6 @@ class SketchActivity : AppCompatActivity() {
     private fun setImageBorder(isImageBordered: Boolean) {
 
         if (isImageBordered) {
-            Log.d("tag_border", "isImageBordered")
 
             val progressDialog = ProgressDialog(this@SketchActivity)
             progressDialog.setCancelable(false)
@@ -445,31 +461,6 @@ class SketchActivity : AppCompatActivity() {
             }
         }
 
-
-    private val startForTakeAndSaveDrawingPhotoResult =
-        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result: ActivityResult ->
-
-            if (result.resultCode == Activity.RESULT_OK) {
-                //Image Uri will not be null for RESULT_OK
-                val uri = result.data?.data!!
-
-                Glide.with(this).asBitmap().load(uri.toString())
-                    .into(object : CustomTarget<Bitmap>() {
-                        override fun onResourceReady(
-                            resource: Bitmap, transition: Transition<in Bitmap>?
-                        ) {
-                            savePhotoDialog(resource)
-                        }
-
-                        override fun onLoadCleared(placeholder: Drawable?) {}
-                    })
-            } else {
-                Toast.makeText(
-                    this, getString(R.string.error_importing_photo), Toast.LENGTH_SHORT
-                ).show()
-            }
-        }
-
     private fun setupCameraCallbacks() {
         binding.cameraView.mode = Mode.VIDEO
         binding.recordVideo.setOnClickListener {
@@ -530,10 +521,9 @@ class SketchActivity : AppCompatActivity() {
         }
     }
 
-
-    private fun subscribe() {
+    private fun setSubscribedUser() {
         if (appDataState?.isSubscribed == true) {
-            handler?.removeCallbacks(timerRunnable)
+            handler?.removeCallbacks(videoTimerRunnable)
             countDownTimer?.cancel()
 
             binding.mainTempContainer.visibility = View.GONE
@@ -543,10 +533,10 @@ class SketchActivity : AppCompatActivity() {
         }
     }
 
+    // Video ------------------
     private fun stopVideo() {
-        Log.d("tag_vid", "stopVideo")
         isRecording = false
-        handler?.removeCallbacks(timerRunnable)
+        handler?.removeCallbacks(videoTimerRunnable)
         binding.recordVideoImage.setImageDrawable(
             AppCompatResources.getDrawable(
                 this@SketchActivity, R.drawable.rec
@@ -554,15 +544,13 @@ class SketchActivity : AppCompatActivity() {
         )
 
         elapsedTimeMillis = 0
-        binding.temp.visibility = View.GONE
+        binding.videoTemp.visibility = View.GONE
         binding.fastVideoCheck.visibility = View.GONE
-        binding.temp.text = getString(R.string._00_00)
+        binding.videoTemp.text = getString(R.string._00_00)
     }
 
     private lateinit var tempFilePath: String
     private fun takeVideo() {
-        Log.d("tag_vid", "takeVideo")
-
         try {
 
             val timestamp = SimpleDateFormat(
@@ -580,9 +568,9 @@ class SketchActivity : AppCompatActivity() {
                 )
             )
 
-            binding.temp.visibility = View.VISIBLE
+            binding.videoTemp.visibility = View.VISIBLE
             binding.fastVideoCheck.visibility = View.VISIBLE
-            handler?.postDelayed(timerRunnable, 1000)
+            handler?.postDelayed(videoTimerRunnable, 1000)
 
         } catch (e: IOException) {
             e.printStackTrace()
@@ -604,55 +592,55 @@ class SketchActivity : AppCompatActivity() {
 
     }
 
-    private val timerRunnable = object : Runnable {
+    private val videoTimerRunnable = object : Runnable {
         override fun run() {
             // Update the elapsed time
             elapsedTimeMillis += 1000
-            updateTimerText()
+            updateVideoTimerText()
 
             // Schedule the next update after 1 second
             handler?.postDelayed(this, 1000)
         }
     }
 
-    private fun updateTimerText() {
+    private fun updateVideoTimerText() {
         val seconds = elapsedTimeMillis / 1000
         val minutes = seconds / 60
         val remainingSeconds = seconds % 60
         val timerText = String.format("%02d:%02d", minutes, remainingSeconds)
 
-        // Update your TextView with the timerText
-        binding.temp.text = timerText
+        binding.videoTemp.text = timerText
     }
+// Video ------------------
 
-    private fun countDown() {
-
-        isTimeIsUpState = false
+    private fun startCountdown() {
         binding.theDrawingIsReadyBtn.visibility = View.GONE
 
-        val countdownDurationMillis: Long = 5 * 60 * 1000
-        val countdownIntervalMillis: Long = 1000
-
         countDownTimer = object : CountDownTimer(
-            countdownDurationMillis, countdownIntervalMillis
+            countdownPeriod, 1000
         ) {
             override fun onTick(millisUntilFinished: Long) {
                 val minutes = (millisUntilFinished / 1000) / 60
                 val seconds = (millisUntilFinished / 1000) % 60
                 val formattedTime = "%02d:%02d".format(minutes, seconds)
 
-                updateMainTimerText(formattedTime, millisUntilFinished)
+                updateMainTimerText(
+                    timerText = formattedTime,
+                    millisUntilFinished = millisUntilFinished
+                )
             }
 
             override fun onFinish() {
-                isTimeIsUpState = true
-                updateMainTimerText("00:00", 0)
-                if (
-                    !isTakePhotoDialogShowingState &&
-                    !isTimeIsUpDialogShowingState &&
-                    appDataState?.isSubscribed == false
-                ) {
-                    timeUpDialog()
+                // event
+                isCountdownRunningState = false
+
+                updateMainTimerText(
+                    timerText = "00:00",
+                    millisUntilFinished = 0
+                )
+                if (appDataState?.isSubscribed == false) {
+                    // event
+                    isTimeFinishedDialogShowingState = true
                 }
             }
         }
@@ -666,14 +654,12 @@ class SketchActivity : AppCompatActivity() {
     ) {
         binding.mainTemp.text = timerText
 
-        val twoMinutes = 2 * 60 * 1000
-        if (millisUntilFinished <= twoMinutes) {
+        if (millisUntilFinished <= showDrawingIsReadyBtnAfter) {
             binding.theDrawingIsReadyBtn.visibility = View.VISIBLE
         }
     }
 
-    private fun timeUpDialog() {
-        isTimeIsUpDialogShowingState = true
+    private fun timeFinishedDialog() {
         val timeDialog = Dialog(this)
         timeDialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
         timeDialog.setCancelable(false)
@@ -689,12 +675,20 @@ class SketchActivity : AppCompatActivity() {
         timeDialog.window!!.attributes = layoutParams
 
         timeDialog.findViewById<Button>(R.id.watch).setOnClickListener {
-            rewarded { countDown() }
-            isTimeIsUpDialogShowingState = false
-            timeDialog.dismiss()
+            // event
+            isTimeFinishedDialogShowingState = false
+            // event
+            rewarded {
+                // event
+                isCountdownRunningState = true
+            }
         }
 
-        timeDialog.show()
+        if (isTimeFinishedDialogShowingState) {
+            timeDialog.show()
+        } else {
+            timeDialog.dismiss()
+        }
     }
 
     private fun rewarded(onRewDone: () -> Unit) {
@@ -726,8 +720,6 @@ class SketchActivity : AppCompatActivity() {
 
 
     private fun takePhotoDialog() {
-        isTakePhotoDialogShowingState = true
-
         val takePhotoDialog = Dialog(this)
         takePhotoDialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
         takePhotoDialog.setCancelable(true)
@@ -745,32 +737,32 @@ class SketchActivity : AppCompatActivity() {
         val itsNotFinished = takePhotoDialog.findViewById<TextView>(R.id.its_not_finished)
         itsNotFinished.paintFlags = itsNotFinished.paintFlags or Paint.UNDERLINE_TEXT_FLAG
 
-        takePhotoDialog.setOnDismissListener {
+        takePhotoDialog.findViewById<TextView>(R.id.its_not_finished).setOnClickListener {
+            // event
             isTakePhotoDialogShowingState = false
-            if (isTimeIsUpState && !isTimeIsUpDialogShowingState) {
-                timeUpDialog()
-            }
-        }
-
-        itsNotFinished.setOnClickListener {
-            takePhotoDialog.dismiss()
         }
 
         takePhotoDialog.findViewById<ImageView>(R.id.close).setOnClickListener {
-            takePhotoDialog.dismiss()
+            // event
+            isTakePhotoDialogShowingState = false
         }
 
         takePhotoDialog.findViewById<Button>(R.id.take_photo).setOnClickListener {
+            // event
             isTakePhotoDialogShowingState = false
-            takePhotoDialog.dismiss()
+            // event
             takePhoto()
         }
 
-        takePhotoDialog.show()
+
+        if (isTakePhotoDialogShowingState) {
+            takePhotoDialog.show()
+        } else {
+            takePhotoDialog.dismiss()
+        }
     }
 
-    private fun savePhotoDialog(bitmap: Bitmap) {
-        isTakePhotoDialogShowingState = true
+    private fun savePhotoDialog() {
         val savePhotoDialog = Dialog(this)
         savePhotoDialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
         savePhotoDialog.setCancelable(true)
@@ -788,30 +780,34 @@ class SketchActivity : AppCompatActivity() {
         val takeAnotherPhoto = savePhotoDialog.findViewById<TextView>(R.id.take_another_photo)
         takeAnotherPhoto.paintFlags = takeAnotherPhoto.paintFlags or Paint.UNDERLINE_TEXT_FLAG
 
-        savePhotoDialog.findViewById<ImageView>(R.id.photo).setImageBitmap(bitmap)
+        savePhotoDialog.findViewById<ImageView>(R.id.photo)
+            .setImageBitmap(SketchBitmap.bitmapToSave)
+
 
         savePhotoDialog.findViewById<ImageView>(R.id.close).setOnClickListener {
-            isTakePhotoDialogShowingState = false
-            savePhotoDialog.dismiss()
-
-            if (isTimeIsUpState && !isTimeIsUpDialogShowingState) {
-                timeUpDialog()
-            }
+            // event
+            isSavePhotoDialogShowingState = false
         }
 
-        takeAnotherPhoto.setOnClickListener {
-            isTakePhotoDialogShowingState = false
-            savePhotoDialog.dismiss()
+        savePhotoDialog.findViewById<TextView>(R.id.take_another_photo).setOnClickListener {
+            // event
+            isSavePhotoDialogShowingState = false
+            // event
             takePhoto()
         }
 
         savePhotoDialog.findViewById<Button>(R.id.save_photo).setOnClickListener {
-            isTakePhotoDialogShowingState = false
-            savePhotoDialog.dismiss()
-            saveImage(bitmap)
+            // event
+            isSavePhotoDialogShowingState = false
+            savePhoto()
         }
 
-        savePhotoDialog.show()
+
+        if (isSavePhotoDialogShowingState) {
+            savePhotoDialog.show()
+        } else {
+            savePhotoDialog.dismiss()
+        }
     }
 
     private fun takePhoto() {
@@ -825,30 +821,66 @@ class SketchActivity : AppCompatActivity() {
         }
     }
 
-    private fun saveImage(bitmap: Bitmap) {
-        lifecycleScope.launch {
+    private val startForTakeAndSaveDrawingPhotoResult =
+        registerForActivityResult(
+            ActivityResultContracts.StartActivityForResult()
+        ) { result: ActivityResult ->
 
-            val isSaved = async {
-                creationRepository.insertPhotoCreation(bitmap)
+            if (result.resultCode == Activity.RESULT_OK) {
+                //Image Uri will not be null for RESULT_OK
+                val uri = result.data?.data!!
+
+                Glide.with(this).asBitmap().load(uri.toString())
+                    .into(object : CustomTarget<Bitmap>() {
+                        override fun onResourceReady(
+                            resource: Bitmap, transition: Transition<in Bitmap>?
+                        ) {
+                            SketchBitmap.bitmapToSave = resource
+                            // event
+                            isSavePhotoDialogShowingState = true
+                        }
+
+                        override fun onLoadCleared(placeholder: Drawable?) {}
+                    })
+            } else {
+                Toast.makeText(
+                    this, getString(R.string.error_importing_photo), Toast.LENGTH_SHORT
+                ).show()
             }
+        }
 
-            val progressDialog = ProgressDialog(this@SketchActivity)
-            progressDialog.setMessage(getString(R.string.saving_image))
-            progressDialog.setCancelable(false)
-            progressDialog.show()
+    private fun savePhoto() {
+        SketchBitmap.bitmapToSave?.let { bitmap ->
+            lifecycleScope.launch {
 
+                val isSaved = async {
+                    creationRepository.insertPhotoCreation(bitmap)
+                }
+
+                val progressDialog = ProgressDialog(this@SketchActivity)
+                progressDialog.setMessage(getString(R.string.saving_image))
+                progressDialog.setCancelable(false)
+                progressDialog.show()
+
+                Toast.makeText(
+                    this@SketchActivity,
+                    if (isSaved.await()) getString(R.string.photo_saved)
+                    else getString(R.string.something_went_wrong_while_saving_photo),
+                    Toast.LENGTH_SHORT
+                ).show()
+
+                if (isSaved.await()) {
+                    SketchBitmap.bitmapToSave = null
+                    progressDialog.dismiss()
+                    inAppReview()
+                }
+            }
+        }.run {
             Toast.makeText(
                 this@SketchActivity,
-                if (isSaved.await()) getString(R.string.photo_saved)
-                else getString(R.string.something_went_wrong_while_saving_photo),
+                getString(R.string.something_went_wrong_while_saving_photo),
                 Toast.LENGTH_SHORT
             ).show()
-
-            if (isSaved.await()) {
-                progressDialog.dismiss()
-                inAppReview()
-            }
-
         }
     }
 
@@ -878,9 +910,12 @@ class SketchActivity : AppCompatActivity() {
             binding.cameraView.open()
             binding.cameraView.clearFocus()
             setupCameraCallbacks()
-        } else if (!PermissionUtils.isCameraGranted(this)) {
+
+        } else {
             PermissionUtils.checkPermission(
-                this, "android.permission.CAMERA", PERMISSIONS_CODE
+                this,
+                Manifest.permission.CAMERA,
+                CAMERA_PERMISSIONS_CODE
             )
         }
 
@@ -888,21 +923,25 @@ class SketchActivity : AppCompatActivity() {
             binding.objImage.setImageBitmap(SketchBitmap.bitmap)
         }
 
-        subscribe()
-
+        setSubscribedUser()
     }
 
     override fun onRequestPermissionsResult(
         requestCode: Int, permissions: Array<String>, grantResults: IntArray
     ) {
-        if (requestCode == PERMISSIONS_CODE && (grantResults.isEmpty() || grantResults[0] != 0)) {
+        if (
+            requestCode == CAMERA_PERMISSIONS_CODE
+            && (grantResults.isEmpty() || grantResults[0] != 0)
+        ) {
             Toast.makeText(
                 this, getString(R.string.permission_not_granted), Toast.LENGTH_SHORT
             ).show()
             finish()
         }
-        if (requestCode != PERMISSIONS_CODE) {
-            super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode != CAMERA_PERMISSIONS_CODE) {
+            super.onRequestPermissionsResult(
+                requestCode, permissions, grantResults
+            )
         }
     }
 
@@ -918,7 +957,7 @@ class SketchActivity : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
         if (appDataState?.isSubscribed == false) {
-            handler?.removeCallbacks(timerRunnable)
+            handler?.removeCallbacks(videoTimerRunnable)
             countDownTimer?.cancel()
             SketchBitmap.bitmap = null
             SketchBitmap.borderedBitmap = null
@@ -926,7 +965,7 @@ class SketchActivity : AppCompatActivity() {
     }
 
     companion object {
-        const val PERMISSIONS_CODE = 3002
+        const val CAMERA_PERMISSIONS_CODE = 3002
 
         fun flip(bitmap: Bitmap?): Bitmap? {
             if (bitmap != null) {

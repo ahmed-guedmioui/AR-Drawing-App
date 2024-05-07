@@ -8,4 +8,5 @@ import android.graphics.Bitmap
 object SketchBitmap {
     var bitmap: Bitmap? = null
     var borderedBitmap: Bitmap? = null
+    var bitmapToSave: Bitmap? = null
 }

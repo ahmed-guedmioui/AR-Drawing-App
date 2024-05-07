@@ -175,7 +175,7 @@
             </androidx.cardview.widget.CardView>
 
             <TextView
-                android:id="@+id/temp"
+                android:id="@+id/video_temp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"

@@ -105,18 +105,11 @@ class SketchActivity : AppCompatActivity() {
     private var isSavePhotoDialogShowingState = false
 
     private var isTimeFinishedDialogShowingState = false
-    private var shouldStartCountdownState = false
 
-    private var elapsedTimeMillis: Long = 0
+    private var videoElapsedTimeMillis: Long = 0
     private var isRecording = false
     private var isSavedVideoCalled = true
-    private var handler: Handler? = null
-
-    private var countDownTimer: CountDownTimer? = null
-
-    private val countdownPeriod: Long = 1 * 60 * 1000
-    private val showDrawingIsReadyBtnAfter: Long = 55 * 1000
-
+    private var videoHandler: Handler? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -194,23 +187,24 @@ class SketchActivity : AppCompatActivity() {
             }
         }
 
-        collectState(sketchViewModel.shouldStartCountdownState) {
-            shouldStartCountdownState = it
+        collectState(sketchViewModel.countdownTimeState) { remainingTime ->
 
-            Log.d(
-                "sketchCountdown",
-                "collect shouldStartCountdownState: $shouldStartCountdownState"
-            )
+            binding.mainTemp.text = remainingTime
 
-            if (shouldStartCountdownState) {
-                startCountdown()
-                sketchViewModel.onEvent(
-                    SketchUiEvent.StartAndStopCountdownTimer(false)
-                )
+            if (remainingTime == "04:00") {
+                binding.theDrawingIsReadyBtn.visibility = View.VISIBLE
+            }
+
+            if (remainingTime == "00:00") {
+                if (appDataState?.isSubscribed == false) {
+                    sketchViewModel.onEvent(
+                        SketchUiEvent.ShowAndHideTimeFinishedDialog(true)
+                    )
+                }
             }
         }
 
-        handler = Handler(Looper.getMainLooper())
+        videoHandler = Handler(Looper.getMainLooper())
         val pushAnime = AnimationUtils.loadAnimation(this, R.anim.view_push)
 
         val cameraManager = getSystemService(Context.CAMERA_SERVICE) as CameraManager
@@ -343,6 +337,7 @@ class SketchActivity : AppCompatActivity() {
         showStartAnimation()
 
         if (appDataState?.isSubscribed == false) {
+            binding.theDrawingIsReadyBtn.visibility = View.GONE
             sketchViewModel.onEvent(
                 SketchUiEvent.StartAndStopCountdownTimer(true)
             )
@@ -450,7 +445,6 @@ class SketchActivity : AppCompatActivity() {
             }
 
         } else {
-            Log.d("tag_border", "!isImageBordered")
             binding.objImage.setImageBitmap(SketchBitmap.bitmap)
             binding.imgOutline.setImageResource(R.drawable.outline)
         }
@@ -564,8 +558,13 @@ class SketchActivity : AppCompatActivity() {
 
     private fun setSubscribedUser() {
         if (appDataState?.isSubscribed == true) {
-            handler?.removeCallbacks(videoTimerRunnable)
-            countDownTimer?.cancel()
+            videoHandler?.removeCallbacks(videoTimerRunnable)
+
+            binding.theDrawingIsReadyBtn.visibility = View.GONE
+            sketchViewModel.onEvent(
+                SketchUiEvent.StartAndStopCountdownTimer(false)
+            )
+//            countDownTimer?.cancel()
 
             binding.mainTempContainer.visibility = View.GONE
             binding.vipPhoto.visibility = View.GONE
@@ -577,14 +576,14 @@ class SketchActivity : AppCompatActivity() {
     // Video ------------------
     private fun stopVideo() {
         isRecording = false
-        handler?.removeCallbacks(videoTimerRunnable)
+        videoHandler?.removeCallbacks(videoTimerRunnable)
         binding.recordVideoImage.setImageDrawable(
             AppCompatResources.getDrawable(
                 this@SketchActivity, R.drawable.rec
             )
         )
 
-        elapsedTimeMillis = 0
+        videoElapsedTimeMillis = 0
         binding.videoTemp.visibility = View.GONE
         binding.fastVideoCheck.visibility = View.GONE
         binding.videoTemp.text = getString(R.string._00_00)
@@ -611,7 +610,7 @@ class SketchActivity : AppCompatActivity() {
 
             binding.videoTemp.visibility = View.VISIBLE
             binding.fastVideoCheck.visibility = View.VISIBLE
-            handler?.postDelayed(videoTimerRunnable, 1000)
+            videoHandler?.postDelayed(videoTimerRunnable, 1000)
 
         } catch (e: IOException) {
             e.printStackTrace()
@@ -636,66 +635,25 @@ class SketchActivity : AppCompatActivity() {
     private val videoTimerRunnable = object : Runnable {
         override fun run() {
             // Update the elapsed time
-            elapsedTimeMillis += 1000
+            videoElapsedTimeMillis += 1000
             updateVideoTimerText()
 
             // Schedule the next update after 1 second
-            handler?.postDelayed(this, 1000)
+            videoHandler?.postDelayed(this, 1000)
         }
     }
 
     private fun updateVideoTimerText() {
-        val seconds = elapsedTimeMillis / 1000
+        val seconds = videoElapsedTimeMillis / 1000
         val minutes = seconds / 60
         val remainingSeconds = seconds % 60
-        val timerText = String.format("%02d:%02d", minutes, remainingSeconds)
+        val timerText = String.format(
+            null, "%02d:%02d", minutes, remainingSeconds
+        )
 
         binding.videoTemp.text = timerText
     }
 // Video ------------------
-
-    private fun startCountdown() {
-        binding.theDrawingIsReadyBtn.visibility = View.GONE
-
-        countDownTimer = object : CountDownTimer(
-            countdownPeriod, 1000
-        ) {
-            override fun onTick(millisUntilFinished: Long) {
-                val minutes = (millisUntilFinished / 1000) / 60
-                val seconds = (millisUntilFinished / 1000) % 60
-                val formattedTime = "%02d:%02d".format(minutes, seconds)
-
-                updateMainTimerText(
-                    timerText = formattedTime,
-                    millisUntilFinished = millisUntilFinished
-                )
-            }
-
-            override fun onFinish() {
-                updateMainTimerText(
-                    timerText = "00:00",
-                    millisUntilFinished = 0
-                )
-                if (appDataState?.isSubscribed == false) {
-                    sketchViewModel.onEvent(
-                        SketchUiEvent.ShowAndHideTimeFinishedDialog(true)
-                    )
-                }
-            }
-        }
-
-        countDownTimer?.start()
-    }
-
-    private fun updateMainTimerText(
-        timerText: String, millisUntilFinished: Long
-    ) {
-        binding.mainTemp.text = timerText
-
-        if (millisUntilFinished <= showDrawingIsReadyBtnAfter) {
-            binding.theDrawingIsReadyBtn.visibility = View.VISIBLE
-        }
-    }
 
     private lateinit var timeFinishedDialog: Dialog
     private fun timeFinishedDialog() {
@@ -720,6 +678,7 @@ class SketchActivity : AppCompatActivity() {
                         SketchUiEvent.ShowAndHideTimeFinishedDialog(false)
                     )
 
+                    binding.theDrawingIsReadyBtn.visibility = View.GONE
                     sketchViewModel.onEvent(
                         SketchUiEvent.StartAndStopCountdownTimer(true)
                     )
@@ -993,8 +952,10 @@ class SketchActivity : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
         if (appDataState?.isSubscribed == false) {
-            handler?.removeCallbacks(videoTimerRunnable)
-            countDownTimer?.cancel()
+            videoHandler?.removeCallbacks(videoTimerRunnable)
+            sketchViewModel.onEvent(
+                SketchUiEvent.StartAndStopCountdownTimer(false)
+            )
             SketchBitmap.bitmap = null
             SketchBitmap.borderedBitmap = null
         }

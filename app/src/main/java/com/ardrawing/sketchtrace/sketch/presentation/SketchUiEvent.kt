@@ -23,4 +23,20 @@ sealed interface SketchUiEvent {
     data object UpdateIsImageLocked : SketchUiEvent
     data object UpdateIsImageBordered : SketchUiEvent
 
+    data object SaveTakenPhoto : SketchUiEvent
+
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+

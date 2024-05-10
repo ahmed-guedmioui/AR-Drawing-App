@@ -164,8 +164,8 @@ class RewardedManagerImpl @Inject constructor(
 
         if (isAdmobRewardedLoaded) {
             admobRewardedAd.show(activity) {
-                isAdmobRewardedLoaded = false
-                loadRewarded(activity)
+//                isAdmobRewardedLoaded = false
+//                loadRewarded(activity)
                 onAdClosedListener.onRewComplete()
             }
         } else {
@@ -194,8 +194,8 @@ class RewardedManagerImpl @Inject constructor(
                 }
 
                 override fun onRewardedVideoCompleted() {
-                    isFacebookRewardedLoaded = false
-                    loadRewarded(activity)
+//                    isFacebookRewardedLoaded = false
+//                    loadRewarded(activity)
                     onAdClosedListener.onRewComplete()
                 }
 

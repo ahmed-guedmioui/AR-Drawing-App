@@ -4,13 +4,14 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ardrawing.sketchtrace.core.domain.model.app_data.AppData
 import com.ardrawing.sketchtrace.core.domain.repository.AppDataRepository
-import com.ardrawing.sketchtrace.creation.domian.repository.CreationRepository
+import com.ardrawing.sketchtrace.sketch.domain.repository.SketchRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -21,7 +22,7 @@ import javax.inject.Inject
 @HiltViewModel
 class SketchViewModel @Inject constructor(
     private val appDataRepository: AppDataRepository,
-    private val creationRepository: CreationRepository
+    private val sketchRepository: SketchRepository
 ) : ViewModel() {
 
 
@@ -52,8 +53,11 @@ class SketchViewModel @Inject constructor(
     private val _isSavePhotoDialogShowingState = MutableStateFlow(false)
     val isSavePhotoDialogShowingState = _isSavePhotoDialogShowingState.asStateFlow()
 
-//    private val _shouldStartCountdownState = MutableStateFlow(false)
-//    val shouldStartCountdownState = _shouldStartCountdownState.asStateFlow()
+    private val _savePhotoProgressVisibility = Channel<Boolean>()
+    val savePhotoProgressVisibility = _savePhotoProgressVisibility.receiveAsFlow()
+
+    private val _isPhotoSavedChannel = Channel<Boolean>()
+    val isPhotoSavedChannel = _isPhotoSavedChannel.receiveAsFlow()
 
     init {
         viewModelScope.launch {
@@ -110,10 +114,22 @@ class SketchViewModel @Inject constructor(
             SketchUiEvent.UpdateIsImageBordered -> {
                 _imageBorderState.update { !it }
             }
+
+            SketchUiEvent.SaveTakenPhoto -> {
+                viewModelScope.launch {
+                    _savePhotoProgressVisibility.send(true)
+
+                    val isSaved = sketchRepository.savePhoto()
+                    _isPhotoSavedChannel.send(isSaved)
+
+                    _savePhotoProgressVisibility.send(false)
+                }
+            }
         }
     }
 
 
+    val showTheDrawingIsReadyBtnTime = "04:55"
     private var countdownJob: Job? = null
     private fun startCountdown() {
         countdownJob?.cancel()

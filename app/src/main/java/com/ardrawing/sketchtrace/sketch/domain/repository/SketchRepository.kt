@@ -13,8 +13,9 @@ interface SketchRepository {
         file: File, isFast: Boolean
     ): Boolean
 
+    suspend fun createTempVideo(): File
 
-    suspend fun deleteTempVideo(uri: String): Boolean
+    suspend fun deleteTempVideo(): Boolean
 
 
 }

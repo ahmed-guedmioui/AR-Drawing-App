@@ -1,6 +1,7 @@
 package com.ardrawing.sketchtrace.sketch.presentation
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.Dialog
 import android.app.ProgressDialog
@@ -15,7 +16,6 @@ import android.graphics.drawable.Drawable
 import android.hardware.camera2.CameraAccessException
 import android.hardware.camera2.CameraCharacteristics
 import android.hardware.camera2.CameraManager
-import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
 import android.os.Handler
@@ -64,17 +64,12 @@ import dagger.hilt.android.AndroidEntryPoint
 import jp.co.cyberagent.android.gpuimage.GPUImage
 import jp.co.cyberagent.android.gpuimage.filter.GPUImageThresholdEdgeDetectionFilter
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
-import java.io.IOException
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
 import javax.inject.Inject
 
 /**
@@ -105,9 +100,8 @@ class SketchActivity : AppCompatActivity() {
     private var isSavePhotoDialogShowingState = false
     private var isTimeFinishedDialogShowingState = false
 
-    private var videoElapsedTimeMillis: Long = 0
     private var isRecording = false
-    private var isSavedVideoCalled = true
+    private var videoElapsedTimeMillis: Long = 0
     private var videoHandler: Handler? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -205,7 +199,6 @@ class SketchActivity : AppCompatActivity() {
         val savePhotoProgressDialog = ProgressDialog(this@SketchActivity)
         savePhotoProgressDialog.setMessage(getString(R.string.saving_image))
         savePhotoProgressDialog.setCancelable(false)
-
         collectLatestFlow(sketchViewModel.savePhotoProgressVisibility) { show ->
             if (show) {
                 savePhotoProgressDialog.show()
@@ -214,15 +207,15 @@ class SketchActivity : AppCompatActivity() {
             }
         }
 
-        collectLatestFlow(sketchViewModel.isPhotoSavedChannel) { saved ->
+        collectLatestFlow(sketchViewModel.isPhotoSavedChannel) { isSaved ->
             Toast.makeText(
                 this@SketchActivity,
-                if (saved) getString(R.string.photo_saved)
+                if (isSaved) getString(R.string.photo_saved)
                 else getString(R.string.something_went_wrong_while_saving_photo),
                 Toast.LENGTH_SHORT
             ).show()
 
-            if (saved) {
+            if (isSaved) {
                 sketchViewModel.onEvent(
                     SketchUiEvent.ShowAndHideSavePhotoDialog(false)
                 )
@@ -231,29 +224,52 @@ class SketchActivity : AppCompatActivity() {
             }
         }
 
-        videoHandler = Handler(Looper.getMainLooper())
-        val pushAnime = AnimationUtils.loadAnimation(this, R.anim.view_push)
 
-        val cameraManager = getSystemService(Context.CAMERA_SERVICE) as CameraManager
-        val isFlashSupported = cameraManager.getCameraCharacteristics("0")
-            .get(CameraCharacteristics.FLASH_INFO_AVAILABLE) == true
-
-        if (!isFlashSupported) {
-            binding.relFlash.visibility = View.GONE
+        collectLatestFlow(sketchViewModel.startTakingVideoChannel) { file ->
+            takeVideo(file)
         }
 
-        nativeManager.setActivity(this)
-        nativeManager.loadNative(
-            findViewById(R.id.native_frame),
-            findViewById(R.id.native_temp),
-            isButtonTop = true
-        )
+        collectLatestFlow(sketchViewModel.stopTakingVideoChannel) { stop ->
+            if (stop) {
+                stopVideo()
+            }
+        }
 
-        binding.objImage.setOnTouchListener(
-            MultiTouch(binding.objImage)
-        )
+        collectLatestFlow(sketchViewModel.isVideoSavedChannel) { isSaved ->
+            Toast.makeText(
+                this@SketchActivity,
+                if (isSaved) application.getString(R.string.video_saved)
+                else getString(R.string.something_went_wrong_while_saving_video),
+                Toast.LENGTH_SHORT
+            ).show()
+        }
+
+        val saveVideoProgressDialog = ProgressDialog(this@SketchActivity)
+        saveVideoProgressDialog.setMessage(getString(R.string.speeding_up_and_saving_video))
+        saveVideoProgressDialog.setCancelable(false)
+        collectLatestFlow(sketchViewModel.saveVideoProgressVisibility) { show ->
+            if (show) {
+                saveVideoProgressDialog.show()
+            } else {
+                saveVideoProgressDialog.dismiss()
+            }
+        }
+
+
+        loadNativeAd()
+        setUiActions()
+
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
+    private fun setUiActions() {
+        val pushAnime = AnimationUtils.loadAnimation(this, R.anim.view_push)
 
         binding.apply {
+
+            objImage.setOnTouchListener(
+                MultiTouch(binding.objImage)
+            )
 
             close.setOnClickListener {
                 binding.nativeParent.visibility = View.GONE
@@ -348,6 +364,8 @@ class SketchActivity : AppCompatActivity() {
 
         imagePath?.let(::loadImage)
 
+        checkFlashAvailable()
+
         showStartAnimation()
 
         if (appDataState?.isSubscribed == false) {
@@ -381,11 +399,30 @@ class SketchActivity : AppCompatActivity() {
             )
     }
 
+    private fun checkFlashAvailable() {
+        val cameraManager = getSystemService(Context.CAMERA_SERVICE) as CameraManager
+        val isFlashSupported = cameraManager.getCameraCharacteristics("0")
+            .get(CameraCharacteristics.FLASH_INFO_AVAILABLE) == true
+
+        if (!isFlashSupported) {
+            binding.relFlash.visibility = View.GONE
+        }
+    }
+
     private fun showStartAnimation() {
         binding.animationView.visibility = View.VISIBLE
         Handler(Looper.getMainLooper()).postDelayed({
             binding.animationView.visibility = View.GONE
         }, 3000)
+    }
+
+    private fun loadNativeAd() {
+        nativeManager.setActivity(this)
+        nativeManager.loadNative(
+            findViewById(R.id.native_frame),
+            findViewById(R.id.native_temp),
+            isButtonTop = true
+        )
     }
 
     private fun flipImage() {
@@ -526,67 +563,38 @@ class SketchActivity : AppCompatActivity() {
         }
     }
 
-    // Video ------------------
-    private fun setupCameraCallbacks() {
+// Video ------------------
+    private fun initializeVideoListeners() {
+        videoHandler = Handler(Looper.getMainLooper())
         binding.cameraView.mode = Mode.VIDEO
+
         binding.recordVideo.setOnClickListener {
             if (isRecording) {
-                binding.cameraView.stopVideo()
-                stopVideo()
+                sketchViewModel.onEvent(SketchUiEvent.StopVideo)
             } else {
                 rewarded {
                     Handler(Looper.getMainLooper()).postDelayed({
-                        takeVideo()
+                        sketchViewModel.onEvent(SketchUiEvent.TakeVideo)
                     }, 500)
                 }
             }
         }
 
-        binding.cameraView.addCameraListener(object : CameraListener() {
-            override fun onVideoTaken(result: VideoResult) {
-                if (!isSavedVideoCalled) {
-                    isSavedVideoCalled = true
-
-                    saveRecordedVideo(result.file)
+        binding.cameraView.addCameraListener(
+            object : CameraListener() {
+                override fun onVideoTaken(result: VideoResult) {
+                    val isFast = binding.fastVideoCheck.isChecked
+                    sketchViewModel.onEvent(
+                        SketchUiEvent.SaveVideo(result.file, isFast)
+                    )
                 }
             }
-        })
-    }
-
-    private fun saveRecordedVideo(file: File) {
-
-        val progressDialog = ProgressDialog(this)
-        progressDialog.setMessage(getString(R.string.speeding_up_and_saving_video))
-        progressDialog.setCancelable(false)
-
-        if (binding.fastVideoCheck.isChecked) {
-            progressDialog.show()
-        }
-
-        lifecycleScope.launch {
-            var isSaved = false
-            val job = launch {
-                isSaved = sketchRepository.saveVideo(
-                    file, binding.fastVideoCheck.isChecked
-                )
-            }
-
-            job.join()
-            Toast.makeText(
-                this@SketchActivity,
-                if (isSaved) application.getString(R.string.video_saved)
-                else getString(R.string.something_went_wrong_while_saving_video),
-                Toast.LENGTH_SHORT
-            ).show()
-
-            progressDialog.dismiss()
-            binding.fastVideoCheck.isChecked = false
-
-            sketchRepository.deleteTempVideo(tempFilePath)
-        }
+        )
     }
 
     private fun stopVideo() {
+        binding.cameraView.stopVideo()
+
         isRecording = false
         videoHandler?.removeCallbacks(videoTimerRunnable)
         binding.recordVideoImage.setImageDrawable(
@@ -598,27 +606,18 @@ class SketchActivity : AppCompatActivity() {
         videoElapsedTimeMillis = 0
         binding.videoTemp.visibility = View.GONE
         binding.fastVideoCheck.visibility = View.GONE
+        binding.fastVideoCheck.isChecked = false
         binding.videoTemp.text = getString(R.string._00_00)
     }
 
-    private lateinit var tempFilePath: String
-    private fun takeVideo() {
-        isSavedVideoCalled = false
-
+    private fun takeVideo(file: File) {
         try {
-
-            val timestamp = SimpleDateFormat(
-                "yyyyMMdd_HHmmss", Locale.getDefault()
-            ).format(Date())
-            val videoFile = File(filesDir, "VIDEO_$timestamp.mp4")
-
-            tempFilePath = Uri.fromFile(videoFile).toString()
-
-            binding.cameraView.takeVideo(videoFile)
+            binding.cameraView.takeVideo(file)
             isRecording = true
             binding.recordVideoImage.setImageDrawable(
                 AppCompatResources.getDrawable(
-                    this, R.drawable.rec_stop
+                    this@SketchActivity,
+                    R.drawable.rec_stop
                 )
             )
 
@@ -626,16 +625,6 @@ class SketchActivity : AppCompatActivity() {
             binding.fastVideoCheck.visibility = View.VISIBLE
             videoHandler?.postDelayed(videoTimerRunnable, 1000)
 
-        } catch (e: IOException) {
-            e.printStackTrace()
-
-            Toast.makeText(
-                this,
-                getString(R.string.error_recording_the_video),
-                Toast.LENGTH_SHORT
-            ).show()
-
-            stopVideo()
         } catch (e: Exception) {
             e.printStackTrace()
 
@@ -645,9 +634,8 @@ class SketchActivity : AppCompatActivity() {
                 Toast.LENGTH_SHORT
             ).show()
 
-            stopVideo()
+            sketchViewModel.onEvent(SketchUiEvent.StopVideo)
         }
-
     }
 
     private val videoTimerRunnable = object : Runnable {
@@ -892,7 +880,7 @@ class SketchActivity : AppCompatActivity() {
         if (PermissionUtils.isCameraGranted(this)) {
             binding.cameraView.open()
             binding.cameraView.clearFocus()
-            setupCameraCallbacks()
+            initializeVideoListeners()
 
         } else {
             PermissionUtils.checkPermission(
@@ -932,7 +920,7 @@ class SketchActivity : AppCompatActivity() {
         super.onPause()
         binding.cameraView.close()
         if (isRecording) {
-            stopVideo()
+            sketchViewModel.onEvent(SketchUiEvent.StopVideo)
         }
     }
 

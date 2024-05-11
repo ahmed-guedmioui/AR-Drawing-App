@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.io.File
 import javax.inject.Inject
 
 /**
@@ -50,6 +51,7 @@ class SketchViewModel @Inject constructor(
     private val _isTakePhotoDialogShowingState = MutableStateFlow(false)
     val isTakePhotoDialogShowingState = _isTakePhotoDialogShowingState.asStateFlow()
 
+
     private val _isSavePhotoDialogShowingState = MutableStateFlow(false)
     val isSavePhotoDialogShowingState = _isSavePhotoDialogShowingState.asStateFlow()
 
@@ -58,6 +60,21 @@ class SketchViewModel @Inject constructor(
 
     private val _isPhotoSavedChannel = Channel<Boolean>()
     val isPhotoSavedChannel = _isPhotoSavedChannel.receiveAsFlow()
+
+
+    private val _startTakingVideoChannel = Channel<File>()
+    val startTakingVideoChannel = _startTakingVideoChannel.receiveAsFlow()
+
+    private val _stopTakingVideoChannel = Channel<Boolean>()
+    val stopTakingVideoChannel = _stopTakingVideoChannel.receiveAsFlow()
+
+    private val _saveVideoProgressVisibility = Channel<Boolean>()
+    val saveVideoProgressVisibility = _saveVideoProgressVisibility.receiveAsFlow()
+
+    private val _isVideoSavedChannel = Channel<Boolean>()
+    val isVideoSavedChannel = _isVideoSavedChannel.receiveAsFlow()
+
+
 
     init {
         viewModelScope.launch {
@@ -123,6 +140,32 @@ class SketchViewModel @Inject constructor(
                     _isPhotoSavedChannel.send(isSaved)
 
                     _savePhotoProgressVisibility.send(false)
+                }
+            }
+
+            SketchUiEvent.StopVideo -> {
+                viewModelScope.launch {
+                    _stopTakingVideoChannel.send(true)
+                }
+            }
+
+            SketchUiEvent.TakeVideo -> {
+                viewModelScope.launch {
+                    val tempFile = sketchRepository.createTempVideo()
+                    _startTakingVideoChannel.send(tempFile)
+                }
+            }
+
+            is SketchUiEvent.SaveVideo -> {
+                viewModelScope.launch{
+                    _saveVideoProgressVisibility.send(true)
+
+                    val isSaved = sketchRepository.saveVideo(
+                        event.videoFile, event.isFast
+                    )
+                    _isVideoSavedChannel.send(isSaved)
+
+                    _saveVideoProgressVisibility.send(false)
                 }
             }
         }

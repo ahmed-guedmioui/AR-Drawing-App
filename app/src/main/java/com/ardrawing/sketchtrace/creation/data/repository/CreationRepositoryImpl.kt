@@ -61,7 +61,7 @@ class CreationRepositoryImpl @Inject constructor(
 
         } catch (e: Exception) {
             e.printStackTrace()
-            Log.d("TAG_CREATION", "Exception: ${e.stackTrace}")
+            Log.d("TAG_CREATION", "Exception: $e")
 
             return false
         }

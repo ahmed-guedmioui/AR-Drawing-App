@@ -168,6 +168,21 @@ class SketchRepositoryImpl @Inject constructor(
     }
 
 
+    private lateinit var tempFilePath: String
+    override suspend fun createTempVideo(): File {
+        val timestamp = SimpleDateFormat(
+            "yyyyMMdd_HHmmss", Locale.getDefault()
+        ).format(Date())
+        val tempVideoFile = File(
+            application.filesDir, "VIDEO_$timestamp.mp4"
+        )
+
+        tempFilePath = Uri.fromFile(tempVideoFile).toString()
+
+        return tempVideoFile
+    }
+
+
     private fun speedUpVideo(
         videoToSpeedUp: File,
         fileNameOutput: String,
@@ -221,8 +236,8 @@ class SketchRepositoryImpl @Inject constructor(
     }
 
 
-    override suspend fun deleteTempVideo(uri: String): Boolean {
-        val file = Uri.parse(uri).path?.let { File(it) }
+    override suspend fun deleteTempVideo(): Boolean {
+        val file = Uri.parse(tempFilePath).path?.let { File(it) }
 
         if (file != null) {
             if (file.exists()) {

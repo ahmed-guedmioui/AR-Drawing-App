@@ -24,7 +24,8 @@ sealed interface SketchUiEvent {
 
 
     data object SaveTakenPhoto : SketchUiEvent
-    data object TakeVideo : SketchUiEvent
+
+    data object StartVideo : SketchUiEvent
     data object StopVideo : SketchUiEvent
     data class SaveVideo(
         val videoFile: File, val isFast: Boolean

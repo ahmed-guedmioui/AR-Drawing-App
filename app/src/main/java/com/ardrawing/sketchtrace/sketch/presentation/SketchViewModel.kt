@@ -62,6 +62,12 @@ class SketchViewModel @Inject constructor(
     val isPhotoSavedChannel = _isPhotoSavedChannel.receiveAsFlow()
 
 
+    private val _isRecordingVideoState = MutableStateFlow(false)
+    val isRecordingVideoState = _isRecordingVideoState.asStateFlow()
+
+    private val _videoElapsedTimeState = MutableStateFlow("00:00")
+    val videoElapsedTimeState = _videoElapsedTimeState.asStateFlow()
+
     private val _startTakingVideoChannel = Channel<File>()
     val startTakingVideoChannel = _startTakingVideoChannel.receiveAsFlow()
 
@@ -73,7 +79,6 @@ class SketchViewModel @Inject constructor(
 
     private val _isVideoSavedChannel = Channel<Boolean>()
     val isVideoSavedChannel = _isVideoSavedChannel.receiveAsFlow()
-
 
 
     init {
@@ -143,28 +148,29 @@ class SketchViewModel @Inject constructor(
                 }
             }
 
-            SketchUiEvent.StopVideo -> {
-                viewModelScope.launch {
-                    _stopTakingVideoChannel.send(true)
-                }
-            }
-
-            SketchUiEvent.TakeVideo -> {
+            SketchUiEvent.StartVideo -> {
                 viewModelScope.launch {
                     val tempFile = sketchRepository.createTempVideo()
                     _startTakingVideoChannel.send(tempFile)
+                    _isRecordingVideoState.update { true }
+                    startVideoElapsedTime()
+                }
+            }
+
+            SketchUiEvent.StopVideo -> {
+                viewModelScope.launch {
+                    _stopTakingVideoChannel.send(true)
+                    _isRecordingVideoState.update { false }
                 }
             }
 
             is SketchUiEvent.SaveVideo -> {
-                viewModelScope.launch{
+                viewModelScope.launch {
                     _saveVideoProgressVisibility.send(true)
-
                     val isSaved = sketchRepository.saveVideo(
                         event.videoFile, event.isFast
                     )
                     _isVideoSavedChannel.send(isSaved)
-
                     _saveVideoProgressVisibility.send(false)
                 }
             }
@@ -177,32 +183,54 @@ class SketchViewModel @Inject constructor(
     private fun startCountdown() {
         countdownJob?.cancel()
         countdownJob = viewModelScope.launch {
-            val totalMinutes = 5 * 60 * 1000
-            val totalSeconds = totalMinutes / 1000
 
-            val startTime = System.currentTimeMillis()
-            var remainingSeconds = totalSeconds.toLong()
+            var countdownElapsedTimeMillis = 5 * 60 * 1000
 
-            while (remainingSeconds > 0) {
-                val elapsedTime = System.currentTimeMillis() - startTime
-                val remaining = totalSeconds - elapsedTime / 1000
-                remainingSeconds = remaining
+            while (countdownElapsedTimeMillis > 0) {
+                countdownElapsedTimeMillis -= 1000
 
-                val formattedRemainingTime = String.format(
-                    locale = null,
-                    format = "%02d:%02d",
-                    remainingSeconds / 60, remainingSeconds % 60
-                )
-                _countdownTimeState.update { formattedRemainingTime }
+                _countdownTimeState.update {
+                    getFormattedTime(countdownElapsedTimeMillis.toLong())
+                }
 
                 delay(1000)
             }
         }
     }
 
+    private var videoElapsedTimeJob: Job? = null
+    private fun startVideoElapsedTime() {
+
+        videoElapsedTimeJob?.cancel()
+        videoElapsedTimeJob = viewModelScope.launch {
+
+            var videoElapsedTimeMillis = 0L
+
+            while (isRecordingVideoState.value) {
+                videoElapsedTimeMillis += 1000
+
+                _videoElapsedTimeState.update {
+                    getFormattedTime(videoElapsedTimeMillis)
+                }
+
+                delay(1000)
+            }
+        }
+    }
+
+    private fun getFormattedTime(time: Long): String {
+        val seconds = time / 1000
+        val minutes = seconds / 60
+        val remainingSeconds = seconds % 60
+        return String.format(
+            null, "%02d:%02d", minutes, remainingSeconds
+        )
+    }
+
     override fun onCleared() {
         super.onCleared()
         countdownJob?.cancel()
+        videoElapsedTimeJob?.cancel()
     }
 }
 

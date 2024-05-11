@@ -95,14 +95,11 @@ class SketchActivity : AppCompatActivity() {
     private var appDataState: AppData? = null
     private var isActivityInitializedState: Boolean = false
     private var imageBorderState: Boolean = false
+    private var isRecordingVideoState: Boolean = false
 
     private var isTakePhotoDialogShowingState = false
     private var isSavePhotoDialogShowingState = false
     private var isTimeFinishedDialogShowingState = false
-
-    private var isRecording = false
-    private var videoElapsedTimeMillis: Long = 0
-    private var videoHandler: Handler? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -225,8 +222,16 @@ class SketchActivity : AppCompatActivity() {
         }
 
 
+        collectLatestFlow(sketchViewModel.videoElapsedTimeState) { time ->
+            binding.videoTemp.text = time
+        }
+
+        collectLatestFlow(sketchViewModel.isRecordingVideoState) { isRecording ->
+            isRecordingVideoState = isRecording
+        }
+
         collectLatestFlow(sketchViewModel.startTakingVideoChannel) { file ->
-            takeVideo(file)
+            startVideo(file)
         }
 
         collectLatestFlow(sketchViewModel.stopTakingVideoChannel) { stop ->
@@ -463,7 +468,7 @@ class SketchActivity : AppCompatActivity() {
 
                     if (bitmapWithFilterApplied != null) {
                         SketchBitmap.borderedBitmap = getBitmapWithTransparentBG(
-                            bitmapWithFilterApplied, -1
+                            bitmapWithFilterApplied
                         )
                     }
 
@@ -549,8 +554,6 @@ class SketchActivity : AppCompatActivity() {
 
     private fun setSubscribedUser() {
         if (appDataState?.isSubscribed == true) {
-            videoHandler?.removeCallbacks(videoTimerRunnable)
-
             binding.theDrawingIsReadyBtn.visibility = View.GONE
             sketchViewModel.onEvent(
                 SketchUiEvent.StartAndStopCountdownTimer(false)
@@ -563,18 +566,17 @@ class SketchActivity : AppCompatActivity() {
         }
     }
 
-// Video ------------------
+    // Video ------------------
     private fun initializeVideoListeners() {
-        videoHandler = Handler(Looper.getMainLooper())
         binding.cameraView.mode = Mode.VIDEO
 
         binding.recordVideo.setOnClickListener {
-            if (isRecording) {
+            if (isRecordingVideoState) {
                 sketchViewModel.onEvent(SketchUiEvent.StopVideo)
             } else {
                 rewarded {
                     Handler(Looper.getMainLooper()).postDelayed({
-                        sketchViewModel.onEvent(SketchUiEvent.TakeVideo)
+                        sketchViewModel.onEvent(SketchUiEvent.StartVideo)
                     }, 500)
                 }
             }
@@ -595,25 +597,21 @@ class SketchActivity : AppCompatActivity() {
     private fun stopVideo() {
         binding.cameraView.stopVideo()
 
-        isRecording = false
-        videoHandler?.removeCallbacks(videoTimerRunnable)
         binding.recordVideoImage.setImageDrawable(
             AppCompatResources.getDrawable(
                 this@SketchActivity, R.drawable.rec
             )
         )
 
-        videoElapsedTimeMillis = 0
         binding.videoTemp.visibility = View.GONE
         binding.fastVideoCheck.visibility = View.GONE
         binding.fastVideoCheck.isChecked = false
         binding.videoTemp.text = getString(R.string._00_00)
     }
 
-    private fun takeVideo(file: File) {
+    private fun startVideo(file: File) {
         try {
             binding.cameraView.takeVideo(file)
-            isRecording = true
             binding.recordVideoImage.setImageDrawable(
                 AppCompatResources.getDrawable(
                     this@SketchActivity,
@@ -623,7 +621,6 @@ class SketchActivity : AppCompatActivity() {
 
             binding.videoTemp.visibility = View.VISIBLE
             binding.fastVideoCheck.visibility = View.VISIBLE
-            videoHandler?.postDelayed(videoTimerRunnable, 1000)
 
         } catch (e: Exception) {
             e.printStackTrace()
@@ -637,29 +634,36 @@ class SketchActivity : AppCompatActivity() {
             sketchViewModel.onEvent(SketchUiEvent.StopVideo)
         }
     }
+    // Video ------------------
 
-    private val videoTimerRunnable = object : Runnable {
-        override fun run() {
-            // Update the elapsed time
-            videoElapsedTimeMillis += 1000
-            updateVideoTimerText()
+    private fun rewarded(onRewDone: () -> Unit) {
 
-            // Schedule the next update after 1 second
-            videoHandler?.postDelayed(this, 1000)
-        }
-    }
+        rewardedManger.showRewarded(
+            activity = this,
+            adClosedListener = object : RewardedManger.OnAdClosedListener {
+                override fun onRewClosed() {}
 
-    private fun updateVideoTimerText() {
-        val seconds = videoElapsedTimeMillis / 1000
-        val minutes = seconds / 60
-        val remainingSeconds = seconds % 60
-        val timerText = String.format(
-            null, "%02d:%02d", minutes, remainingSeconds
+                override fun onRewFailedToShow() {
+                    Toast.makeText(
+                        this@SketchActivity,
+                        getString(R.string.ad_is_not_loaded_yet),
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+
+                override fun onRewComplete() {
+                    onRewDone()
+                }
+            },
+            isUnlockImages = false,
+            onOpenPaywall = {
+                Intent(
+                    this, PaywallActivity::class.java
+                ).also(::startActivity)
+            }
         )
-
-        binding.videoTemp.text = timerText
     }
-// Video ------------------
+
 
     private lateinit var timeFinishedDialog: Dialog
     private fun timeFinishedDialog() {
@@ -691,33 +695,6 @@ class SketchActivity : AppCompatActivity() {
                 }
             )
         }
-    }
-
-    private fun rewarded(onRewDone: () -> Unit) {
-        rewardedManger.showRewarded(
-            activity = this,
-            adClosedListener = object : RewardedManger.OnAdClosedListener {
-                override fun onRewClosed() {}
-
-                override fun onRewFailedToShow() {
-                    Toast.makeText(
-                        this@SketchActivity,
-                        getString(R.string.ad_is_not_loaded_yet),
-                        Toast.LENGTH_SHORT
-                    ).show()
-                }
-
-                override fun onRewComplete() {
-                    onRewDone()
-                }
-            },
-            isUnlockImages = false,
-            onOpenPaywall = {
-                Intent(
-                    this, PaywallActivity::class.java
-                ).also(::startActivity)
-            }
-        )
     }
 
 
@@ -808,6 +785,19 @@ class SketchActivity : AppCompatActivity() {
         }
     }
 
+    private fun savePhoto() {
+        if (SketchBitmap.bitmapToSave != null) {
+            sketchViewModel.onEvent(SketchUiEvent.SaveTakenPhoto)
+
+        } else {
+            Toast.makeText(
+                this@SketchActivity,
+                getString(R.string.something_went_wrong_while_saving_photo),
+                Toast.LENGTH_SHORT
+            ).show()
+        }
+    }
+
     private val startForTakeAndSaveDrawingPhotoResult =
         registerForActivityResult(
             ActivityResultContracts.StartActivityForResult()
@@ -841,39 +831,6 @@ class SketchActivity : AppCompatActivity() {
                 ).show()
             }
         }
-
-    private fun savePhoto() {
-        if (SketchBitmap.bitmapToSave != null) {
-            sketchViewModel.onEvent(SketchUiEvent.SaveTakenPhoto)
-
-        } else {
-            Toast.makeText(
-                this@SketchActivity,
-                getString(R.string.something_went_wrong_while_saving_photo),
-                Toast.LENGTH_SHORT
-            ).show()
-        }
-    }
-
-
-    private fun inAppReview() {
-        val manager = ReviewManagerFactory.create(this)
-
-        val request = manager.requestReviewFlow()
-        request.addOnCompleteListener { task ->
-            if (task.isSuccessful) {
-                val reviewInfo = task.result
-
-                val flow = manager.launchReviewFlow(this, reviewInfo)
-                flow.addOnCompleteListener { _ ->
-                    super.onBackPressed()
-                }
-
-            } else {
-                super.onBackPressed()
-            }
-        }
-    }
 
     override fun onResume() {
         super.onResume()
@@ -916,10 +873,14 @@ class SketchActivity : AppCompatActivity() {
         }
     }
 
+    companion object {
+        const val CAMERA_AND_MIC_PERMISSIONS_CODE = 3002
+    }
+
     override fun onPause() {
         super.onPause()
         binding.cameraView.close()
-        if (isRecording) {
+        if (isRecordingVideoState) {
             sketchViewModel.onEvent(SketchUiEvent.StopVideo)
         }
     }
@@ -927,40 +888,35 @@ class SketchActivity : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
         if (appDataState?.isSubscribed == false) {
-            videoHandler?.removeCallbacks(videoTimerRunnable)
             SketchBitmap.bitmap = null
             SketchBitmap.borderedBitmap = null
             SketchBitmap.bitmapToSave = null
         }
     }
 
-    companion object {
-        const val CAMERA_AND_MIC_PERMISSIONS_CODE = 3002
-
-        fun flip(bitmap: Bitmap?): Bitmap? {
-            if (bitmap != null) {
-                val matrix = Matrix()
-                matrix.preScale(-1.0f, 1.0f)
-                return Bitmap.createBitmap(
-                    bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true
-                )
-            }
-            return null
+    private fun flip(bitmap: Bitmap?): Bitmap? {
+        if (bitmap != null) {
+            val matrix = Matrix()
+            matrix.preScale(-1.0f, 1.0f)
+            return Bitmap.createBitmap(
+                bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true
+            )
         }
+        return null
+    }
 
-        fun getBitmapWithTransparentBG(bitmap: Bitmap, color: Int): Bitmap {
-            val copy = bitmap.copy(Bitmap.Config.ARGB_8888, true)
-            val width = copy.width
-            val height = copy.height
-            for (i in 0 until height) {
-                for (j in 0 until width) {
-                    if (copy.getPixel(j, i) == color) {
-                        copy.setPixel(j, i, 0)
-                    }
+    private fun getBitmapWithTransparentBG(bitmap: Bitmap): Bitmap {
+        val copy = bitmap.copy(Bitmap.Config.ARGB_8888, true)
+        val width = copy.width
+        val height = copy.height
+        for (i in 0 until height) {
+            for (j in 0 until width) {
+                if (copy.getPixel(j, i) == -1) {
+                    copy.setPixel(j, i, 0)
                 }
             }
-            return copy
         }
+        return copy
     }
 
     private fun <T> LifecycleOwner.collectStateFlow(
@@ -985,6 +941,25 @@ class SketchActivity : AppCompatActivity() {
                 flow.collectLatest { value ->
                     collect(value)
                 }
+            }
+        }
+    }
+
+    private fun inAppReview() {
+        val manager = ReviewManagerFactory.create(this)
+
+        val request = manager.requestReviewFlow()
+        request.addOnCompleteListener { task ->
+            if (task.isSuccessful) {
+                val reviewInfo = task.result
+
+                val flow = manager.launchReviewFlow(this, reviewInfo)
+                flow.addOnCompleteListener { _ ->
+                    super.onBackPressed()
+                }
+
+            } else {
+                super.onBackPressed()
             }
         }
     }

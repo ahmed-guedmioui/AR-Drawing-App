@@ -10,6 +10,7 @@ import android.provider.DocumentsContract;
 import android.provider.MediaStore;
 import android.text.TextUtils;
 import android.util.Log;
+
 import com.anggrayudi.storage.file.DocumentFileCompat;
 import com.anggrayudi.storage.file.StorageId;
 
@@ -42,36 +43,36 @@ public class FileUtils {
             if (isDownloadsDocument(uri)) {
                 if (Build.VERSION.SDK_INT >= 23) {
 
-                        Cursor query = context.getContentResolver().query(uri, new String[]{"_display_name"}, null, null, null);
-                        if (query != null) {
-                            try {
-                                if (query.moveToFirst()) {
-                                    String str2 = Environment.getExternalStorageDirectory().toString() + "/Download/" + query.getString(0);
-                                    if (!TextUtils.isEmpty(str2)) {
-                                        if (query != null) {
-                                            query.close();
-                                        }
-                                        return str2;
+                    Cursor query = context.getContentResolver().query(uri, new String[]{"_display_name"}, null, null, null);
+                    if (query != null) {
+                        try {
+                            if (query.moveToFirst()) {
+                                String str2 = Environment.getExternalStorageDirectory().toString() + "/Download/" + query.getString(0);
+                                if (!TextUtils.isEmpty(str2)) {
+                                    if (query != null) {
+                                        query.close();
                                     }
+                                    return str2;
                                 }
-                            } catch (Exception e) {
-                              e.printStackTrace();
                             }
+                        } catch (Exception e) {
+                            e.printStackTrace();
                         }
-                        if (query != null) {
-                            query.close();
+                    }
+                    if (query != null) {
+                        query.close();
+                    }
+                    String documentId = DocumentsContract.getDocumentId(uri);
+                    if (!TextUtils.isEmpty(documentId)) {
+                        if (documentId.startsWith("raw:")) {
+                            return documentId.replaceFirst("raw:", "");
                         }
-                        String documentId = DocumentsContract.getDocumentId(uri);
-                        if (!TextUtils.isEmpty(documentId)) {
-                            if (documentId.startsWith("raw:")) {
-                                return documentId.replaceFirst("raw:", "");
-                            }
-                            try {
-                                return getDataColumn(context, ContentUris.withAppendedId(Uri.parse(new String[]{"content://downloads/public_downloads", "content://downloads/my_downloads"}[0]), Long.valueOf(documentId).longValue()), null, null);
-                            } catch (NumberFormatException unused) {
-                                return uri.getPath().replaceFirst("^/document/raw:", "").replaceFirst("^raw:", "");
-                            }
+                        try {
+                            return getDataColumn(context, ContentUris.withAppendedId(Uri.parse(new String[]{"content://downloads/public_downloads", "content://downloads/my_downloads"}[0]), Long.valueOf(documentId).longValue()), null, null);
+                        } catch (NumberFormatException unused) {
+                            return uri.getPath().replaceFirst("^/document/raw:", "").replaceFirst("^raw:", "");
                         }
+                    }
 
                 } else {
                     String documentId2 = DocumentsContract.getDocumentId(uri);
@@ -235,24 +236,32 @@ public class FileUtils {
     private static String getDataColumn(Context context2, Uri uri, String str, String[] strArr) {
         Cursor cursor = null;
 
-            Cursor query = context2.getContentResolver().query(uri, new String[]{"_data"}, str, strArr, null);
-            if (query != null) {
-                try {
-                    if (query.moveToFirst()) {
-                        String string = query.getString(query.getColumnIndexOrThrow("_data"));
-                        if (query != null) {
-                            query.close();
-                        }
-                        return string;
-                    }
-                } catch (Exception th) {
-                    th.printStackTrace();
-                }
-            }
-            if (query != null) {
-                query.close();
-            }
+        if (context2 == null) {
             return null;
+        }
+
+        Cursor query = context2
+                .getContentResolver()
+                .query(uri, new String[]{"_data"}, str, strArr, null);
+
+        if (query == null) {
+           return null;
+        }
+        try {
+            if (query.moveToFirst()) {
+                String string = query.getString(query.getColumnIndexOrThrow("_data"));
+                if (query != null) {
+                    query.close();
+                }
+                return string;
+            }
+        } catch (Exception th) {
+            th.printStackTrace();
+        }
+        if (query != null) {
+            query.close();
+        }
+        return null;
 
     }
 

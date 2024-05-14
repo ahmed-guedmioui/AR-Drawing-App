@@ -184,8 +184,7 @@ class SketchViewModel @Inject constructor(
         countdownJob?.cancel()
         countdownJob = viewModelScope.launch {
 
-            var countdownElapsedTimeMillis = 5 * 60 * 1000
-
+            var countdownElapsedTimeMillis = 5 * 60 * 1000f
             while (countdownElapsedTimeMillis > 0) {
                 countdownElapsedTimeMillis -= 1000
 

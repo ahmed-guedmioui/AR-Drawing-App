@@ -34,8 +34,10 @@ import com.ardrawing.sketchtrace.paywall.presentation.PaywallActivity
 import com.ardrawing.sketchtrace.core.presentation.util.Animations
 import com.ardrawing.sketchtrace.language.data.util.LanguageChanger
 import com.ardrawing.sketchtrace.core.data.util.UrlOpener
-import com.ardrawing.sketchtrace.core.domain.repository.ads.AppOpenManager
-import com.ardrawing.sketchtrace.core.domain.repository.ads.InterstitialManger
+import com.ardrawing.sketchtrace.core.data.util.ads_original.AdmobAppOpenAdManager
+import com.ardrawing.sketchtrace.core.data.util.ads_original.InterstitialAdManager
+import com.ardrawing.sketchtrace.core.data.util.ads_original.NativeAdsManager
+import com.ardrawing.sketchtrace.core.data.util.ads_original.RewardedAdsManager
 import com.google.android.gms.ads.MobileAds
 import com.google.android.ump.ConsentDebugSettings
 import com.google.android.ump.ConsentInformation
@@ -44,7 +46,6 @@ import com.google.android.ump.UserMessagingPlatform
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import java.util.concurrent.atomic.AtomicBoolean
-import javax.inject.Inject
 
 
 @AndroidEntryPoint
@@ -55,11 +56,11 @@ class SplashActivity : AppCompatActivity() {
     private lateinit var splashState: SplashState
     private lateinit var binding: ActivitySplashBinding
 
-    @Inject
-    lateinit var appOpenManager: AppOpenManager
-
-    @Inject
-    lateinit var interstitialManger: InterstitialManger
+//    @Inject
+//    lateinit var appOpenManager: AppOpenManager
+//
+//    @Inject
+//    lateinit var interstitialManger: InterstitialManger
 
     private var isNotificationDialogCalled = AtomicBoolean(false)
     private var canShowAds = AtomicBoolean(false)
@@ -128,7 +129,6 @@ class SplashActivity : AppCompatActivity() {
     }
 
     private fun getConsent() {
-
         val debugSettings = ConsentDebugSettings.Builder(this)
             .setDebugGeography(ConsentDebugSettings.DebugGeography.DEBUG_GEOGRAPHY_EEA)
             .addTestDeviceHashedId("EC63707298751E23CCEB09A07FCB3B1F")
@@ -143,9 +143,7 @@ class SplashActivity : AppCompatActivity() {
             this,
             params,
             {
-                UserMessagingPlatform.loadAndShowConsentFormIfRequired(
-                    this@SplashActivity
-                ) {
+                UserMessagingPlatform.loadAndShowConsentFormIfRequired(this@SplashActivity) {
                     // Consent has been gathered.
                     if (consentInformation.canRequestAds()) {
                         canShowAds.set(true)
@@ -207,13 +205,25 @@ class SplashActivity : AppCompatActivity() {
         MobileAds.initialize(this)
 
         splashState.appData?.let { appData ->
-            interstitialManger.setAppDataRepository(appData)
-            interstitialManger.loadInterstitial(activity = this)
 
-            appOpenManager.setAppDataRepository(appData)
-            appOpenManager.showSplashAd(activity = this) {
+            RewardedAdsManager.setAppData(appData)
+            NativeAdsManager.setAppData(appData)
+            InterstitialAdManager.setAppData(appData)
+
+            InterstitialAdManager.loadInterstitial(this)
+            AdmobAppOpenAdManager(application).showSplashAd(
+                appData, this
+            ) {
                 navigate()
             }
+
+//            interstitialManger.setAppDataRepository(appData)
+//            interstitialManger.loadInterstitial(activity = this)
+//
+//            appOpenManager.setAppDataRepository(appData)
+//            appOpenManager.showSplashAd(activity = this) {
+//                navigate()
+//            }
         }
 
     }

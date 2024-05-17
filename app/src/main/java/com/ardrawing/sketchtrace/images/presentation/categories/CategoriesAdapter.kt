@@ -9,6 +9,7 @@ import androidx.cardview.widget.CardView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.ardrawing.sketchtrace.R
+import com.ardrawing.sketchtrace.core.data.util.ads_original.NativeAdsManager
 import com.ardrawing.sketchtrace.core.domain.repository.ads.NativeManager
 import com.ardrawing.sketchtrace.images.domain.model.images.ImageCategory
 import com.ardrawing.sketchtrace.images.presentation.category.CategoryAdapter
@@ -19,7 +20,7 @@ import com.ardrawing.sketchtrace.images.presentation.category.CategoryAdapter
 class CategoriesAdapter(
     private val activity: Activity,
     var imageCategoryList: List<ImageCategory> = emptyList(),
-    private val nativeManager: NativeManager
+//    private val nativeManager: NativeManager
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     override fun getItemViewType(i: Int): Int {
@@ -40,7 +41,7 @@ class CategoriesAdapter(
             return NativeViewHolder(
                 itemView = view,
                 activity = activity,
-                nativeManager = nativeManager
+//                nativeManager = nativeManager
             )
         }
 
@@ -140,17 +141,24 @@ class CategoriesAdapter(
     private class NativeViewHolder(
         itemView: View,
         activity: Activity,
-        nativeManager: NativeManager
+//        nativeManager: NativeManager
     ) :
         RecyclerView.ViewHolder(itemView) {
         init {
 
-            nativeManager.setActivity(activity)
-            nativeManager.loadNative(
+            NativeAdsManager.loadNative(
                 itemView.findViewById(R.id.native_frame),
                 itemView.findViewById(R.id.native_temp),
+                activity,
                 isButtonTop = false
             )
+
+//            nativeManager.setActivity(activity)
+//            nativeManager.loadNative(
+//                itemView.findViewById(R.id.native_frame),
+//                itemView.findViewById(R.id.native_temp),
+//                isButtonTop = false
+//            )
         }
     }
 

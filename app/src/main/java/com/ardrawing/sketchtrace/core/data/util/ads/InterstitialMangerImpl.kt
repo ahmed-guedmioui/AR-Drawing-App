@@ -1,4 +1,4 @@
-package com.ardrawing.sketchtrace.core.data.repository.ads
+package com.ardrawing.sketchtrace.core.data.util.ads
 
 import android.app.Activity
 import android.app.ProgressDialog
@@ -194,6 +194,7 @@ class InterstitialMangerImpl @Inject constructor(
     private fun showAdmobInter(activity: Activity) {
 
         if (!prefs.getBoolean(PrefsConstants.CAN_SHOW_ADMOB_ADS, true)) {
+            onAdClosedListener.onAdClosed()
             return
         }
 

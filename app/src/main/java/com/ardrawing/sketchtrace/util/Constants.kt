@@ -11,6 +11,8 @@ object Constants {
 
 // Do Not Edit These!
 object PrefsConstants {
+    const val PREFS_FILE_NAME = "ar_drawing_med_prefs_file"
+
     const val ADMOB_OPEN_APP_AD_ID = "admobOpenApp"
     const val CAN_SHOW_ADMOB_ADS = "can_show_ads"
     const val IS_APP_RATED = "is_rated"

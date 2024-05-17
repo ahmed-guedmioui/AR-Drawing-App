@@ -2,10 +2,10 @@ package com.ardrawing.sketchtrace.core.di
 
 import com.ardrawing.sketchtrace.core.data.repository.AppDataRepositoryImpl
 import com.ardrawing.sketchtrace.core.data.repository.CoreRepositoryImpl
-import com.ardrawing.sketchtrace.core.data.repository.ads.AdmobAppOpenManagerImpl
-import com.ardrawing.sketchtrace.core.data.repository.ads.InterstitialMangerImpl
-import com.ardrawing.sketchtrace.core.data.repository.ads.NativeManagerImpl
-import com.ardrawing.sketchtrace.core.data.repository.ads.RewardedManagerImpl
+import com.ardrawing.sketchtrace.core.data.util.ads.AdmobAppOpenManagerImpl
+import com.ardrawing.sketchtrace.core.data.util.ads.InterstitialMangerImpl
+import com.ardrawing.sketchtrace.core.data.util.ads.NativeManagerImpl
+import com.ardrawing.sketchtrace.core.data.util.ads.RewardedManagerImpl
 import com.ardrawing.sketchtrace.core.domain.repository.AppDataRepository
 import com.ardrawing.sketchtrace.core.domain.repository.CoreRepository
 import com.ardrawing.sketchtrace.core.domain.repository.ads.AppOpenManager

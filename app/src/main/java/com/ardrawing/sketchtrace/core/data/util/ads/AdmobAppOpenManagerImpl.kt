@@ -1,4 +1,4 @@
-package com.ardrawing.sketchtrace.core.data.repository.ads
+package com.ardrawing.sketchtrace.core.data.util.ads
 
 import android.app.Activity
 import android.app.Application
@@ -68,7 +68,7 @@ class AdmobAppOpenManagerImpl @Inject constructor(
 
         val id = prefs.getString(
             PrefsConstants.ADMOB_OPEN_APP_AD_ID,
-            appData?.admobOpenApp
+            appData.admobOpenApp
         ) ?: ""
 
         Log.d(LOG_TAG, "id = $id")
@@ -200,7 +200,7 @@ class AdmobAppOpenManagerImpl @Inject constructor(
     ) {
 
         if (
-            appData?.showAdsForThisUser != true ||
+            !appData.showAdsForThisUser ||
             !prefs.getBoolean(PrefsConstants.CAN_SHOW_ADMOB_ADS, true)
         ) {
             onAdClosed()

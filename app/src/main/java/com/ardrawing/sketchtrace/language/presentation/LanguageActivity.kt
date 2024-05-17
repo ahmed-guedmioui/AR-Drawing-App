@@ -10,15 +10,14 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.ardrawing.sketchtrace.R
+import com.ardrawing.sketchtrace.core.data.util.ads_original.InterstitialAdManager
+import com.ardrawing.sketchtrace.core.data.util.ads_original.NativeAdsManager
 import com.ardrawing.sketchtrace.databinding.ActivityLanguageBinding
+import com.ardrawing.sketchtrace.language.data.util.LanguageChanger
 import com.ardrawing.sketchtrace.onboarding.presentation.OnboardingActivity
 import com.ardrawing.sketchtrace.util.Constants
-import com.ardrawing.sketchtrace.language.data.util.LanguageChanger
-import com.ardrawing.sketchtrace.core.domain.repository.ads.InterstitialManger
-import com.ardrawing.sketchtrace.core.domain.repository.ads.NativeManager
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 /**
  * @author Ahmed Guedmioui
@@ -39,11 +38,11 @@ class LanguageActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityLanguageBinding
 
-    @Inject
-    lateinit var interstitialManger: InterstitialManger
-
-    @Inject
-    lateinit var nativeManager: NativeManager
+//    @Inject
+//    lateinit var interstitialManger: InterstitialManger
+//
+//    @Inject
+//    lateinit var nativeManager: NativeManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -61,12 +60,19 @@ class LanguageActivity : AppCompatActivity() {
             }
         }
 
-        nativeManager.setActivity(this)
-        nativeManager.loadNative(
-            findViewById(R.id.native_frame),
-            findViewById(R.id.native_temp),
-            isButtonTop = false
-        )
+       NativeAdsManager.loadNative(
+           findViewById(R.id.native_frame),
+           findViewById(R.id.native_temp),
+           this,
+           isButtonTop = false
+       )
+
+//        nativeManager.setActivity(this)
+//        nativeManager.loadNative(
+//            findViewById(R.id.native_frame),
+//            findViewById(R.id.native_temp),
+//            isButtonTop = false
+//        )
 
         val fromSplash = intent?.extras?.getBoolean("from_splash")
 
@@ -78,9 +84,9 @@ class LanguageActivity : AppCompatActivity() {
         }
 
         binding.apply.setOnClickListener {
-            interstitialManger.showInterstitial(
+            InterstitialAdManager.showInterstitial(
                 this,
-                object : InterstitialManger.OnAdClosedListener {
+                object : InterstitialAdManager.OnAdClosedListener {
                     override fun onAdClosed() {
                         languageViewModel.onEvent(LanguageUiEvent.Navigate)
 
@@ -99,6 +105,28 @@ class LanguageActivity : AppCompatActivity() {
                     }
                 }
             )
+
+//            interstitialManger.showInterstitial(
+//                this,
+//                object : InterstitialManger.OnAdClosedListener {
+//                    override fun onAdClosed() {
+//                        languageViewModel.onEvent(LanguageUiEvent.Navigate)
+//
+//                        if (fromSplash == true) {
+//                            Intent(
+//                                this@LanguageActivity, OnboardingActivity::class.java
+//                            ).also {
+//                                startActivity(it)
+//                            }
+//                        } else {
+//                            Constants.languageChanged1 = true
+//                            Constants.languageChanged2 = true
+//                        }
+//
+//                        finish()
+//                    }
+//                }
+//            )
         }
 
         binding.english.setOnClickListener {

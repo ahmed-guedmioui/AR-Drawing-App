@@ -23,6 +23,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.ardrawing.sketchtrace.R
+import com.ardrawing.sketchtrace.core.data.util.ads_original.RewardedAdsManager
 import com.ardrawing.sketchtrace.databinding.ActivityTraceBinding
 import com.ardrawing.sketchtrace.paywall.presentation.PaywallActivity
 import com.ardrawing.sketchtrace.language.data.util.LanguageChanger
@@ -48,8 +49,8 @@ class TraceActivity : AppCompatActivity() {
 
     private var imageBitmap: Bitmap? = null
 
-    @Inject
-    lateinit var rewardedManger: RewardedManger
+//    @Inject
+//    lateinit var rewardedManger: RewardedManger
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -237,9 +238,9 @@ class TraceActivity : AppCompatActivity() {
     }
 
     private fun rewarded(onRewDone: () -> Unit) {
-        rewardedManger.showRewarded(
+        RewardedAdsManager.showRewarded(
             activity = this,
-            adClosedListener = object : RewardedManger.OnAdClosedListener {
+            adClosedListener = object : RewardedAdsManager.OnAdClosedListener {
                 override fun onRewClosed() {
                     onRewDone()
                 }
@@ -252,15 +253,41 @@ class TraceActivity : AppCompatActivity() {
                     ).show()
                 }
 
-                override fun onRewComplete() {
-                }
+                override fun onRewComplete() {}
+
             },
             isUnlockImages = false,
             onOpenPaywall = {
                 Intent(this, PaywallActivity::class.java).also {
                     startActivity(it)
                 }
-            })
+            }
+        )
+
+//        rewardedManger.showRewarded(
+//            activity = this,
+//            adClosedListener = object : RewardedManger.OnAdClosedListener {
+//                override fun onRewClosed() {
+//                    onRewDone()
+//                }
+//
+//                override fun onRewFailedToShow() {
+//                    Toast.makeText(
+//                        this@TraceActivity,
+//                        getString(R.string.ad_is_not_loaded_yet),
+//                        Toast.LENGTH_SHORT
+//                    ).show()
+//                }
+//
+//                override fun onRewComplete() {}
+//            },
+//            isUnlockImages = false,
+//            onOpenPaywall = {
+//                Intent(this, PaywallActivity::class.java).also {
+//                    startActivity(it)
+//                }
+//            }
+//        )
     }
 
     private fun colorDialog() {

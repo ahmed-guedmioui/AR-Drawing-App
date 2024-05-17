@@ -12,6 +12,9 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.GridLayoutManager
 import com.ardrawing.sketchtrace.R
+import com.ardrawing.sketchtrace.core.data.util.ads_original.InterstitialAdManager
+import com.ardrawing.sketchtrace.core.data.util.ads_original.NativeAdsManager
+import com.ardrawing.sketchtrace.core.data.util.ads_original.RewardedAdsManager
 import com.ardrawing.sketchtrace.databinding.ActivityCategoryBinding
 import com.ardrawing.sketchtrace.paywall.presentation.PaywallActivity
 import com.ardrawing.sketchtrace.sketch.presentation.SketchActivity
@@ -35,14 +38,14 @@ class CategoryActivity : AppCompatActivity() {
     private val categoryViewModel: CategoryViewModel by viewModels()
     private var categoryState: CategoryState? = null
 
-    @Inject
-    lateinit var rewardedManger: RewardedManger
-
-    @Inject
-    lateinit var interstitialManger: InterstitialManger
-
-    @Inject
-    lateinit var nativeManager: NativeManager
+//    @Inject
+//    lateinit var rewardedManger: RewardedManger
+//
+//    @Inject
+//    lateinit var interstitialManger: InterstitialManger
+//
+//    @Inject
+//    lateinit var nativeManager: NativeManager
 
 
     private lateinit var binding: ActivityCategoryBinding
@@ -120,12 +123,19 @@ class CategoryActivity : AppCompatActivity() {
             }
         }
 
-        nativeManager.setActivity(this)
-        nativeManager.loadNative(
+        NativeAdsManager.loadNative(
             findViewById(R.id.native_frame),
             findViewById(R.id.native_temp),
+            this,
             isButtonTop = false
         )
+
+//        nativeManager.setActivity(this)
+//        nativeManager.loadNative(
+//            findViewById(R.id.native_frame),
+//            findViewById(R.id.native_temp),
+//            isButtonTop = false
+//        )
 
         initImageListRec()
 
@@ -162,9 +172,9 @@ class CategoryActivity : AppCompatActivity() {
     private fun rewarded(
         onRewComplete: () -> Unit
     ) {
-        rewardedManger.showRewarded(
+        RewardedAdsManager.showRewarded(
             activity = this,
-            adClosedListener = object : RewardedManger.OnAdClosedListener {
+            adClosedListener = object : RewardedAdsManager.OnAdClosedListener {
                 override fun onRewClosed() {}
 
                 override fun onRewFailedToShow() {
@@ -186,32 +196,91 @@ class CategoryActivity : AppCompatActivity() {
                 }
             }
         )
+
+//        rewardedManger.showRewarded(
+//            activity = this,
+//            adClosedListener = object : RewardedManger.OnAdClosedListener {
+//                override fun onRewClosed() {}
+//
+//                override fun onRewFailedToShow() {
+//                    Toast.makeText(
+//                        this@CategoryActivity,
+//                        getString(R.string.ad_is_not_loaded_yet),
+//                        Toast.LENGTH_SHORT
+//                    ).show()
+//                }
+//
+//                override fun onRewComplete() {
+//                    onRewComplete()
+//                }
+//
+//            },
+//            onOpenPaywall = {
+//                Intent(this, PaywallActivity::class.java).also {
+//                    startActivity(it)
+//                }
+//            }
+//        )
     }
 
     private fun traceDrawingScreen(imagePath: String) {
-        interstitialManger.showInterstitial(
+        InterstitialAdManager.showInterstitial(
             this,
-            object : InterstitialManger.OnAdClosedListener {
+            object : InterstitialAdManager.OnAdClosedListener {
                 override fun onAdClosed() {
-                    val intent = Intent(this@CategoryActivity, TraceActivity::class.java)
-                    intent.putExtra("imagePath", imagePath)
-                    startActivity(intent)
+                    Intent(
+                        this@CategoryActivity, TraceActivity::class.java
+                    ).also { intent ->
+                        intent.putExtra("imagePath", imagePath)
+                        startActivity(intent)
+                    }
                 }
             }
         )
+
+//        interstitialManger.showInterstitial(
+//            this,
+//            object : InterstitialManger.OnAdClosedListener {
+//                override fun onAdClosed() {
+//                    Intent(
+//                        this@CategoryActivity, TraceActivity::class.java
+//                    ).also {intent ->
+//                        intent.putExtra("imagePath", imagePath)
+//                        startActivity(intent)
+//                    }
+//                }
+//            }
+//        )
     }
 
     private fun sketchDrawingScreen(imagePath: String) {
-        interstitialManger.showInterstitial(
+        InterstitialAdManager.showInterstitial(
             this,
-            object : InterstitialManger.OnAdClosedListener {
+            object : InterstitialAdManager.OnAdClosedListener {
                 override fun onAdClosed() {
-                    val intent = Intent(this@CategoryActivity, SketchActivity::class.java)
-                    intent.putExtra("imagePath", imagePath)
-                    startActivity(intent)
+                    Intent(
+                        this@CategoryActivity, SketchActivity::class.java
+                    ).also {intent ->
+                        intent.putExtra("imagePath", imagePath)
+                        startActivity(intent)
+                    }
                 }
             }
         )
+
+//        interstitialManger.showInterstitial(
+//            this,
+//            object : InterstitialManger.OnAdClosedListener {
+//                override fun onAdClosed() {
+//                    Intent(
+//                        this@CategoryActivity, SketchActivity::class.java
+//                    ).also {intent ->
+//                        intent.putExtra("imagePath", imagePath)
+//                        startActivity(intent)
+//                    }
+//                }
+//            }
+//        )
     }
 
     override fun onResume() {

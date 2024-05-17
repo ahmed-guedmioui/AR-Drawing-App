@@ -4,11 +4,12 @@ import android.app.Application
 import android.content.Context
 import android.content.SharedPreferences
 import com.ardrawing.sketchtrace.core.data.remote.AppDataApi
-import com.ardrawing.sketchtrace.core.data.repository.ads.AdmobAppOpenManagerImpl
-import com.ardrawing.sketchtrace.core.data.repository.ads.InterstitialMangerImpl
-import com.ardrawing.sketchtrace.core.data.repository.ads.NativeManagerImpl
-import com.ardrawing.sketchtrace.core.data.repository.ads.RewardedManagerImpl
+import com.ardrawing.sketchtrace.core.data.util.ads.AdmobAppOpenManagerImpl
+import com.ardrawing.sketchtrace.core.data.util.ads.InterstitialMangerImpl
+import com.ardrawing.sketchtrace.core.data.util.ads.NativeManagerImpl
+import com.ardrawing.sketchtrace.core.data.util.ads.RewardedManagerImpl
 import com.ardrawing.sketchtrace.core.domain.repository.AppDataRepository
+import com.ardrawing.sketchtrace.util.PrefsConstants
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -49,7 +50,7 @@ object AppModule {
     @Singleton
     fun provideSharedPref(app: Application): SharedPreferences {
         return app.getSharedPreferences(
-            "ar_drawing_med_prefs_file", Context.MODE_PRIVATE
+            PrefsConstants.PREFS_FILE_NAME, Context.MODE_PRIVATE
         )
     }
 

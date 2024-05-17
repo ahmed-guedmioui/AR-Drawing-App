@@ -178,7 +178,7 @@ class SketchViewModel @Inject constructor(
     }
 
 
-    val showTheDrawingIsReadyBtnTime = "04:55"
+    val showTheDrawingIsReadyBtnTime = "04:30"
     private var countdownJob: Job? = null
     private fun startCountdown() {
         countdownJob?.cancel()

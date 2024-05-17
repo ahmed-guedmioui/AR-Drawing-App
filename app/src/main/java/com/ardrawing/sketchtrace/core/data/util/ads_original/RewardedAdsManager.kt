@@ -1,8 +1,8 @@
-package com.ardrawing.sketchtrace.core.data.repository.ads
+package com.ardrawing.sketchtrace.core.data.util.ads_original
 
 import android.app.Activity
 import android.app.Dialog
-import android.content.SharedPreferences
+import android.content.Context
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.view.Gravity
@@ -11,9 +11,7 @@ import android.view.WindowManager
 import android.widget.ImageView
 import androidx.cardview.widget.CardView
 import com.ardrawing.sketchtrace.R
-import com.ardrawing.sketchtrace.core.domain.repository.AppDataRepository
-import com.ardrawing.sketchtrace.core.domain.repository.ads.RewardedManger
-import com.ardrawing.sketchtrace.util.AdsConstants
+import com.ardrawing.sketchtrace.core.domain.model.app_data.AppData
 import com.ardrawing.sketchtrace.util.PrefsConstants
 import com.facebook.ads.Ad
 import com.facebook.ads.RewardedVideoAd
@@ -22,16 +20,10 @@ import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.FullScreenContentCallback
 import com.google.android.gms.ads.LoadAdError
 import com.google.android.gms.ads.rewarded.RewardedAdLoadCallback
-import javax.inject.Inject
 
-class RewardedManagerImpl @Inject constructor(
-    appDataRepository: AppDataRepository,
-    private val prefs: SharedPreferences
-) : RewardedManger {
+object RewardedAdsManager {
 
-    private var appData = appDataRepository.getAppData()
-
-    private lateinit var onAdClosedListener: RewardedManger.OnAdClosedListener
+    private lateinit var onAdClosedListener: OnAdClosedListener
 
     private var isFacebookRewardedLoaded = false
     private var isAdmobRewardedLoaded = false
@@ -39,27 +31,37 @@ class RewardedManagerImpl @Inject constructor(
     private lateinit var admobRewardedAd: com.google.android.gms.ads.rewarded.RewardedAd
     private lateinit var facebookRewardedAd: RewardedVideoAd
 
+    private lateinit var appData: AppData
 
-    override fun loadRewarded(activity: Activity) {
+    fun setAppData(appData: AppData) {
+        this.appData = appData
+    }
 
-        if (!appData.showAdsForThisUser) {
+    fun loadRewarded(activity: Activity) {
+        val prefs = activity.getSharedPreferences(
+            PrefsConstants.PREFS_FILE_NAME, Context.MODE_PRIVATE
+        )
+
+        if (
+            !appData.showAdsForThisUser ||
+            !prefs.getBoolean(PrefsConstants.CAN_SHOW_ADMOB_ADS, true)
+        ) {
             return
         }
 
         when (appData.rewarded) {
-            AdsConstants.ADMOB -> loadAdmobRewarded(activity)
-            AdsConstants.FACEBOOK -> loadFacebookRewarded(activity)
+            AdType.admob -> loadAdmobRewarded(activity)
+            AdType.facebook -> loadFacebookRewarded(activity)
         }
     }
 
-    override fun showRewarded(
+    fun showRewarded(
         activity: Activity,
-        adClosedListener: RewardedManger.OnAdClosedListener,
-        isUnlockImages: Boolean,
+        adClosedListener: OnAdClosedListener,
+        isUnlockImages: Boolean = true,
         onOpenPaywall: () -> Unit,
     ) {
         onAdClosedListener = adClosedListener
-
         if (!appData.showAdsForThisUser) {
             onAdClosedListener.onRewClosed()
             onAdClosedListener.onRewComplete()
@@ -73,14 +75,14 @@ class RewardedManagerImpl @Inject constructor(
 
     private fun dialog(
         activity: Activity,
-        isImages: Boolean = true,
+        isUnlockImages: Boolean = true,
         onOpenPaywall: () -> Unit,
     ) {
         val dialog = Dialog(activity)
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
         dialog.setCancelable(true)
         dialog.setContentView(
-            if (isImages) R.layout.dialog_rewarded_images else R.layout.dialog_rewarded
+            if (isUnlockImages) R.layout.dialog_rewarded_images else R.layout.dialog_rewarded
         )
         val layoutParams = WindowManager.LayoutParams()
 
@@ -98,8 +100,8 @@ class RewardedManagerImpl @Inject constructor(
 
         dialog.findViewById<CardView>(R.id.watch).setOnClickListener {
             when (appData.rewarded) {
-                AdsConstants.ADMOB -> showAdmobRewarded(activity)
-                AdsConstants.FACEBOOK -> showFacebookRewarded(activity)
+                AdType.admob -> showAdmobRewarded(activity)
+                AdType.facebook -> showFacebookRewarded(activity)
                 else -> onAdClosedListener.onRewFailedToShow()
             }
             dialog.dismiss()
@@ -116,6 +118,9 @@ class RewardedManagerImpl @Inject constructor(
     // Admob ---------------------------------------------------------------------------------------------------------------------
 
     private fun loadAdmobRewarded(activity: Activity) {
+        val prefs = activity.getSharedPreferences(
+            PrefsConstants.PREFS_FILE_NAME, Context.MODE_PRIVATE
+        )
 
         if (!prefs.getBoolean(PrefsConstants.CAN_SHOW_ADMOB_ADS, true)) {
             return
@@ -157,15 +162,19 @@ class RewardedManagerImpl @Inject constructor(
     }
 
     private fun showAdmobRewarded(activity: Activity) {
+        val prefs = activity.getSharedPreferences(
+            PrefsConstants.PREFS_FILE_NAME, Context.MODE_PRIVATE
+        )
 
         if (!prefs.getBoolean(PrefsConstants.CAN_SHOW_ADMOB_ADS, true)) {
+            onAdClosedListener.onRewComplete()
             return
         }
 
         if (isAdmobRewardedLoaded) {
             admobRewardedAd.show(activity) {
-//                isAdmobRewardedLoaded = false
-//                loadRewarded(activity)
+                isAdmobRewardedLoaded = false
+                loadRewarded(activity)
                 onAdClosedListener.onRewComplete()
             }
         } else {
@@ -179,9 +188,7 @@ class RewardedManagerImpl @Inject constructor(
     private fun loadFacebookRewarded(activity: Activity) {
 
         isFacebookRewardedLoaded = false
-        facebookRewardedAd = RewardedVideoAd(
-            activity, appData.facebookRewarded
-        )
+        facebookRewardedAd = RewardedVideoAd(activity, appData.facebookRewarded)
 
         val rewardedVideoAdListener: RewardedVideoAdListener =
             object : RewardedVideoAdListener {
@@ -194,8 +201,8 @@ class RewardedManagerImpl @Inject constructor(
                 }
 
                 override fun onRewardedVideoCompleted() {
-//                    isFacebookRewardedLoaded = false
-//                    loadRewarded(activity)
+                    isFacebookRewardedLoaded = false
+                    loadRewarded(activity)
                     onAdClosedListener.onRewComplete()
                 }
 
@@ -222,5 +229,11 @@ class RewardedManagerImpl @Inject constructor(
             loadRewarded(activity)
             onAdClosedListener.onRewFailedToShow()
         }
+    }
+
+    interface OnAdClosedListener {
+        fun onRewClosed()
+        fun onRewFailedToShow()
+        fun onRewComplete()
     }
 }

@@ -9,6 +9,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.GridLayoutManager
+import com.ardrawing.sketchtrace.core.data.util.ads_original.InterstitialAdManager
 import com.ardrawing.sketchtrace.databinding.ActivityMyCreationLsitBinding
 import com.ardrawing.sketchtrace.creation.presentation.creation_details.CreationDetailsActivity
 import com.ardrawing.sketchtrace.creation.presentation.creation_list.adapter.CreationListAdapter
@@ -24,8 +25,8 @@ import javax.inject.Inject
 @AndroidEntryPoint
 class CreationListActivity : AppCompatActivity() {
 
-    @Inject
-    lateinit var interstitialManger: InterstitialManger
+//    @Inject
+//    lateinit var interstitialManger: InterstitialManger
 
     private val creationListViewModel: CreationListViewModel by viewModels()
     private lateinit var creationListState: CreationListState
@@ -65,9 +66,9 @@ class CreationListActivity : AppCompatActivity() {
         creationListAdapter.setClickListener(object :
             CreationListAdapter.ClickListener {
             override fun oClick(uri: String, isVideo: Boolean) {
-                interstitialManger.showInterstitial(
+                InterstitialAdManager.showInterstitial(
                     this@CreationListActivity,
-                    object : InterstitialManger.OnAdClosedListener {
+                    object : InterstitialAdManager.OnAdClosedListener {
                         override fun onAdClosed() {
                             Intent(
                                 this@CreationListActivity,
@@ -79,7 +80,25 @@ class CreationListActivity : AppCompatActivity() {
                                 finish()
                             }
                         }
-                    })
+                    }
+                )
+
+//                interstitialManger.showInterstitial(
+//                    this@CreationListActivity,
+//                    object : InterstitialManger.OnAdClosedListener {
+//                        override fun onAdClosed() {
+//                            Intent(
+//                                this@CreationListActivity,
+//                                CreationDetailsActivity::class.java
+//                            ).also { intent ->
+//                                intent.putExtra("uri", uri)
+//                                intent.putExtra("isVideo", isVideo)
+//                                startActivity(intent)
+//                                finish()
+//                            }
+//                        }
+//                    }
+//                )
             }
         })
 

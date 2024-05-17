@@ -14,8 +14,8 @@ data class AppData(
     val admobOpenApp: String,
     val admobRewarded: String,
 
-    val facebookInterstitial: String,
-    val facebookNative: String,
+    var facebookInterstitial: String,
+    var facebookNative: String,
     val facebookRewarded: String,
 
     val clicksToShowInter: Int,

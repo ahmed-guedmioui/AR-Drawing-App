@@ -20,6 +20,8 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.ardrawing.sketchtrace.R
+import com.ardrawing.sketchtrace.core.data.util.ads_original.InterstitialAdManager
+import com.ardrawing.sketchtrace.core.data.util.ads_original.NativeAdsManager
 import com.ardrawing.sketchtrace.core.domain.model.app_data.AppData
 import com.ardrawing.sketchtrace.databinding.ActivityGetStartedBinding
 import com.ardrawing.sketchtrace.home.presentation.HomeActivity
@@ -42,11 +44,11 @@ class GetStartedActivity : AppCompatActivity() {
     private var getStartedState: GetStartedState? = null
     private lateinit var binding: ActivityGetStartedBinding
 
-    @Inject
-    lateinit var interstitialManger: InterstitialManger
-
-    @Inject
-    lateinit var nativeManager: NativeManager
+//    @Inject
+//    lateinit var interstitialManger: InterstitialManger
+//
+//    @Inject
+//    lateinit var nativeManager: NativeManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -72,23 +74,40 @@ class GetStartedActivity : AppCompatActivity() {
         }
 
         binding.getStarted.setOnClickListener {
-            interstitialManger.showInterstitial(
+            InterstitialAdManager.showInterstitial(
                 this,
-                object : InterstitialManger.OnAdClosedListener {
+                object : InterstitialAdManager.OnAdClosedListener {
                     override fun onAdClosed() {
                         getStartedViewModel.onEvent(GetStartedUiEvent.Navigate)
                         navigate()
                     }
                 }
             )
+
+//            interstitialManger.showInterstitial(
+//                this,
+//                object : InterstitialManger.OnAdClosedListener {
+//                    override fun onAdClosed() {
+//                        getStartedViewModel.onEvent(GetStartedUiEvent.Navigate)
+//                        navigate()
+//                    }
+//                }
+//            )
         }
 
-        nativeManager.setActivity(this)
-        nativeManager.loadNative(
+        NativeAdsManager.loadNative(
             findViewById(R.id.native_frame),
             findViewById(R.id.native_temp),
+            this,
             isButtonTop = false
         )
+
+//        nativeManager.setActivity(this)
+//        nativeManager.loadNative(
+//            findViewById(R.id.native_frame),
+//            findViewById(R.id.native_temp),
+//            isButtonTop = false
+//        )
 
     }
 

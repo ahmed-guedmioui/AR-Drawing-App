@@ -1,7 +1,7 @@
-package com.ardrawing.sketchtrace.core.data.repository.ads
+package com.ardrawing.sketchtrace.core.data.util.ads_original
 
 import android.app.Activity
-import android.content.SharedPreferences
+import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.Button
@@ -9,11 +9,6 @@ import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
-import com.ardrawing.sketchtrace.R
-import com.ardrawing.sketchtrace.core.domain.repository.AppDataRepository
-import com.ardrawing.sketchtrace.core.domain.repository.ads.NativeManager
-import com.ardrawing.sketchtrace.util.AdsConstants
-import com.ardrawing.sketchtrace.util.PrefsConstants
 import com.facebook.ads.Ad
 import com.facebook.ads.AdError
 import com.facebook.ads.AdOptionsView
@@ -27,26 +22,25 @@ import com.google.android.gms.ads.LoadAdError
 import com.google.android.gms.ads.VideoController.VideoLifecycleCallbacks
 import com.google.android.gms.ads.nativead.NativeAd
 import com.google.android.gms.ads.nativead.NativeAdView
-import javax.inject.Inject
+import com.ardrawing.sketchtrace.R
+import com.ardrawing.sketchtrace.core.domain.model.app_data.AppData
+import com.ardrawing.sketchtrace.util.PrefsConstants
 
-class NativeManagerImpl @Inject constructor(
-    appDataRepository: AppDataRepository,
-    private val prefs: SharedPreferences
-) : NativeManager {
-
-    private var appData = appDataRepository.getAppData()
+object NativeAdsManager {
 
     private var admobNativeAd: NativeAd? = null
-    private lateinit var activity: Activity
 
-    override fun setActivity(activity: Activity) {
-        this.activity = activity
+    private lateinit var appData: AppData
+
+    fun setAppData(appData: AppData) {
+        this.appData = appData
     }
 
-    override fun loadNative(
+    fun loadNative(
         nativeFrame: FrameLayout,
         nativeTemp: TextView,
-        isButtonTop: Boolean
+        activity: Activity,
+        isButtonTop: Boolean = false
     ) {
 
         if (!appData.showAdsForThisUser) {
@@ -55,12 +49,12 @@ class NativeManagerImpl @Inject constructor(
         }
 
         when (appData.native) {
-            AdsConstants.ADMOB -> loadAdmobNative(
-                nativeFrame, nativeTemp, isButtonTop
+            AdType.admob -> loadAdmobNative(
+                nativeFrame, nativeTemp, activity, isButtonTop
             )
 
-            AdsConstants.FACEBOOK -> loadFacebookNative(
-                nativeFrame, nativeTemp, isButtonTop
+            AdType.facebook -> loadFacebookNative(
+                nativeFrame, nativeTemp, activity, isButtonTop
             )
 
             else -> {
@@ -76,15 +70,21 @@ class NativeManagerImpl @Inject constructor(
     private fun loadAdmobNative(
         nativeFrame: FrameLayout,
         nativeTemp: TextView,
+        activity: Activity,
         isButtonTop: Boolean
     ) {
+
+        val prefs = activity.getSharedPreferences(
+            PrefsConstants.PREFS_FILE_NAME, Context.MODE_PRIVATE
+        )
 
         if (!prefs.getBoolean(PrefsConstants.CAN_SHOW_ADMOB_ADS, true)) {
             return
         }
 
-        val builder = AdLoader.Builder(activity, appData.admobNative)
-
+        val builder = AdLoader.Builder(
+            activity, appData.admobNative
+        )
         builder.forNativeAd { nativeAd: NativeAd ->
             val isDestroyed = activity.isDestroyed
             if (isDestroyed || activity.isFinishing || activity.isChangingConfigurations) {
@@ -96,12 +96,11 @@ class NativeManagerImpl @Inject constructor(
             }
             admobNativeAd = nativeAd
             val adView = if (!isButtonTop) {
-                activity.layoutInflater.inflate(
-                    R.layout.native_admob, null
-                ) as NativeAdView
+                activity.layoutInflater.inflate(R.layout.native_admob, null) as NativeAdView
             } else {
                 activity.layoutInflater.inflate(
-                    R.layout.native_admob_button_top, null
+                    R.layout.native_admob_button_top,
+                    null
                 ) as NativeAdView
             }
 
@@ -173,11 +172,10 @@ class NativeManagerImpl @Inject constructor(
     private fun loadFacebookNative(
         nativeFrame: FrameLayout,
         nativeTemp: TextView,
+        activity: Activity,
         isButtonTop: Boolean
     ) {
-        val nativeAd = com.facebook.ads.NativeAd(
-            activity, appData.facebookNative
-        )
+        val nativeAd = com.facebook.ads.NativeAd(activity, appData.facebookNative)
         val nativeAdListener: NativeAdListener = object : NativeAdListener {
             override fun onMediaDownloaded(ad: Ad) {}
             override fun onError(ad: Ad, adError: AdError) {
@@ -192,7 +190,7 @@ class NativeManagerImpl @Inject constructor(
                 nativeTemp.visibility = View.GONE
                 nativeFrame.visibility = View.VISIBLE
                 populateFacebookNative(
-                    nativeFrame, nativeAd, isButtonTop
+                    nativeFrame, nativeTemp, nativeAd, activity, isButtonTop
                 )
             }
 
@@ -204,7 +202,9 @@ class NativeManagerImpl @Inject constructor(
 
     private fun populateFacebookNative(
         nativeFrame: FrameLayout,
+        nativeTemp: TextView,
         nativeAd: com.facebook.ads.NativeAd,
+        activity: Activity,
         isButtonTop: Boolean
     ) {
 
@@ -229,7 +229,7 @@ class NativeManagerImpl @Inject constructor(
             val adOptionsView = AdOptionsView(activity, nativeAd, nativeAdLayout)
             adChoicesContainer.removeAllViews()
             adChoicesContainer.addView(adOptionsView, 0)
-        } catch (_: Exception) {
+        } catch (e: Exception) {
         }
 
         // Create native UI using the ad metadata.

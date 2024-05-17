@@ -23,8 +23,11 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.viewpager.widget.ViewPager
 import com.ardrawing.sketchtrace.BuildConfig
 import com.ardrawing.sketchtrace.R
-import com.ardrawing.sketchtrace.core.data.repository.ads.RewardedManagerImpl
+import com.ardrawing.sketchtrace.core.data.util.ads.RewardedManagerImpl
 import com.ardrawing.sketchtrace.core.data.util.UrlOpener
+import com.ardrawing.sketchtrace.core.data.util.ads_original.InterstitialAdManager
+import com.ardrawing.sketchtrace.core.data.util.ads_original.NativeAdsManager
+import com.ardrawing.sketchtrace.core.data.util.ads_original.RewardedAdsManager
 import com.ardrawing.sketchtrace.core.data.util.rateApp
 import com.ardrawing.sketchtrace.core.domain.repository.ads.InterstitialManger
 import com.ardrawing.sketchtrace.core.domain.repository.ads.NativeManager
@@ -51,14 +54,14 @@ class HomeActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityHomeBinding
 
-    @Inject
-    lateinit var rewardedManagerImpl: RewardedManagerImpl
-
-    @Inject
-    lateinit var interstitialManger: InterstitialManger
-
-    @Inject
-    lateinit var nativeManager: NativeManager
+//    @Inject
+//    lateinit var rewardedManagerImpl: RewardedManagerImpl
+//
+//    @Inject
+//    lateinit var interstitialManger: InterstitialManger
+//
+//    @Inject
+//    lateinit var nativeManager: NativeManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -100,14 +103,22 @@ class HomeActivity : AppCompatActivity() {
             }
         }
 
-        rewardedManagerImpl.loadRewarded(this)
+        RewardedAdsManager.loadRewarded(this)
+//        rewardedManagerImpl.loadRewarded(this)
 
-        nativeManager.setActivity(this)
-        nativeManager.loadNative(
+        NativeAdsManager.loadNative(
             findViewById(R.id.native_frame),
             findViewById(R.id.native_temp),
+            this,
             isButtonTop = false
         )
+
+//        nativeManager.setActivity(this)
+//        nativeManager.loadNative(
+//            findViewById(R.id.native_frame),
+//            findViewById(R.id.native_temp),
+//            isButtonTop = false
+//        )
 
         val pushAnimation = AnimationUtils.loadAnimation(this, R.anim.view_push)
 
@@ -215,9 +226,9 @@ class HomeActivity : AppCompatActivity() {
     }
 
     private fun drawingListScreen(isTrace: Boolean) {
-        interstitialManger.showInterstitial(
+        InterstitialAdManager.showInterstitial(
             this,
-            object : InterstitialManger.OnAdClosedListener {
+            object : InterstitialAdManager.OnAdClosedListener {
                 override fun onAdClosed() {
                     val intent = Intent(this@HomeActivity, CategoriesActivity::class.java)
                     intent.putExtra("isTrace", isTrace)
@@ -225,6 +236,17 @@ class HomeActivity : AppCompatActivity() {
                 }
             }
         )
+
+//        interstitialManger.showInterstitial(
+//            this,
+//            object : InterstitialManger.OnAdClosedListener {
+//                override fun onAdClosed() {
+//                    val intent = Intent(this@HomeActivity, CategoriesActivity::class.java)
+//                    intent.putExtra("isTrace", isTrace)
+//                    startActivity(intent)
+//                }
+//            }
+//        )
     }
 
     override fun onBackPressed() {

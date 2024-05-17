@@ -11,6 +11,8 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.ardrawing.sketchtrace.R
+import com.ardrawing.sketchtrace.core.data.util.ads_original.InterstitialAdManager
+import com.ardrawing.sketchtrace.core.data.util.ads_original.NativeAdsManager
 import com.ardrawing.sketchtrace.get_started.presentation.GetStartedActivity
 import com.ardrawing.sketchtrace.databinding.ActivityTipsBinding
 import com.ardrawing.sketchtrace.core.presentation.util.Animations
@@ -34,11 +36,11 @@ class OnboardingActivity : AppCompatActivity() {
 
     private var isFromSplash = true
 
-    @Inject
-    lateinit var interstitialManger: InterstitialManger
-
-    @Inject
-    lateinit var nativeManager: NativeManager
+//    @Inject
+//    lateinit var interstitialManger: InterstitialManger
+//
+//    @Inject
+//    lateinit var nativeManager: NativeManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -57,12 +59,19 @@ class OnboardingActivity : AppCompatActivity() {
             }
         }
 
-        nativeManager.setActivity(this)
-        nativeManager.loadNative(
+        NativeAdsManager.loadNative(
             findViewById(R.id.native_frame),
             findViewById(R.id.native_temp),
+            this,
             isButtonTop = false
         )
+
+//        nativeManager.setActivity(this)
+//        nativeManager.loadNative(
+//            findViewById(R.id.native_frame),
+//            findViewById(R.id.native_temp),
+//            isButtonTop = false
+//        )
 
         changeTip()
 
@@ -133,21 +142,38 @@ class OnboardingActivity : AppCompatActivity() {
             }
 
             5 -> {
-                interstitialManger.showInterstitial(
+                InterstitialAdManager.showInterstitial(
                     this,
-                    object : InterstitialManger.OnAdClosedListener {
-                    override fun onAdClosed() {
-                        if (isFromSplash) {
-                            onboardingViewModel.onEvent(OnboardingUiEvent.Navigate)
-                            Intent(
-                                this@OnboardingActivity, GetStartedActivity::class.java
-                            ).also {
-                                startActivity(it)
+                    object : InterstitialAdManager.OnAdClosedListener {
+                        override fun onAdClosed() {
+                            if (isFromSplash) {
+                                onboardingViewModel.onEvent(OnboardingUiEvent.Navigate)
+                                Intent(
+                                    this@OnboardingActivity, GetStartedActivity::class.java
+                                ).also {
+                                    startActivity(it)
+                                }
                             }
+                            finish()
                         }
-                        finish()
                     }
-                })
+                )
+
+//                interstitialManger.showInterstitial(
+//                    this,
+//                    object : InterstitialManger.OnAdClosedListener {
+//                    override fun onAdClosed() {
+//                        if (isFromSplash) {
+//                            onboardingViewModel.onEvent(OnboardingUiEvent.Navigate)
+//                            Intent(
+//                                this@OnboardingActivity, GetStartedActivity::class.java
+//                            ).also {
+//                                startActivity(it)
+//                            }
+//                        }
+//                        finish()
+//                    }
+//                })
             }
         }
     }

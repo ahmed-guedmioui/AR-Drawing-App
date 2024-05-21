@@ -136,7 +136,7 @@ class SplashActivity : AppCompatActivity() {
 
         val params = ConsentRequestParameters
             .Builder()
-            .setConsentDebugSettings(debugSettings)
+//            .setConsentDebugSettings(debugSettings)
             .build()
 
         consentInformation.requestConsentInfoUpdate(
@@ -204,16 +204,10 @@ class SplashActivity : AppCompatActivity() {
 
         MobileAds.initialize(this)
 
-        splashState.appData?.let { appData ->
 
-            RewardedAdsManager.setAppData(appData)
-            NativeAdsManager.setAppData(appData)
-            InterstitialAdManager.setAppData(appData)
-
-            InterstitialAdManager.loadInterstitial(this)
-            AdmobAppOpenAdManager(application).showSplashAd(
-                appData, this
-            ) {
+        InterstitialAdManager.loadInterstitial(this)
+        AdmobAppOpenAdManager(application)
+            .showSplashAd(this) {
                 navigate()
             }
 
@@ -224,7 +218,7 @@ class SplashActivity : AppCompatActivity() {
 //            appOpenManager.showSplashAd(activity = this) {
 //                navigate()
 //            }
-        }
+
 
     }
 

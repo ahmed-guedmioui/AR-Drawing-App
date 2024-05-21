@@ -461,6 +461,10 @@ class SketchActivity : AppCompatActivity() {
 
     private fun setImageBorder(isImageBordered: Boolean) {
 
+        if (SketchBitmap.bitmap == null) {
+            return
+        }
+
         if (isImageBordered) {
 
             val progressDialog = ProgressDialog(this@SketchActivity)

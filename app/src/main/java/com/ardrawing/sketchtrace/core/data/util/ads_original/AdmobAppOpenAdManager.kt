@@ -8,6 +8,7 @@ import android.os.Bundle
 import android.util.Log
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.ProcessLifecycleOwner
+import com.ardrawing.sketchtrace.core.data.repository.AppDataInstance
 import com.ardrawing.sketchtrace.core.domain.model.app_data.AppData
 import com.ardrawing.sketchtrace.util.PrefsConstants
 import com.google.android.gms.ads.AdError
@@ -187,7 +188,6 @@ class AdmobAppOpenAdManager(
      */
 
     fun showSplashAd(
-        appData: AppData,
         activity: Activity,
         onAdClosed: () -> Unit
     ) {
@@ -197,7 +197,7 @@ class AdmobAppOpenAdManager(
         )
 
         if (
-            !appData.showAdsForThisUser ||
+            AppDataInstance.appData?.showAdsForThisUser == false ||
             !prefs.getBoolean(PrefsConstants.CAN_SHOW_ADMOB_ADS, true)
         ) {
             onAdClosed()

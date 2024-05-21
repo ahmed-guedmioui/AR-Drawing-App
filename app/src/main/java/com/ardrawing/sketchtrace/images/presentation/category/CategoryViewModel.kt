@@ -46,6 +46,10 @@ class CategoryViewModel @Inject constructor(
         when (event) {
 
             is CategoryUiEvents.UpdateCategoryPositionAndIsTrace -> {
+                if (event.categoryPosition > categoryState.value.imageCategoryList.lastIndex) {
+                    return
+                }
+
                 val imageCategory =
                     categoryState.value.imageCategoryList[event.categoryPosition]
 

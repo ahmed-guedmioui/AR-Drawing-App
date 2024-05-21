@@ -71,7 +71,7 @@ class AppDataRepositoryImpl @Inject constructor(
 
             appDataDto?.let {
                 AppDataInstance.appData = it.toAppData()
-
+     
                 prefs.edit()
                     .putString(PrefsConstants.ADMOB_OPEN_APP_AD_ID, getAppData().admobOpenApp)
                     .apply()
@@ -104,31 +104,6 @@ class AppDataRepositoryImpl @Inject constructor(
     override fun updateSubscriptionExpireDate(subscriptionExpireDate: String) {
         getAppData().subscriptionExpireDate = subscriptionExpireDate
     }
-
-//    private fun subscription() {
-//        Purchases.sharedInstance.getCustomerInfo(
-//            object : ReceiveCustomerInfoCallback {
-//                override fun onError(error: PurchasesError) {
-//                    updateIsSubscribed(false)
-//                }
-//
-//                override fun onReceived(customerInfo: CustomerInfo) {
-//                    val date = customerInfo.getExpirationDateForEntitlement(
-//                        BuildConfig.ENTITLEMENT
-//                    )
-//                    date?.let {
-//                        if (it.after(Date())) {
-//                            updateIsSubscribed(true)
-//                        }
-//                    }
-//                    UpdateSubscriptionExpireDate(
-//                        date, this@AppDataRepositoryImpl
-//                    ).invoke()
-//                    updateShowAdsForThisUser()
-//                }
-//            }
-//        )
-//    }
 
     override fun updateShowAdsForThisUser() {
         if (getAppData().isSubscribed) {

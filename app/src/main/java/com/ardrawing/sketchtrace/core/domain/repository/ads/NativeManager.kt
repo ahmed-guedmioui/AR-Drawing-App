@@ -9,12 +9,11 @@ import android.widget.TextView
  */
 interface NativeManager {
 
-    fun setActivity(activity: Activity)
-
     fun loadNative(
         nativeFrame: FrameLayout,
         nativeTemp: TextView,
-        isButtonTop: Boolean = false
+        isButtonTop: Boolean = false,
+        activity: Activity
     )
 
 }

@@ -54,14 +54,14 @@ class CategoriesActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityCategoriesBinding
 
-//    @Inject
-//    lateinit var rewardedManger: RewardedManger
-//
-//    @Inject
-//    lateinit var interstitialManger: InterstitialManger
-//
-//    @Inject
-//    lateinit var nativeManager: NativeManager
+    @Inject
+    lateinit var rewardedManger: RewardedManger
+
+    @Inject
+    lateinit var interstitialManger: InterstitialManger
+
+    @Inject
+    lateinit var nativeManager: NativeManager
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -134,7 +134,7 @@ class CategoriesActivity : AppCompatActivity() {
 
         categoriesAdapter = CategoriesAdapter(
             activity = this,
-//            nativeManager = nativeManager
+            nativeManager = nativeManager
         )
 
         initAdapterClicks()
@@ -202,76 +202,54 @@ class CategoriesActivity : AppCompatActivity() {
             }
         })
 
-        categoriesAdapter?.setViewMoreClickListener(object :
-            CategoriesAdapter.ViewMoreClickListener {
-            override fun oClick(categoryPosition: Int) {
-                InterstitialAdManager.showInterstitial(
-                    this@CategoriesActivity,
-                    object : InterstitialAdManager.OnAdClosedListener {
-                        override fun onAdClosed() {
-                            Intent(
-                                this@CategoriesActivity,
-                                CategoryActivity::class.java
-                            ).also {intent ->
-                                intent.putExtra("categoryPosition", categoryPosition)
-                                intent.putExtra("isTrace", categoriesState?.isTrace)
-                                startActivity(intent)
-                            }
-                        }
-                    }
-                )
+        categoriesAdapter?.setViewMoreClickListener(
+            object : CategoriesAdapter.ViewMoreClickListener {
+                override fun oClick(categoryPosition: Int) {
 
-//                interstitialManger.showInterstitial(
-//                    this@CategoriesActivity,
-//                    object : InterstitialManger.OnAdClosedListener {
-//                        override fun onAdClosed() {
-//                            Intent(
-//                                this@CategoriesActivity,
-//                                CategoryActivity::class.java
-//                            ).also {intent ->
-//                                intent.putExtra("categoryPosition", categoryPosition)
-//                                intent.putExtra("isTrace", categoriesState?.isTrace)
-//                                startActivity(intent)
+//                    InterstitialAdManager.showInterstitial(
+//                        this@CategoriesActivity,
+//                        object : InterstitialAdManager.OnAdClosedListener {
+//                            override fun onAdClosed() {
+//                                Intent(
+//                                    this@CategoriesActivity,
+//                                    CategoryActivity::class.java
+//                                ).also { intent ->
+//                                    intent.putExtra("categoryPosition", categoryPosition)
+//                                    intent.putExtra("isTrace", categoriesState?.isTrace)
+//                                    startActivity(intent)
+//                                }
 //                            }
 //                        }
-//                    }
-//                )
+//                    )
+
+                    interstitialManger.showInterstitial(
+                        this@CategoriesActivity,
+                        object : InterstitialManger.OnAdClosedListener {
+                            override fun onAdClosed() {
+                                Intent(
+                                    this@CategoriesActivity,
+                                    CategoryActivity::class.java
+                                ).also { intent ->
+                                    intent.putExtra("categoryPosition", categoryPosition)
+                                    intent.putExtra("isTrace", categoriesState?.isTrace)
+                                    startActivity(intent)
+                                }
+                            }
+                        }
+                    )
+
+                }
             }
-        })
+        )
     }
 
     private fun rewarded(
         onRewComplete: () -> Unit
     ) {
 
-        RewardedAdsManager.showRewarded(
-            activity = this,
-            adClosedListener = object : RewardedAdsManager.OnAdClosedListener {
-                override fun onRewClosed() {}
-
-                override fun onRewFailedToShow() {
-                    Toast.makeText(
-                        this@CategoriesActivity,
-                        getString(R.string.ad_is_not_loaded_yet),
-                        Toast.LENGTH_SHORT
-                    ).show()
-                }
-
-                override fun onRewComplete() {
-                    onRewComplete()
-                }
-
-            },
-            onOpenPaywall = {
-                Intent(this, PaywallActivity::class.java).also {
-                    startActivity(it)
-                }
-            }
-        )
-
-//        rewardedManger.showRewarded(
+//        RewardedAdsManager.showRewarded(
 //            activity = this,
-//            adClosedListener = object : RewardedManger.OnAdClosedListener {
+//            adClosedListener = object : RewardedAdsManager.OnAdClosedListener {
 //                override fun onRewClosed() {}
 //
 //                override fun onRewFailedToShow() {
@@ -285,13 +263,42 @@ class CategoriesActivity : AppCompatActivity() {
 //                override fun onRewComplete() {
 //                    onRewComplete()
 //                }
+//
 //            },
 //            onOpenPaywall = {
-//                Intent(this, PaywallActivity::class.java).also {
+//                Intent(
+//                    this, PaywallActivity::class.java
+//                ).also {
 //                    startActivity(it)
 //                }
 //            }
 //        )
+
+        rewardedManger.showRewarded(
+            activity = this,
+            adClosedListener = object : RewardedManger.OnAdClosedListener {
+                override fun onRewClosed() {}
+
+                override fun onRewFailedToShow() {
+                    Toast.makeText(
+                        this@CategoriesActivity,
+                        getString(R.string.ad_is_not_loaded_yet),
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+
+                override fun onRewComplete() {
+                    onRewComplete()
+                }
+            },
+            onOpenPaywall = {
+                Intent(
+                    this, PaywallActivity::class.java
+                ).also {
+                    startActivity(it)
+                }
+            }
+        )
     }
 
     private fun isWriteStoragePermissionGranted(): Boolean {
@@ -409,23 +416,9 @@ class CategoriesActivity : AppCompatActivity() {
         }
 
     private fun traceDrawingScreen(imagePath: String) {
-        InterstitialAdManager.showInterstitial(
-            this,
-            object : InterstitialAdManager.OnAdClosedListener {
-                override fun onAdClosed() {
-                    Intent(
-                        this@CategoriesActivity, TraceActivity::class.java
-                    ).also {
-                        it.putExtra("imagePath", imagePath)
-                        startActivity(it)
-                    }
-                }
-            }
-        )
-
-//        interstitialManger.showInterstitial(
+//        InterstitialAdManager.showInterstitial(
 //            this,
-//            object : InterstitialManger.OnAdClosedListener {
+//            object : InterstitialAdManager.OnAdClosedListener {
 //                override fun onAdClosed() {
 //                    Intent(
 //                        this@CategoriesActivity, TraceActivity::class.java
@@ -436,15 +429,13 @@ class CategoriesActivity : AppCompatActivity() {
 //                }
 //            }
 //        )
-    }
 
-    private fun sketchDrawingScreen(imagePath: String) {
-        InterstitialAdManager.showInterstitial(
+        interstitialManger.showInterstitial(
             this,
-            object : InterstitialAdManager.OnAdClosedListener {
+            object : InterstitialManger.OnAdClosedListener {
                 override fun onAdClosed() {
                     Intent(
-                        this@CategoriesActivity, SketchActivity::class.java
+                        this@CategoriesActivity, TraceActivity::class.java
                     ).also {
                         it.putExtra("imagePath", imagePath)
                         startActivity(it)
@@ -452,10 +443,12 @@ class CategoriesActivity : AppCompatActivity() {
                 }
             }
         )
+    }
 
-//        interstitialManger.showInterstitial(
+    private fun sketchDrawingScreen(imagePath: String) {
+//        InterstitialAdManager.showInterstitial(
 //            this,
-//            object : InterstitialManger.OnAdClosedListener {
+//            object : InterstitialAdManager.OnAdClosedListener {
 //                override fun onAdClosed() {
 //                    Intent(
 //                        this@CategoriesActivity, SketchActivity::class.java
@@ -466,6 +459,20 @@ class CategoriesActivity : AppCompatActivity() {
 //                }
 //            }
 //        )
+
+        interstitialManger.showInterstitial(
+            this,
+            object : InterstitialManger.OnAdClosedListener {
+                override fun onAdClosed() {
+                    Intent(
+                        this@CategoriesActivity, SketchActivity::class.java
+                    ).also {
+                        it.putExtra("imagePath", imagePath)
+                        startActivity(it)
+                    }
+                }
+            }
+        )
     }
 
     override fun onResume() {

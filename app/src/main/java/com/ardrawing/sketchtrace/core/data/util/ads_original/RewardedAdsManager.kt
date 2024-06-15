@@ -33,14 +33,7 @@ object RewardedAdsManager {
     private lateinit var facebookRewardedAd: RewardedVideoAd
 
     fun loadRewarded(activity: Activity) {
-        val prefs = activity.getSharedPreferences(
-            PrefsConstants.PREFS_FILE_NAME, Context.MODE_PRIVATE
-        )
-
-        if (
-            AppDataInstance.appData?.showAdsForThisUser == false ||
-            !prefs.getBoolean(PrefsConstants.CAN_SHOW_ADMOB_ADS, true)
-        ) {
+        if (AppDataInstance.appData?.showAdsForThisUser == false) {
             return
         }
 
@@ -184,7 +177,8 @@ object RewardedAdsManager {
 
         isFacebookRewardedLoaded = false
         facebookRewardedAd = RewardedVideoAd(
-            activity, AppDataInstance.appData?.facebookRewarded ?: ""
+            activity,
+            AppDataInstance.appData?.facebookRewarded ?: ""
         )
 
         val rewardedVideoAdListener: RewardedVideoAdListener =

@@ -7,7 +7,7 @@ import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import com.ardrawing.sketchtrace.R
-import com.ardrawing.sketchtrace.core.domain.model.app_data.AppData
+import com.ardrawing.sketchtrace.core.data.repository.AppDataInstance
 import com.ardrawing.sketchtrace.core.domain.repository.AppDataRepository
 import com.ardrawing.sketchtrace.core.domain.repository.ads.InterstitialManger
 import com.ardrawing.sketchtrace.util.AdsConstants
@@ -23,7 +23,6 @@ import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback
 import javax.inject.Inject
 
 class InterstitialMangerImpl @Inject constructor(
-    appDataRepository: AppDataRepository,
     private val prefs: SharedPreferences
 ) : InterstitialManger {
 
@@ -36,19 +35,13 @@ class InterstitialMangerImpl @Inject constructor(
     private lateinit var onAdClosedListener: InterstitialManger.OnAdClosedListener
     private var counter = 1
 
-    private var appData = appDataRepository.getAppData()
-
-    override fun setAppDataRepository(appData: AppData) {
-        this.appData = appData
-    }
-
     override fun loadInterstitial(activity: Activity) {
 
-        if (!appData.showAdsForThisUser) {
+        if (AppDataInstance.appData?.showAdsForThisUser == false) {
             return
         }
 
-        when (appData.interstitial) {
+        when (AppDataInstance.appData?.interstitial) {
             AdsConstants.ADMOB -> loadAdmobInter(activity)
             AdsConstants.FACEBOOK -> loadFacebookInter(activity)
         }
@@ -61,12 +54,12 @@ class InterstitialMangerImpl @Inject constructor(
 
         onAdClosedListener = adClosedListener
 
-        if (!appData.showAdsForThisUser) {
+        if (AppDataInstance.appData?.showAdsForThisUser == false) {
             onAdClosedListener.onAdClosed()
             return
         }
 
-        if (appData.clicksToShowInter == counter) {
+        if (AppDataInstance.appData?.clicksToShowInter == counter) {
             counter = 1
 
             val progressDialog = ProgressDialog(activity)
@@ -75,7 +68,7 @@ class InterstitialMangerImpl @Inject constructor(
             progressDialog.show()
 
             Handler(Looper.getMainLooper()).postDelayed({
-                when (appData.interstitial) {
+                when (AppDataInstance.appData?.interstitial) {
                     AdsConstants.ADMOB -> showAdmobInter(activity)
                     AdsConstants.FACEBOOK -> showFacebookInter(activity)
                     else -> onAdClosedListener.onAdClosed()
@@ -99,7 +92,10 @@ class InterstitialMangerImpl @Inject constructor(
     private fun loadFacebookInter(activity: Activity) {
         isFacebookInterLoaded = false
         facebookInterstitialAd =
-            com.facebook.ads.InterstitialAd(activity, appData.facebookInterstitial)
+            com.facebook.ads.InterstitialAd(
+                activity,
+                AppDataInstance.appData?.facebookInterstitial ?: ""
+            )
         val interstitialAdListener: InterstitialAdListener = object : InterstitialAdListener {
             override fun onInterstitialDisplayed(ad: Ad) {}
             override fun onInterstitialDismissed(ad: Ad) {
@@ -148,7 +144,7 @@ class InterstitialMangerImpl @Inject constructor(
 
         InterstitialAd.load(
             activity,
-            appData.admobInterstitial,
+            AppDataInstance.appData?.admobInterstitial ?: "",
             adRequest,
             object : InterstitialAdLoadCallback() {
                 override fun onAdLoaded(interstitialAd: InterstitialAd) {

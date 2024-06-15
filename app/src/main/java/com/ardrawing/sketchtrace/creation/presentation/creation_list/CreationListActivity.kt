@@ -25,8 +25,8 @@ import javax.inject.Inject
 @AndroidEntryPoint
 class CreationListActivity : AppCompatActivity() {
 
-//    @Inject
-//    lateinit var interstitialManger: InterstitialManger
+    @Inject
+    lateinit var interstitialManger: InterstitialManger
 
     private val creationListViewModel: CreationListViewModel by viewModels()
     private lateinit var creationListState: CreationListState
@@ -56,36 +56,20 @@ class CreationListActivity : AppCompatActivity() {
     }
 
     private fun initCreationListRec() {
-       val creationListAdapter = CreationListAdapter(
+        val creationListAdapter = CreationListAdapter(
             this, creationListState.creationList
         )
 
         binding.recyclerView.layoutManager = GridLayoutManager(this, 2)
         binding.recyclerView.adapter = creationListAdapter
 
-        creationListAdapter.setClickListener(object :
-            CreationListAdapter.ClickListener {
-            override fun oClick(uri: String, isVideo: Boolean) {
-                InterstitialAdManager.showInterstitial(
-                    this@CreationListActivity,
-                    object : InterstitialAdManager.OnAdClosedListener {
-                        override fun onAdClosed() {
-                            Intent(
-                                this@CreationListActivity,
-                                CreationDetailsActivity::class.java
-                            ).also { intent ->
-                                intent.putExtra("uri", uri)
-                                intent.putExtra("isVideo", isVideo)
-                                startActivity(intent)
-                                finish()
-                            }
-                        }
-                    }
-                )
+        creationListAdapter.setClickListener(
+            object : CreationListAdapter.ClickListener {
+                override fun oClick(uri: String, isVideo: Boolean) {
 
-//                interstitialManger.showInterstitial(
+//                InterstitialAdManager.showInterstitial(
 //                    this@CreationListActivity,
-//                    object : InterstitialManger.OnAdClosedListener {
+//                    object : InterstitialAdManager.OnAdClosedListener {
 //                        override fun onAdClosed() {
 //                            Intent(
 //                                this@CreationListActivity,
@@ -99,8 +83,26 @@ class CreationListActivity : AppCompatActivity() {
 //                        }
 //                    }
 //                )
+
+                    interstitialManger.showInterstitial(
+                        this@CreationListActivity,
+                        object : InterstitialManger.OnAdClosedListener {
+                            override fun onAdClosed() {
+                                Intent(
+                                    this@CreationListActivity,
+                                    CreationDetailsActivity::class.java
+                                ).also { intent ->
+                                    intent.putExtra("uri", uri)
+                                    intent.putExtra("isVideo", isVideo)
+                                    startActivity(intent)
+                                    finish()
+                                }
+                            }
+                        }
+                    )
+                }
             }
-        })
+        )
 
     }
 

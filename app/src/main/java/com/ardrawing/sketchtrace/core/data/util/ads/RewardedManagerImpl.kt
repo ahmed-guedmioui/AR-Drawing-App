@@ -11,7 +11,7 @@ import android.view.WindowManager
 import android.widget.ImageView
 import androidx.cardview.widget.CardView
 import com.ardrawing.sketchtrace.R
-import com.ardrawing.sketchtrace.core.domain.repository.AppDataRepository
+import com.ardrawing.sketchtrace.core.data.repository.AppDataInstance
 import com.ardrawing.sketchtrace.core.domain.repository.ads.RewardedManger
 import com.ardrawing.sketchtrace.util.AdsConstants
 import com.ardrawing.sketchtrace.util.PrefsConstants
@@ -25,11 +25,8 @@ import com.google.android.gms.ads.rewarded.RewardedAdLoadCallback
 import javax.inject.Inject
 
 class RewardedManagerImpl @Inject constructor(
-    appDataRepository: AppDataRepository,
     private val prefs: SharedPreferences
 ) : RewardedManger {
-
-    private var appData = appDataRepository.getAppData()
 
     private lateinit var onAdClosedListener: RewardedManger.OnAdClosedListener
 
@@ -42,11 +39,11 @@ class RewardedManagerImpl @Inject constructor(
 
     override fun loadRewarded(activity: Activity) {
 
-        if (!appData.showAdsForThisUser) {
+        if (AppDataInstance.appData?.showAdsForThisUser == false) {
             return
         }
 
-        when (appData.rewarded) {
+        when (AppDataInstance.appData?.rewarded) {
             AdsConstants.ADMOB -> loadAdmobRewarded(activity)
             AdsConstants.FACEBOOK -> loadFacebookRewarded(activity)
         }
@@ -60,7 +57,7 @@ class RewardedManagerImpl @Inject constructor(
     ) {
         onAdClosedListener = adClosedListener
 
-        if (!appData.showAdsForThisUser) {
+        if (AppDataInstance.appData?.showAdsForThisUser == false) {
             onAdClosedListener.onRewClosed()
             onAdClosedListener.onRewComplete()
             return
@@ -97,7 +94,7 @@ class RewardedManagerImpl @Inject constructor(
         }
 
         dialog.findViewById<CardView>(R.id.watch).setOnClickListener {
-            when (appData.rewarded) {
+            when (AppDataInstance.appData?.rewarded) {
                 AdsConstants.ADMOB -> showAdmobRewarded(activity)
                 AdsConstants.FACEBOOK -> showFacebookRewarded(activity)
                 else -> onAdClosedListener.onRewFailedToShow()
@@ -127,7 +124,7 @@ class RewardedManagerImpl @Inject constructor(
 
         com.google.android.gms.ads.rewarded.RewardedAd.load(
             activity,
-            appData.admobRewarded,
+            AppDataInstance.appData?.admobRewarded ?: "",
             adRequest,
             object : RewardedAdLoadCallback() {
 
@@ -180,7 +177,8 @@ class RewardedManagerImpl @Inject constructor(
 
         isFacebookRewardedLoaded = false
         facebookRewardedAd = RewardedVideoAd(
-            activity, appData.facebookRewarded
+            activity,
+            AppDataInstance.appData?.facebookRewarded ?: ""
         )
 
         val rewardedVideoAdListener: RewardedVideoAdListener =

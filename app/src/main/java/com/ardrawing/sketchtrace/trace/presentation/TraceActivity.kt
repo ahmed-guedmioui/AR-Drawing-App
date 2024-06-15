@@ -49,8 +49,8 @@ class TraceActivity : AppCompatActivity() {
 
     private var imageBitmap: Bitmap? = null
 
-//    @Inject
-//    lateinit var rewardedManger: RewardedManger
+    @Inject
+    lateinit var rewardedManger: RewardedManger
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -238,35 +238,9 @@ class TraceActivity : AppCompatActivity() {
     }
 
     private fun rewarded(onRewDone: () -> Unit) {
-        RewardedAdsManager.showRewarded(
-            activity = this,
-            adClosedListener = object : RewardedAdsManager.OnAdClosedListener {
-                override fun onRewClosed() {
-                    onRewDone()
-                }
-
-                override fun onRewFailedToShow() {
-                    Toast.makeText(
-                        this@TraceActivity,
-                        getString(R.string.ad_is_not_loaded_yet),
-                        Toast.LENGTH_SHORT
-                    ).show()
-                }
-
-                override fun onRewComplete() {}
-
-            },
-            isUnlockImages = false,
-            onOpenPaywall = {
-                Intent(this, PaywallActivity::class.java).also {
-                    startActivity(it)
-                }
-            }
-        )
-
-//        rewardedManger.showRewarded(
+//        RewardedAdsManager.showRewarded(
 //            activity = this,
-//            adClosedListener = object : RewardedManger.OnAdClosedListener {
+//            adClosedListener = object : RewardedAdsManager.OnAdClosedListener {
 //                override fun onRewClosed() {
 //                    onRewDone()
 //                }
@@ -280,14 +254,44 @@ class TraceActivity : AppCompatActivity() {
 //                }
 //
 //                override fun onRewComplete() {}
+//
 //            },
 //            isUnlockImages = false,
 //            onOpenPaywall = {
-//                Intent(this, PaywallActivity::class.java).also {
+//                Intent(
+//                    this, PaywallActivity::class.java
+//                ).also {
 //                    startActivity(it)
 //                }
 //            }
 //        )
+
+        rewardedManger.showRewarded(
+            activity = this,
+            adClosedListener = object : RewardedManger.OnAdClosedListener {
+                override fun onRewClosed() {
+                    onRewDone()
+                }
+
+                override fun onRewFailedToShow() {
+                    Toast.makeText(
+                        this@TraceActivity,
+                        getString(R.string.ad_is_not_loaded_yet),
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+
+                override fun onRewComplete() {}
+            },
+            isUnlockImages = false,
+            onOpenPaywall = {
+                Intent(
+                    this, PaywallActivity::class.java
+                ).also {
+                    startActivity(it)
+                }
+            }
+        )
     }
 
     private fun colorDialog() {

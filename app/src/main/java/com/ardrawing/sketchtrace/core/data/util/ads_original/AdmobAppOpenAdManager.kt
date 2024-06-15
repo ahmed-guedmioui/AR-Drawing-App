@@ -59,8 +59,10 @@ class AdmobAppOpenAdManager(
             PrefsConstants.PREFS_FILE_NAME, Context.MODE_PRIVATE
         )
 
-        val id = prefs.getString(PrefsConstants.ADMOB_OPEN_APP_AD_ID, "") ?: ""
-        Log.d(LOG_TAG, "id = $id")
+        val id = prefs.getString(
+            PrefsConstants.ADMOB_OPEN_APP_AD_ID, ""
+        ) ?: ""
+
         loadCallback = object : AppOpenAdLoadCallback() {
             /**
              * Called when an app open ad has loaded.
@@ -70,9 +72,6 @@ class AdmobAppOpenAdManager(
             override fun onAdLoaded(ad: AppOpenAd) {
                 appOpenAd = ad
                 loadTime = Date().time
-                Log.d(LOG_TAG, "onAdLoaded")
-                Log.d(LOG_TAG, "\n\n")
-
                 if (isSplash) {
                     showAdIfAvailable(activity) {
                         onAdClosed()
@@ -86,7 +85,6 @@ class AdmobAppOpenAdManager(
              * @param loadAdError the error.
              */
             override fun onAdFailedToLoad(loadAdError: LoadAdError) {
-                Log.d(LOG_TAG, "onAdFailedToLoad $loadAdError")
                 if (isSplash) {
                     onAdClosed()
                 }
@@ -118,7 +116,6 @@ class AdmobAppOpenAdManager(
         // Only show ad if there is not already an app open ad currently showing
         // and an ad is available.
         if (!isShowingAd && isAdAvailable) {
-            Log.d(LOG_TAG, "Will show ad.")
             val fullScreenContentCallback: FullScreenContentCallback =
                 object : FullScreenContentCallback() {
                     override fun onAdDismissedFullScreenContent() {
@@ -149,14 +146,12 @@ class AdmobAppOpenAdManager(
                 appOpenAd?.show(activity)
 
             } else {
-                Log.d(LOG_TAG, "currentActivity = null")
                 if (isSplash) {
                     onAdClosed()
                 }
 
             }
         } else {
-            Log.d(LOG_TAG, "Can not show ad.")
             if (isSplash) {
                 onAdClosed()
             }
@@ -205,7 +200,6 @@ class AdmobAppOpenAdManager(
         }
 
         if (isSplash) {
-            Log.d(LOG_TAG, "showSplashAd: fetchAd")
             fetchAd(activity) {
                 onAdClosed()
                 isSplash = false

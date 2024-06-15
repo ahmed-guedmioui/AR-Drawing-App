@@ -214,7 +214,9 @@ class CreationDetailsActivity : AppCompatActivity() {
         }
     }
 
-    private fun shareCreationOnPlatform(creation: Creation, platform: Int) {
+    private fun shareCreationOnPlatform(
+        creation: Creation, platform: Int
+    ) {
         val shareIntent = Intent(Intent.ACTION_SEND)
         shareIntent.type = if (creation.isVideo) "video/*" else "image/*"
         shareIntent.putExtra(Intent.EXTRA_STREAM, creation.uri)
@@ -248,7 +250,6 @@ class CreationDetailsActivity : AppCompatActivity() {
                     )
                     startActivity(globalChooserIntent)
                 }
-                // Add more cases for other custom logic
             }
         }
     }

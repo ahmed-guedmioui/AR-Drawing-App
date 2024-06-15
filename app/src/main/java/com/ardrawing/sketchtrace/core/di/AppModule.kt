@@ -57,38 +57,34 @@ object AppModule {
     @Provides
     @Singleton
     fun providesAdmobAppOpenManager(
-        appDataRepository: AppDataRepository,
         prefs: SharedPreferences,
         app: Application
     ): AdmobAppOpenManagerImpl {
-        return AdmobAppOpenManagerImpl(appDataRepository, prefs, app)
+        return AdmobAppOpenManagerImpl(prefs, app)
     }
 
     @Provides
     @Singleton
     fun providesRewardedManager(
-        appDataRepository: AppDataRepository,
         prefs: SharedPreferences
     ): RewardedManagerImpl {
-        return RewardedManagerImpl(appDataRepository, prefs)
+        return RewardedManagerImpl(prefs)
     }
 
     @Provides
     @Singleton
     fun providesInterManager(
-        appDataRepository: AppDataRepository,
         prefs: SharedPreferences
     ): InterstitialMangerImpl {
-        return InterstitialMangerImpl(appDataRepository, prefs)
+        return InterstitialMangerImpl(prefs)
     }
 
     @Provides
     @Singleton
     fun providesNativeManager(
-        appDataRepository: AppDataRepository,
         prefs: SharedPreferences
     ): NativeManagerImpl {
-        return NativeManagerImpl(appDataRepository, prefs)
+        return NativeManagerImpl(prefs)
     }
 
 }

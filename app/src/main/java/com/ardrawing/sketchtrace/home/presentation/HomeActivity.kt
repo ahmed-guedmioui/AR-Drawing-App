@@ -54,14 +54,14 @@ class HomeActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityHomeBinding
 
-//    @Inject
-//    lateinit var rewardedManagerImpl: RewardedManagerImpl
-//
-//    @Inject
-//    lateinit var interstitialManger: InterstitialManger
-//
-//    @Inject
-//    lateinit var nativeManager: NativeManager
+    @Inject
+    lateinit var rewardedManagerImpl: RewardedManagerImpl
+
+    @Inject
+    lateinit var interstitialManger: InterstitialManger
+
+    @Inject
+    lateinit var nativeManager: NativeManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -103,22 +103,22 @@ class HomeActivity : AppCompatActivity() {
             }
         }
 
-        RewardedAdsManager.loadRewarded(this)
-//        rewardedManagerImpl.loadRewarded(this)
+//        RewardedAdsManager.loadRewarded(this)
+        rewardedManagerImpl.loadRewarded(this)
 
-        NativeAdsManager.loadNative(
-            findViewById(R.id.native_frame),
-            findViewById(R.id.native_temp),
-            this,
-            isButtonTop = false
-        )
-
-//        nativeManager.setActivity(this)
-//        nativeManager.loadNative(
+//        NativeAdsManager.loadNative(
 //            findViewById(R.id.native_frame),
 //            findViewById(R.id.native_temp),
+//            this,
 //            isButtonTop = false
 //        )
+
+        nativeManager.loadNative(
+            findViewById(R.id.native_frame),
+            findViewById(R.id.native_temp),
+            isButtonTop = false,
+            this
+        )
 
         val pushAnimation = AnimationUtils.loadAnimation(this, R.anim.view_push)
 
@@ -226,27 +226,33 @@ class HomeActivity : AppCompatActivity() {
     }
 
     private fun drawingListScreen(isTrace: Boolean) {
-        InterstitialAdManager.showInterstitial(
-            this,
-            object : InterstitialAdManager.OnAdClosedListener {
-                override fun onAdClosed() {
-                    val intent = Intent(this@HomeActivity, CategoriesActivity::class.java)
-                    intent.putExtra("isTrace", isTrace)
-                    startActivity(intent)
-                }
-            }
-        )
-
-//        interstitialManger.showInterstitial(
+//        InterstitialAdManager.showInterstitial(
 //            this,
-//            object : InterstitialManger.OnAdClosedListener {
+//            object : InterstitialAdManager.OnAdClosedListener {
 //                override fun onAdClosed() {
-//                    val intent = Intent(this@HomeActivity, CategoriesActivity::class.java)
-//                    intent.putExtra("isTrace", isTrace)
-//                    startActivity(intent)
+//                    Intent(
+//                        this@HomeActivity, CategoriesActivity::class.java
+//                    ).also {
+//                        it.putExtra("isTrace", isTrace)
+//                        startActivity(it)
+//                    }
 //                }
 //            }
 //        )
+
+        interstitialManger.showInterstitial(
+            this,
+            object : InterstitialManger.OnAdClosedListener {
+                override fun onAdClosed() {
+                    Intent(
+                        this@HomeActivity, CategoriesActivity::class.java
+                    ).also {
+                        it.putExtra("isTrace", isTrace)
+                        startActivity(it)
+                    }
+                }
+            }
+        )
     }
 
     override fun onBackPressed() {

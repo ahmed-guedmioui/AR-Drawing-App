@@ -8,6 +8,7 @@ import android.os.Bundle
 import android.util.Log
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.ProcessLifecycleOwner
+import com.ardrawing.sketchtrace.core.data.repository.AppDataInstance
 import com.ardrawing.sketchtrace.core.domain.model.app_data.AppData
 import com.ardrawing.sketchtrace.core.domain.repository.ads.AppOpenManager
 import com.ardrawing.sketchtrace.core.domain.repository.AppDataRepository
@@ -22,7 +23,6 @@ import java.util.Date
 import javax.inject.Inject
 
 class AdmobAppOpenManagerImpl @Inject constructor(
-    appDataRepository: AppDataRepository,
     private val prefs: SharedPreferences,
     private val app: Application,
 ) : AppOpenManager, LifecycleObserver, ActivityLifecycleCallbacks {
@@ -32,11 +32,6 @@ class AdmobAppOpenManagerImpl @Inject constructor(
     private var currentActivity: Activity? = null
     private lateinit var loadCallback: AppOpenAdLoadCallback
 
-    private var appData = appDataRepository.getAppData()
-
-    override fun setAppDataRepository(appData: AppData) {
-        this.appData = appData
-    }
 
     /**
      * Utility method to check if ad was loaded more than n hours ago.
@@ -68,10 +63,8 @@ class AdmobAppOpenManagerImpl @Inject constructor(
 
         val id = prefs.getString(
             PrefsConstants.ADMOB_OPEN_APP_AD_ID,
-            appData.admobOpenApp
+            AppDataInstance.appData?.admobOpenApp
         ) ?: ""
-
-        Log.d(LOG_TAG, "id = $id")
 
         loadCallback = object : AppOpenAdLoadCallback() {
             /**
@@ -82,7 +75,6 @@ class AdmobAppOpenManagerImpl @Inject constructor(
             override fun onAdLoaded(ad: AppOpenAd) {
                 appOpenAd = ad
                 loadTime = Date().time
-                Log.d(LOG_TAG, "onAdLoaded")
 
                 if (isSplash) {
                     showAdIfAvailable(activity) {
@@ -97,7 +89,6 @@ class AdmobAppOpenManagerImpl @Inject constructor(
              * @param loadAdError the error.
              */
             override fun onAdFailedToLoad(loadAdError: LoadAdError) {
-                Log.d(LOG_TAG, "onAdFailedToLoad $loadAdError")
                 if (isSplash) {
                     onAdClosed()
                 }
@@ -129,7 +120,6 @@ class AdmobAppOpenManagerImpl @Inject constructor(
         // Only show ad if there is not already an app open ad currently showing
         // and an ad is available.
         if (!isShowingAd && isAdAvailable) {
-            Log.d(LOG_TAG, "Will show ad.")
             val fullScreenContentCallback: FullScreenContentCallback =
                 object : FullScreenContentCallback() {
                     override fun onAdDismissedFullScreenContent() {
@@ -160,14 +150,12 @@ class AdmobAppOpenManagerImpl @Inject constructor(
                 appOpenAd?.show(activity)
 
             } else {
-                Log.d(LOG_TAG, "currentActivity = null")
                 if (isSplash) {
                     onAdClosed()
                 }
 
             }
         } else {
-            Log.d(LOG_TAG, "Can not show ad.")
             if (isSplash) {
                 onAdClosed()
             }
@@ -200,7 +188,7 @@ class AdmobAppOpenManagerImpl @Inject constructor(
     ) {
 
         if (
-            !appData.showAdsForThisUser ||
+            AppDataInstance.appData?.showAdsForThisUser == false ||
             !prefs.getBoolean(PrefsConstants.CAN_SHOW_ADMOB_ADS, true)
         ) {
             onAdClosed()

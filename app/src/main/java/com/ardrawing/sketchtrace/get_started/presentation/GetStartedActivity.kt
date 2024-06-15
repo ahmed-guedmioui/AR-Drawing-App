@@ -44,11 +44,11 @@ class GetStartedActivity : AppCompatActivity() {
     private var getStartedState: GetStartedState? = null
     private lateinit var binding: ActivityGetStartedBinding
 
-//    @Inject
-//    lateinit var interstitialManger: InterstitialManger
-//
-//    @Inject
-//    lateinit var nativeManager: NativeManager
+    @Inject
+    lateinit var interstitialManger: InterstitialManger
+
+    @Inject
+    lateinit var nativeManager: NativeManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -74,40 +74,40 @@ class GetStartedActivity : AppCompatActivity() {
         }
 
         binding.getStarted.setOnClickListener {
-            InterstitialAdManager.showInterstitial(
-                this,
-                object : InterstitialAdManager.OnAdClosedListener {
-                    override fun onAdClosed() {
-                        getStartedViewModel.onEvent(GetStartedUiEvent.Navigate)
-                        navigate()
-                    }
-                }
-            )
-
-//            interstitialManger.showInterstitial(
+//            InterstitialAdManager.showInterstitial(
 //                this,
-//                object : InterstitialManger.OnAdClosedListener {
+//                object : InterstitialAdManager.OnAdClosedListener {
 //                    override fun onAdClosed() {
 //                        getStartedViewModel.onEvent(GetStartedUiEvent.Navigate)
 //                        navigate()
 //                    }
 //                }
 //            )
+
+            interstitialManger.showInterstitial(
+                this,
+                object : InterstitialManger.OnAdClosedListener {
+                    override fun onAdClosed() {
+                        getStartedViewModel.onEvent(GetStartedUiEvent.Navigate)
+                        navigate()
+                    }
+                }
+            )
         }
 
-        NativeAdsManager.loadNative(
-            findViewById(R.id.native_frame),
-            findViewById(R.id.native_temp),
-            this,
-            isButtonTop = false
-        )
-
-//        nativeManager.setActivity(this)
-//        nativeManager.loadNative(
+//        NativeAdsManager.loadNative(
 //            findViewById(R.id.native_frame),
 //            findViewById(R.id.native_temp),
+//            this,
 //            isButtonTop = false
 //        )
+
+        nativeManager.loadNative(
+            findViewById(R.id.native_frame),
+            findViewById(R.id.native_temp),
+            isButtonTop = false,
+            this
+        )
 
     }
 

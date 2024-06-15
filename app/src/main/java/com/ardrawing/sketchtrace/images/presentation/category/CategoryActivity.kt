@@ -38,14 +38,14 @@ class CategoryActivity : AppCompatActivity() {
     private val categoryViewModel: CategoryViewModel by viewModels()
     private var categoryState: CategoryState? = null
 
-//    @Inject
-//    lateinit var rewardedManger: RewardedManger
-//
-//    @Inject
-//    lateinit var interstitialManger: InterstitialManger
-//
-//    @Inject
-//    lateinit var nativeManager: NativeManager
+    @Inject
+    lateinit var rewardedManger: RewardedManger
+
+    @Inject
+    lateinit var interstitialManger: InterstitialManger
+
+    @Inject
+    lateinit var nativeManager: NativeManager
 
 
     private lateinit var binding: ActivityCategoryBinding
@@ -123,19 +123,19 @@ class CategoryActivity : AppCompatActivity() {
             }
         }
 
-        NativeAdsManager.loadNative(
-            findViewById(R.id.native_frame),
-            findViewById(R.id.native_temp),
-            this,
-            isButtonTop = false
-        )
-
-//        nativeManager.setActivity(this)
-//        nativeManager.loadNative(
+//        NativeAdsManager.loadNative(
 //            findViewById(R.id.native_frame),
 //            findViewById(R.id.native_temp),
+//            this,
 //            isButtonTop = false
 //        )
+
+        nativeManager.loadNative(
+            findViewById(R.id.native_frame),
+            findViewById(R.id.native_temp),
+            isButtonTop = false,
+            this
+        )
 
         initImageListRec()
 
@@ -172,34 +172,9 @@ class CategoryActivity : AppCompatActivity() {
     private fun rewarded(
         onRewComplete: () -> Unit
     ) {
-        RewardedAdsManager.showRewarded(
-            activity = this,
-            adClosedListener = object : RewardedAdsManager.OnAdClosedListener {
-                override fun onRewClosed() {}
-
-                override fun onRewFailedToShow() {
-                    Toast.makeText(
-                        this@CategoryActivity,
-                        getString(R.string.ad_is_not_loaded_yet),
-                        Toast.LENGTH_SHORT
-                    ).show()
-                }
-
-                override fun onRewComplete() {
-                    onRewComplete()
-                }
-
-            },
-            onOpenPaywall = {
-                Intent(this, PaywallActivity::class.java).also {
-                    startActivity(it)
-                }
-            }
-        )
-
-//        rewardedManger.showRewarded(
+//        RewardedAdsManager.showRewarded(
 //            activity = this,
-//            adClosedListener = object : RewardedManger.OnAdClosedListener {
+//            adClosedListener = object : RewardedAdsManager.OnAdClosedListener {
 //                override fun onRewClosed() {}
 //
 //                override fun onRewFailedToShow() {
@@ -221,45 +196,54 @@ class CategoryActivity : AppCompatActivity() {
 //                }
 //            }
 //        )
-    }
 
-    private fun traceDrawingScreen(imagePath: String) {
-        InterstitialAdManager.showInterstitial(
-            this,
-            object : InterstitialAdManager.OnAdClosedListener {
-                override fun onAdClosed() {
-                    Intent(
-                        this@CategoryActivity, TraceActivity::class.java
-                    ).also { intent ->
-                        intent.putExtra("imagePath", imagePath)
-                        startActivity(intent)
-                    }
+        rewardedManger.showRewarded(
+            activity = this,
+            adClosedListener = object : RewardedManger.OnAdClosedListener {
+                override fun onRewClosed() {}
+
+                override fun onRewFailedToShow() {
+                    Toast.makeText(
+                        this@CategoryActivity,
+                        getString(R.string.ad_is_not_loaded_yet),
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+
+                override fun onRewComplete() {
+                    onRewComplete()
+                }
+
+            },
+            onOpenPaywall = {
+                Intent(this, PaywallActivity::class.java).also {
+                    startActivity(it)
                 }
             }
         )
+    }
 
-//        interstitialManger.showInterstitial(
+    private fun traceDrawingScreen(imagePath: String) {
+//        InterstitialAdManager.showInterstitial(
 //            this,
-//            object : InterstitialManger.OnAdClosedListener {
+//            object : InterstitialAdManager.OnAdClosedListener {
 //                override fun onAdClosed() {
 //                    Intent(
 //                        this@CategoryActivity, TraceActivity::class.java
-//                    ).also {intent ->
+//                    ).also { intent ->
 //                        intent.putExtra("imagePath", imagePath)
 //                        startActivity(intent)
 //                    }
 //                }
 //            }
 //        )
-    }
 
-    private fun sketchDrawingScreen(imagePath: String) {
-        InterstitialAdManager.showInterstitial(
+        interstitialManger.showInterstitial(
             this,
-            object : InterstitialAdManager.OnAdClosedListener {
+            object : InterstitialManger.OnAdClosedListener {
                 override fun onAdClosed() {
                     Intent(
-                        this@CategoryActivity, SketchActivity::class.java
+                        this@CategoryActivity, TraceActivity::class.java
                     ).also {intent ->
                         intent.putExtra("imagePath", imagePath)
                         startActivity(intent)
@@ -267,10 +251,12 @@ class CategoryActivity : AppCompatActivity() {
                 }
             }
         )
+    }
 
-//        interstitialManger.showInterstitial(
+    private fun sketchDrawingScreen(imagePath: String) {
+//        InterstitialAdManager.showInterstitial(
 //            this,
-//            object : InterstitialManger.OnAdClosedListener {
+//            object : InterstitialAdManager.OnAdClosedListener {
 //                override fun onAdClosed() {
 //                    Intent(
 //                        this@CategoryActivity, SketchActivity::class.java
@@ -281,6 +267,20 @@ class CategoryActivity : AppCompatActivity() {
 //                }
 //            }
 //        )
+
+        interstitialManger.showInterstitial(
+            this,
+            object : InterstitialManger.OnAdClosedListener {
+                override fun onAdClosed() {
+                    Intent(
+                        this@CategoryActivity, SketchActivity::class.java
+                    ).also {intent ->
+                        intent.putExtra("imagePath", imagePath)
+                        startActivity(intent)
+                    }
+                }
+            }
+        )
     }
 
     override fun onResume() {

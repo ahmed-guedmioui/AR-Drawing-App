@@ -83,11 +83,11 @@ class SketchActivity : AppCompatActivity() {
     @Inject
     lateinit var sketchRepository: SketchRepository
 
-//    @Inject
-//    lateinit var rewardedManger: RewardedManger
-//
-//    @Inject
-//    lateinit var nativeManager: NativeManager
+    @Inject
+    lateinit var rewardedManger: RewardedManger
+
+    @Inject
+    lateinit var nativeManager: NativeManager
 
     private lateinit var binding: ActivitySketchBinding
 
@@ -278,7 +278,7 @@ class SketchActivity : AppCompatActivity() {
                 MultiTouch(binding.objImage)
             )
 
-            close.setOnClickListener {
+            closeNativeAd.setOnClickListener {
                 binding.nativeParent.visibility = View.GONE
             }
 
@@ -424,19 +424,19 @@ class SketchActivity : AppCompatActivity() {
     }
 
     private fun loadNativeAd() {
-        NativeAdsManager.loadNative(
-            findViewById(R.id.native_frame),
-            findViewById(R.id.native_temp),
-            this,
-            isButtonTop = false
-        )
-
-//        nativeManager.setActivity(this)
-//        nativeManager.loadNative(
+//        NativeAdsManager.loadNative(
 //            findViewById(R.id.native_frame),
 //            findViewById(R.id.native_temp),
-//            isButtonTop = true
+//            this,
+//            isButtonTop = false
 //        )
+
+        nativeManager.loadNative(
+            findViewById(R.id.native_frame),
+            findViewById(R.id.native_temp),
+            isButtonTop = true,
+            this
+        )
     }
 
     private fun flipImage() {
@@ -651,9 +651,37 @@ class SketchActivity : AppCompatActivity() {
 
     private fun rewarded(onRewDone: () -> Unit) {
 
-        RewardedAdsManager.showRewarded(
+//        RewardedAdsManager.showRewarded(
+//            activity = this,
+//            adClosedListener = object : RewardedAdsManager.OnAdClosedListener {
+//                override fun onRewClosed() {
+//                    onRewDone()
+//                }
+//
+//                override fun onRewFailedToShow() {
+//                    Toast.makeText(
+//                        this@SketchActivity,
+//                        getString(R.string.ad_is_not_loaded_yet),
+//                        Toast.LENGTH_SHORT
+//                    ).show()
+//                }
+//
+//                override fun onRewComplete() {}
+//
+//            },
+//            isUnlockImages = false,
+//            onOpenPaywall = {
+//                Intent(
+//                    this, PaywallActivity::class.java
+//                ).also {
+//                    startActivity(it)
+//                }
+//            }
+//        )
+
+        rewardedManger.showRewarded(
             activity = this,
-            adClosedListener = object : RewardedAdsManager.OnAdClosedListener {
+            adClosedListener = object : RewardedManger.OnAdClosedListener {
                 override fun onRewClosed() {
                     onRewDone()
                 }
@@ -667,40 +695,14 @@ class SketchActivity : AppCompatActivity() {
                 }
 
                 override fun onRewComplete() {}
-
             },
             isUnlockImages = false,
             onOpenPaywall = {
-                Intent(this, PaywallActivity::class.java).also {
-                    startActivity(it)
-                }
+                Intent(
+                    this, PaywallActivity::class.java
+                ).also(::startActivity)
             }
         )
-
-//        rewardedManger.showRewarded(
-//            activity = this,
-//            adClosedListener = object : RewardedManger.OnAdClosedListener {
-//                override fun onRewClosed() {}
-//
-//                override fun onRewFailedToShow() {
-//                    Toast.makeText(
-//                        this@SketchActivity,
-//                        getString(R.string.ad_is_not_loaded_yet),
-//                        Toast.LENGTH_SHORT
-//                    ).show()
-//                }
-//
-//                override fun onRewComplete() {
-//                    onRewDone()
-//                }
-//            },
-//            isUnlockImages = false,
-//            onOpenPaywall = {
-//                Intent(
-//                    this, PaywallActivity::class.java
-//                ).also(::startActivity)
-//            }
-//        )
     }
 
 

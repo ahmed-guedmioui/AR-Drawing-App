@@ -10,6 +10,7 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import com.ardrawing.sketchtrace.R
+import com.ardrawing.sketchtrace.core.data.repository.AppDataInstance
 import com.ardrawing.sketchtrace.core.domain.repository.AppDataRepository
 import com.ardrawing.sketchtrace.core.domain.repository.ads.NativeManager
 import com.ardrawing.sketchtrace.util.AdsConstants
@@ -30,31 +31,27 @@ import com.google.android.gms.ads.nativead.NativeAdView
 import javax.inject.Inject
 
 class NativeManagerImpl @Inject constructor(
-    appDataRepository: AppDataRepository,
     private val prefs: SharedPreferences
 ) : NativeManager {
-
-    private var appData = appDataRepository.getAppData()
 
     private var admobNativeAd: NativeAd? = null
     private lateinit var activity: Activity
 
-    override fun setActivity(activity: Activity) {
-        this.activity = activity
-    }
-
     override fun loadNative(
         nativeFrame: FrameLayout,
         nativeTemp: TextView,
-        isButtonTop: Boolean
+        isButtonTop: Boolean,
+        activity: Activity
     ) {
 
-        if (!appData.showAdsForThisUser) {
+        this.activity = activity
+
+        if (AppDataInstance.appData?.showAdsForThisUser == false) {
             nativeTemp.visibility = View.GONE
             return
         }
 
-        when (appData.native) {
+        when (AppDataInstance.appData?.native) {
             AdsConstants.ADMOB -> loadAdmobNative(
                 nativeFrame, nativeTemp, isButtonTop
             )
@@ -83,7 +80,10 @@ class NativeManagerImpl @Inject constructor(
             return
         }
 
-        val builder = AdLoader.Builder(activity, appData.admobNative)
+        val builder = AdLoader.Builder(
+            activity,
+            AppDataInstance.appData?.admobNative ?: ""
+        )
 
         builder.forNativeAd { nativeAd: NativeAd ->
             val isDestroyed = activity.isDestroyed
@@ -176,7 +176,8 @@ class NativeManagerImpl @Inject constructor(
         isButtonTop: Boolean
     ) {
         val nativeAd = com.facebook.ads.NativeAd(
-            activity, appData.facebookNative
+            activity,
+            AppDataInstance.appData?.facebookNative ?: ""
         )
         val nativeAdListener: NativeAdListener = object : NativeAdListener {
             override fun onMediaDownloaded(ad: Ad) {}

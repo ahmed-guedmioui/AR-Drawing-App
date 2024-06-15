@@ -8,10 +8,6 @@ import com.ardrawing.sketchtrace.core.domain.model.app_data.AppData
  */
 interface AppOpenManager {
 
-    fun setAppDataRepository(
-        appData: AppData
-    )
-
     fun showSplashAd(
         activity: Activity,
         onAdClosed: () -> Unit

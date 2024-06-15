@@ -8,10 +8,6 @@ import com.ardrawing.sketchtrace.core.domain.model.app_data.AppData
  */
 interface InterstitialManger {
 
-    fun setAppDataRepository(
-        appData: AppData
-    )
-
     fun loadInterstitial(activity: Activity)
 
     fun showInterstitial(
